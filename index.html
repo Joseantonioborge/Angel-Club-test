@@ -310,7 +310,28 @@
   .cf-feedback.success { background: rgba(46,125,50,0.10); border: 1px solid rgba(46,125,50,0.25); color: var(--green); }
   .cf-feedback.error { background: rgba(198,40,40,0.08); border: 1px solid rgba(198,40,40,0.20); color: var(--red); }
 
-  /* SCROLLBAR */
+  /* ── ADMIN STYLES ── */
+  .admin-badge-pill {
+    display:inline-flex; align-items:center; gap:6px;
+    background:linear-gradient(135deg,rgba(230,168,23,0.18),rgba(249,200,70,0.10));
+    border:1px solid rgba(230,168,23,0.40); border-radius:20px;
+    padding:3px 10px 3px 6px; font-size:10px; color:#B8860B; font-weight:700;
+    letter-spacing:0.05em; vertical-align:middle; margin-left:8px;
+  }
+  #admin-section .kpi-card::before {
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  }
+  .adm-rank-item {
+    display:flex; align-items:center; gap:10px;
+    padding:10px 0; border-bottom:1px solid rgba(30,136,229,0.07);
+  }
+  .adm-rank-item:last-child { border-bottom:none; }
+  .adm-rank-num { font-family:'Syne',sans-serif; font-weight:800; font-size:18px; color:rgba(30,136,229,0.22); width:28px; flex-shrink:0; }
+  .adm-rank-name { font-family:'Syne',sans-serif; font-weight:700; font-size:13px; color:var(--text); }
+  .adm-rank-email { font-size:10px; color:var(--muted); }
+  .adm-rank-amt { font-family:'Syne',sans-serif; font-weight:800; font-size:15px; color:var(--gold); white-space:nowrap; }
+  .adm-rank-startups { font-size:10px; color:var(--muted); margin-top:1px; }
+  .admin-tab-glow { box-shadow: 0 0 0 3px rgba(230,168,23,0.15), 0 4px 16px rgba(230,168,23,0.20) !important; }
   ::-webkit-scrollbar { width: 5px; }
   ::-webkit-scrollbar-track { background: var(--bg2); border-radius: 3px; }
   ::-webkit-scrollbar-thumb { background: rgba(30,136,229,0.25); border-radius: 3px; }
@@ -363,21 +384,45 @@
       <div class="login-logo-icon">A</div>
       <div class="login-logo-text">ANGEL<span>CLUB</span></div>
     </div>
-    <div class="login-title">Portal del Inversor</div>
-    <div class="login-sub">Accede con tu nombre completo y correo electrónico<br>tal como figuran en tu ficha de inversor</div>
-    <div class="login-field">
-      <label class="login-label">Nombre y apellidos</label>
-      <input class="login-input" id="login-name" type="text" placeholder="Ej: Ana García López" autocomplete="name">
+    <!-- MODE TABS -->
+    <div style="display:flex;gap:0;margin-bottom:28px;background:rgba(30,136,229,0.07);border-radius:12px;padding:4px;">
+      <button id="tab-investor" onclick="setLoginMode('investor')" style="flex:1;padding:9px 0;border:none;border-radius:9px;font-family:'Syne',sans-serif;font-weight:700;font-size:12px;cursor:pointer;transition:all 0.2s;background:linear-gradient(135deg,var(--blue),var(--blue-bright));color:white;box-shadow:0 2px 8px rgba(21,101,192,0.20);">👤 Inversor</button>
+      <button id="tab-admin" onclick="setLoginMode('admin')" style="flex:1;padding:9px 0;border:none;border-radius:9px;font-family:'Syne',sans-serif;font-weight:700;font-size:12px;cursor:pointer;transition:all 0.2s;background:transparent;color:var(--muted);">⚙️ Administrador</button>
     </div>
-    <div class="login-field">
-      <label class="login-label">Correo electrónico</label>
-      <input class="login-input" id="login-email" type="email" placeholder="tu@email.com" autocomplete="email">
+
+    <div id="login-title" class="login-title">Portal del Inversor</div>
+    <div id="login-sub" class="login-sub">Accede con tu nombre completo y correo electrónico<br>tal como figuran en tu ficha de inversor</div>
+
+    <!-- INVESTOR FIELDS -->
+    <div id="investor-fields">
+      <div class="login-field">
+        <label class="login-label">Nombre y apellidos</label>
+        <input class="login-input" id="login-name" type="text" placeholder="Ej: Ana García López" autocomplete="name">
+      </div>
+      <div class="login-field">
+        <label class="login-label">Correo electrónico</label>
+        <input class="login-input" id="login-email" type="email" placeholder="tu@email.com" autocomplete="email">
+      </div>
     </div>
-    <button class="login-btn" onclick="doLogin()">
-      <span>Acceder al Portal</span> <span>→</span>
+
+    <!-- ADMIN FIELDS -->
+    <div id="admin-fields" style="display:none;">
+      <div class="login-field">
+        <label class="login-label">Usuario administrador</label>
+        <input class="login-input" id="admin-user" type="email" placeholder="equipo@angelclub.es" autocomplete="off">
+      </div>
+      <div class="login-field" style="position:relative;">
+        <label class="login-label">Contraseña</label>
+        <input class="login-input" id="admin-pass" type="password" placeholder="••••••••••••" autocomplete="off" style="padding-right:46px;">
+        <button onclick="togglePass()" style="position:absolute;right:14px;top:35px;background:none;border:none;cursor:pointer;font-size:15px;color:var(--muted);padding:0;" id="pass-eye">👁</button>
+      </div>
+    </div>
+
+    <button class="login-btn" id="login-btn" onclick="doLogin()">
+      <span id="login-btn-text">Acceder al Portal</span> <span>→</span>
     </button>
-    <div class="login-error" id="login-error">❌ Datos no encontrados. Comprueba tu nombre y email exactamente como figuran en tu ficha de inversor.</div>
-    <div class="login-hint">
+    <div class="login-error" id="login-error"></div>
+    <div class="login-hint" id="login-hint">
       ¿Problemas de acceso? Contacta con nosotros en<br>
       <a href="mailto:equipo@angelclub.es" style="color:var(--blue-bright);text-decoration:none;">equipo@angelclub.es</a>
     </div>
@@ -396,20 +441,28 @@
       <div class="logo-icon">A</div>
       <div>
         <div class="logo-text">ANGEL<span>CLUB</span></div>
-        <div style="font-size:10px;color:var(--muted);letter-spacing:0.15em;text-transform:uppercase;margin-top:2px;">Portal Inversor</div>
+        <div id="topbar-subtitle" style="font-size:10px;color:var(--muted);letter-spacing:0.15em;text-transform:uppercase;margin-top:2px;">Portal Inversor</div>
       </div>
     </div>
     <div class="topbar-right">
-      <div class="investor-badge">
+      <div class="investor-badge" id="user-badge">
         <div class="investor-avatar" id="inv-avatar">?</div>
         <div>
           <div class="investor-name-badge" id="inv-name-display">—</div>
           <div class="investor-email-badge" id="inv-email-display">—</div>
         </div>
       </div>
+      <!-- ADMIN BADGE (hidden by default) -->
+      <div id="admin-badge" style="display:none;background:linear-gradient(135deg,rgba(230,168,23,0.15),rgba(230,168,23,0.08));border:1px solid rgba(230,168,23,0.35);border-radius:30px;padding:8px 18px;display:none;align-items:center;gap:10px;box-shadow:0 2px 10px rgba(230,168,23,0.10);">
+        <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#E6A817,#F9C846);display:flex;align-items:center;justify-content:center;font-size:15px;">⚙️</div>
+        <div>
+          <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:13px;color:var(--text);">Administrador</div>
+          <div style="font-size:10px;color:var(--muted);">equipo@angelclub.es</div>
+        </div>
+      </div>
       <div class="topbar-date">
         <strong id="today-date"></strong>
-        <span>Mi Portfolio</span>
+        <span id="topbar-view-label">Mi Portfolio</span>
       </div>
       <button class="logout-btn" onclick="doLogout()">⎋ Cerrar sesión</button>
     </div>
@@ -419,25 +472,25 @@
   <div class="kpi-grid">
     <div class="kpi-card glowing">
       <span class="kpi-icon">💰</span>
-      <div class="kpi-label">Mi Capital Invertido</div>
+      <div class="kpi-label" id="kpi-total-label">Capital Invertido</div>
       <div class="kpi-value kpi-accent" id="kpi-total">€0</div>
       <div class="kpi-sub" id="kpi-total-sub">En — startups</div>
     </div>
     <div class="kpi-card">
-      <span class="kpi-icon">🚀</span>
-      <div class="kpi-label">Inversiones Activas</div>
+      <span class="kpi-icon" id="kpi2-icon">🚀</span>
+      <div class="kpi-label" id="kpi2-label">Inversiones Activas</div>
       <div class="kpi-value" id="kpi-active" style="color:var(--text);">0</div>
       <div class="kpi-sub" id="kpi-active-sub">proyectos en cartera</div>
     </div>
     <div class="kpi-card">
       <span class="kpi-icon">🏆</span>
-      <div class="kpi-label">Exits Exitosos</div>
+      <div class="kpi-label" id="kpi3-label">Exits Exitosos</div>
       <div class="kpi-value kpi-green" id="kpi-exits">0</div>
       <div class="kpi-sub" id="kpi-exits-sub">retorno de inversión</div>
     </div>
     <div class="kpi-card">
       <span class="kpi-icon">📊</span>
-      <div class="kpi-label">Mejor TIR</div>
+      <div class="kpi-label" id="kpi4-label">Mejor TIR</div>
       <div class="kpi-value kpi-gold" id="kpi-tir">—</div>
       <div class="kpi-sub" id="kpi-tir-sub">en portfolio activo</div>
     </div>
@@ -446,7 +499,7 @@
   <!-- TABLE + DONUT -->
   <div class="two-col">
     <div class="panel">
-      <div class="panel-title">📋 Mis Inversiones</div>
+      <div class="panel-title" id="table-panel-title">📋 Mis Inversiones</div>
       <div class="table-scroll">
         <table class="investments-table">
           <thead>
@@ -494,7 +547,7 @@
     </div>
 
     <div class="panel">
-      <div class="panel-title">🔝 Top Inversiones Propias</div>
+      <div class="panel-title" id="top-panel-title">🔝 Top Inversiones Propias</div>
       <div id="top-list" style="display:flex;flex-direction:column;gap:12px;"></div>
     </div>
   </div>
@@ -535,7 +588,7 @@
       <textarea class="field-input field-textarea" id="cf-message" placeholder="Escribe tu consulta sobre el proyecto…"></textarea>
     </div>
     <div class="contact-actions">
-      <div class="contact-hint">📬 El mensaje se enviará a <strong>equipo@angelclub.es</strong></div>
+      <div class="contact-hint">📬 El mensaje se enviará a <strong><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="e78296928e9788a7868980828b848b9285c98294">[email&#160;protected]</a></strong></div>
       <button class="send-btn" id="cf-send" onclick="sendContactForm()">
         <span id="cf-btn-text">Enviar solicitud</span>
         <span class="btn-arrow">→</span>
@@ -544,10 +597,116 @@
     <div id="cf-feedback" style="display:none;"></div>
   </div>
 
+  <!-- ═══════ ADMIN ONLY SECTION ═══════ -->
+  <div id="admin-section" style="display:none;">
+
+    <!-- ADMIN KPI EXTRA ROW -->
+    <div class="kpi-grid" style="margin-top:24px;">
+      <div class="kpi-card" style="animation-delay:0.1s;">
+        <span class="kpi-icon">👥</span>
+        <div class="kpi-label">Total Inversores</div>
+        <div class="kpi-value" id="adm-investors" style="color:var(--text);">0</div>
+        <div class="kpi-sub">con posición activa</div>
+      </div>
+      <div class="kpi-card" style="animation-delay:0.2s;">
+        <span class="kpi-icon">📈</span>
+        <div class="kpi-label">Capital Medio / Inversor</div>
+        <div class="kpi-value kpi-accent" id="adm-avg">€0</div>
+        <div class="kpi-sub">por inversor registrado</div>
+      </div>
+      <div class="kpi-card" style="animation-delay:0.3s;">
+        <span class="kpi-icon">🎯</span>
+        <div class="kpi-label">Startup Más Respaldada</div>
+        <div class="kpi-value kpi-gold" id="adm-top-startup" style="font-size:16px;line-height:1.2;margin-top:6px;">—</div>
+        <div class="kpi-sub" id="adm-top-startup-sub">por nº de inversores</div>
+      </div>
+      <div class="kpi-card" style="animation-delay:0.4s;">
+        <span class="kpi-icon">💼</span>
+        <div class="kpi-label">Capital Total Club</div>
+        <div class="kpi-value kpi-green" id="adm-total-capital">€0</div>
+        <div class="kpi-sub">en todas las startups</div>
+      </div>
+    </div>
+
+    <!-- TABLA GLOBAL STARTUPS -->
+    <div class="panel" style="margin-top:24px;animation-delay:0.15s;">
+      <div class="panel-title">🏢 Portfolio Completo AngelClub — Todas las Startups</div>
+      <div class="table-scroll">
+        <table class="investments-table" id="admin-startup-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Startup</th>
+              <th>Capital Total</th>
+              <th>Equity</th>
+              <th>Estado</th>
+              <th>TIR</th>
+              <th>Inversores</th>
+              <th>Web</th>
+            </tr>
+          </thead>
+          <tbody id="admin-startup-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- RANKING INVERSORES + PIE BY STARTUP -->
+    <div class="bottom-grid" style="margin-top:24px;">
+
+      <div class="panel" style="animation-delay:0.2s;">
+        <div class="panel-title">🏆 Top Inversores por Capital Total</div>
+        <div id="adm-investor-ranking" style="display:flex;flex-direction:column;gap:10px;max-height:400px;overflow-y:auto;"></div>
+      </div>
+
+      <div class="panel" style="animation-delay:0.25s;">
+        <div class="panel-title">🎯 Distribución Global del Portfolio</div>
+        <div class="chart-wrap">
+          <svg class="donut" width="190" height="190" viewBox="0 0 200 200" id="admin-donut-svg">
+            <g id="admin-donut-segments"></g>
+            <text class="donut-center-text" x="100" y="93" id="admin-donut-center-val">€0</text>
+            <text class="donut-center-sub" x="100" y="113">total club</text>
+          </svg>
+          <div class="legend" id="admin-donut-legend"></div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- TABLA INVERSORES DETALLE -->
+    <div class="panel" style="margin-top:24px;animation-delay:0.3s;">
+      <div class="panel-title">👥 Directorio de Inversores
+        <span style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;margin-left:8px;" id="adm-investor-count-label"></span>
+      </div>
+      <div style="margin-bottom:16px;display:flex;gap:12px;flex-wrap:wrap;align-items:center;">
+        <input id="adm-search" class="field-input" type="text" placeholder="🔍 Buscar inversor o startup…" oninput="filterAdminTable()" style="max-width:320px;margin:0;">
+        <select id="adm-filter-startup" class="field-input field-select" onchange="filterAdminTable()" style="max-width:220px;margin:0;">
+          <option value="">Todas las startups</option>
+        </select>
+      </div>
+      <div class="table-scroll" style="max-height:520px;">
+        <table class="investments-table" id="adm-investors-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Inversor</th>
+              <th>Email</th>
+              <th>Startup</th>
+              <th>Aportación</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody id="adm-investors-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+  <!-- END ADMIN SECTION -->
+
 </div>
 </div>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 // ═══════════════════════════════════════════════════════════════
 // MASTER STARTUP DATA
 // ═══════════════════════════════════════════════════════════════
@@ -1226,6 +1385,7 @@ const RAW_INVESTORS = [
 // ═══════════════════════════════════════════════════════════════
 // BUILD INVESTOR INDEX (by email → list of investments)
 // ═══════════════════════════════════════════════════════════════
+let currentInvestor = null;
 const INVESTOR_DB = {}; // key: email_lower => { names:Set, investments:Map<startupKey, amount> }
 RAW_INVESTORS.forEach(([name, email, startup, amount]) => {
   if (!email || !name) return;
@@ -1239,13 +1399,60 @@ RAW_INVESTORS.forEach(([name, email, startup, amount]) => {
 });
 
 // ═══════════════════════════════════════════════════════════════
-// LOGIN LOGIC
+// LOGIN MODE TOGGLE
 // ═══════════════════════════════════════════════════════════════
-let currentInvestor = null;
+let loginMode = 'investor';
 
-// Allow Enter key on both fields
+function setLoginMode(mode) {
+  loginMode = mode;
+  const isAdmin = mode === 'admin';
+  document.getElementById('investor-fields').style.display = isAdmin ? 'none' : 'block';
+  document.getElementById('admin-fields').style.display    = isAdmin ? 'block' : 'none';
+  document.getElementById('login-title').textContent = isAdmin ? 'Acceso Administrador' : 'Portal del Inversor';
+  document.getElementById('login-sub').textContent   = isAdmin
+    ? 'Acceso exclusivo para el equipo de AngelClub'
+    : 'Accede con tu nombre completo y correo electrónico tal como figuran en tu ficha de inversor';
+  document.getElementById('login-btn-text').textContent = isAdmin ? 'Entrar como Admin' : 'Acceder al Portal';
+  document.getElementById('login-hint').style.display = isAdmin ? 'none' : 'block';
+  document.getElementById('login-error').style.display = 'none';
+
+  const tabInv = document.getElementById('tab-investor');
+  const tabAdm = document.getElementById('tab-admin');
+  if (isAdmin) {
+    tabAdm.style.background = 'linear-gradient(135deg,#E6A817,#F9C846)';
+    tabAdm.style.color = 'white';
+    tabAdm.style.boxShadow = '0 2px 8px rgba(230,168,23,0.30)';
+    tabInv.style.background = 'transparent';
+    tabInv.style.color = 'var(--muted)';
+    tabInv.style.boxShadow = 'none';
+  } else {
+    tabInv.style.background = 'linear-gradient(135deg,var(--blue),var(--blue-bright))';
+    tabInv.style.color = 'white';
+    tabInv.style.boxShadow = '0 2px 8px rgba(21,101,192,0.20)';
+    tabAdm.style.background = 'transparent';
+    tabAdm.style.color = 'var(--muted)';
+    tabAdm.style.boxShadow = 'none';
+  }
+}
+
+function togglePass() {
+  const inp = document.getElementById('admin-pass');
+  const eye = document.getElementById('pass-eye');
+  if (inp.type === 'password') { inp.type = 'text'; eye.textContent = '🙈'; }
+  else { inp.type = 'password'; eye.textContent = '👁'; }
+}
+
+// Allow Enter key
 document.getElementById('login-name').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
 document.getElementById('login-email').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+document.getElementById('admin-user').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+document.getElementById('admin-pass').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+
+// ═══════════════════════════════════════════════════════════════
+// ADMIN CREDENTIALS
+// ═══════════════════════════════════════════════════════════════
+const ADMIN_USER = 'equipo@angelclub.es';
+const ADMIN_PASS = 'soytuangel2026';
 
 function normalize(s) {
   return s.trim().toLowerCase()
@@ -1254,9 +1461,28 @@ function normalize(s) {
 }
 
 function doLogin() {
+  const errEl = document.getElementById('login-error');
+  errEl.style.display = 'none';
+
+  if (loginMode === 'admin') {
+    const user = document.getElementById('admin-user').value.trim().toLowerCase();
+    const pass = document.getElementById('admin-pass').value;
+    if (!user || !pass) {
+      errEl.textContent = '⚠️ Por favor, introduce usuario y contraseña.';
+      errEl.style.display = 'block'; return;
+    }
+    if (user !== ADMIN_USER || pass !== ADMIN_PASS) {
+      errEl.textContent = '❌ Credenciales incorrectas. Acceso denegado.';
+      errEl.style.display = 'block'; return;
+    }
+    currentInvestor = { role: 'admin', name: 'Administrador', email: ADMIN_USER };
+    showAdminDashboard();
+    return;
+  }
+
+  // INVESTOR LOGIN
   const nameInput  = document.getElementById('login-name').value.trim();
   const emailInput = document.getElementById('login-email').value.trim().toLowerCase();
-  const errEl = document.getElementById('login-error');
 
   if (!nameInput || !emailInput) {
     errEl.textContent = '⚠️ Por favor, introduce tu nombre y correo electrónico.';
@@ -1265,36 +1491,39 @@ function doLogin() {
 
   const record = INVESTOR_DB[emailInput];
   if (!record) {
+    errEl.textContent = '❌ Datos no encontrados. Comprueba tu nombre y email exactamente como figuran en tu ficha de inversor.';
     errEl.style.display = 'block'; return;
   }
 
-  // Fuzzy name match: check if input name matches any stored name for this email
   const normInput = normalize(nameInput);
   let matched = false;
   record.names.forEach(n => {
     if (normalize(n) === normInput) matched = true;
-    // Also allow partial: input is contained in stored name or vice versa
     if (normalize(n).includes(normInput) || normInput.includes(normalize(n).split(' ')[0])) matched = true;
   });
 
   if (!matched) {
+    errEl.textContent = '❌ Datos no encontrados. Comprueba tu nombre y email exactamente como figuran en tu ficha de inversor.';
     errEl.style.display = 'block'; return;
   }
 
   errEl.style.display = 'none';
-  // Use the longest stored name as display name
   const displayName = [...record.names].sort((a,b)=>b.length-a.length)[0];
-  currentInvestor = { name: displayName, email: emailInput, investments: record.investments };
+  currentInvestor = { role: 'investor', name: displayName, email: emailInput, investments: record.investments };
   showDashboard();
 }
 
 function doLogout() {
   currentInvestor = null;
   document.getElementById('dashboard').style.display = 'none';
+  document.getElementById('admin-section').style.display = 'none';
   document.getElementById('login-screen').style.display = 'flex';
   document.getElementById('login-name').value = '';
   document.getElementById('login-email').value = '';
+  document.getElementById('admin-user').value = '';
+  document.getElementById('admin-pass').value = '';
   document.getElementById('login-error').style.display = 'none';
+  setLoginMode('investor');
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -1305,6 +1534,13 @@ const COLORS = ['#1976D2','#2196F3','#42A5F5','#64B5F6','#1565C0','#0D47A1','#00
 function showDashboard() {
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('dashboard').style.display = 'block';
+  document.getElementById('admin-section').style.display = 'none';
+
+  // Topbar
+  document.getElementById('user-badge').style.display = 'flex';
+  document.getElementById('admin-badge').style.display = 'none';
+  document.getElementById('topbar-subtitle').textContent = 'Portal Inversor';
+  document.getElementById('topbar-view-label').textContent = 'Mi Portfolio';
 
   const inv = currentInvestor;
   const initials = inv.name.split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase();
@@ -1313,28 +1549,33 @@ function showDashboard() {
   document.getElementById('inv-email-display').textContent = inv.email;
   document.getElementById('today-date').textContent = new Date().toLocaleDateString('es-ES',{day:'numeric',month:'long',year:'numeric'});
 
+  // KPI labels — investor mode
+  document.getElementById('kpi-total-label').textContent = 'Mi Capital Invertido';
+  document.getElementById('kpi2-label').textContent = 'Inversiones Activas';
+  document.getElementById('kpi3-label').textContent = 'Exits Exitosos';
+  document.getElementById('kpi4-label').textContent = 'Mejor TIR';
+  document.getElementById('table-panel-title').innerHTML = '📋 Mis Inversiones';
+  document.getElementById('top-panel-title').innerHTML = '🔝 Top Inversiones Propias';
+
   // Build portfolio
   const portfolio = [];
   inv.investments.forEach((investorAmount, key) => {
     const s = STARTUPS[key];
     if (s) portfolio.push({ ...s, key, investorAmount });
   });
-
-  // Sort by investor amount desc
   portfolio.sort((a,b) => (b.investorAmount||0) - (a.investorAmount||0));
 
   const totalInvestorCapital = portfolio.reduce((s,p) => s+(p.investorAmount||0), 0);
   const totalClubCapital = portfolio.reduce((s,p) => s+p.capital, 0);
   const activeCount = portfolio.filter(p=>p.status==='active').length;
-  const exitCount = portfolio.filter(p=>p.status==='exit').length;
-  const failCount = portfolio.filter(p=>p.status==='fail').length;
-  const bestTir = portfolio.filter(p=>p.tir).sort((a,b)=>b.tir-a.tir)[0];
+  const exitCount   = portfolio.filter(p=>p.status==='exit').length;
+  const failCount   = portfolio.filter(p=>p.status==='fail').length;
+  const bestTir     = portfolio.filter(p=>p.tir).sort((a,b)=>b.tir-a.tir)[0];
 
-  // KPIs
   animateCounter(document.getElementById('kpi-total'), totalInvestorCapital);
   document.getElementById('kpi-total-sub').textContent = `En ${portfolio.length} startups`;
   document.getElementById('kpi-active').textContent = activeCount;
-  document.getElementById('kpi-active-sub').textContent = `${Math.round(activeCount/portfolio.length*100)||0}% del portfolio`;
+  document.getElementById('kpi-active-sub').textContent = `${Math.round(activeCount/Math.max(portfolio.length,1)*100)}% del portfolio`;
   document.getElementById('kpi-exits').textContent = exitCount;
   document.getElementById('kpi-exits-sub').textContent = exitCount > 0 ? `${exitCount} desinversión${exitCount>1?'es':''}` : 'Sin exits aún';
   document.getElementById('kpi-tir').textContent = bestTir ? `+${bestTir.tir}%` : '—';
@@ -1344,7 +1585,6 @@ function showDashboard() {
   const tbody = document.getElementById('inv-table-body');
   tbody.innerHTML = '';
   const maxCap = Math.max(...portfolio.map(p=>p.capital), 1);
-
   portfolio.forEach((p, idx) => {
     const barW = (p.capital/maxCap*100).toFixed(0);
     const pct = totalClubCapital > 0 ? (p.capital/totalClubCapital*100).toFixed(1) : 0;
@@ -1353,52 +1593,299 @@ function showDashboard() {
     const nameEl = p.web
       ? `<a href="${p.web}" target="_blank" class="startup-name">${p.name} <span class="link-icon">↗</span></a>`
       : `<span class="startup-name" style="cursor:default;">${p.name}</span>`;
-    const tirEl = p.tir
-      ? `<span class="tir-value">+${p.tir}%</span>`
-      : `<span style="color:var(--muted);font-size:10px;">—</span>`;
-    const webEl = p.web
-      ? `<a href="${p.web}" target="_blank" style="color:var(--blue-bright);font-size:11px;text-decoration:none;">↗ Web</a>`
-      : `<span style="color:var(--muted);font-size:10px;">—</span>`;
+    const tirEl = p.tir ? `<span class="tir-value">+${p.tir}%</span>` : `<span style="color:var(--muted);font-size:10px;">—</span>`;
+    const webEl = p.web ? `<a href="${p.web}" target="_blank" style="color:var(--blue-bright);font-size:11px;text-decoration:none;">↗ Web</a>` : `<span style="color:var(--muted);font-size:10px;">—</span>`;
     const myAmountEl = p.investorAmount > 0
       ? `<span style="color:var(--gold);font-family:'Syne',sans-serif;font-weight:700;">€${p.investorAmount.toLocaleString('es-ES')}</span>`
       : `<span style="color:var(--muted);font-size:10px;">Part.</span>`;
-
     const tr = document.createElement('tr');
-    tr.style.animationDelay = `${idx*0.04}s`;
     tr.innerHTML = `
       <td>${nameEl}</td>
-      <td>
-        <span class="amount-cell">€${p.capital.toLocaleString('es-ES')}</span>
+      <td><span class="amount-cell">€${p.capital.toLocaleString('es-ES')}</span>
         <div class="bar-mini"><div class="bar-mini-fill" style="width:${barW}%;animation-delay:${idx*0.04+0.3}s"></div></div>
-        <div class="investor-amount">${pct}% del club</div>
-      </td>
+        <div class="investor-amount">${pct}% del club</div></td>
       <td>${myAmountEl}</td>
       <td><span class="equity-tag">${p.equity}</span></td>
       <td><span class="status-badge ${statusClass}">${statusLabel}</span></td>
       <td>${tirEl}</td>
-      <td>${webEl}</td>
-    `;
+      <td>${webEl}</td>`;
     tbody.appendChild(tr);
   });
 
-  // DONUT
   renderDonut(portfolio, totalInvestorCapital);
-
-  // STATS
   renderStats(portfolio, activeCount, exitCount, failCount);
-
-  // TOP LIST
   renderTop(portfolio);
 
-  // CONTACT FORM prefill
   document.getElementById('cf-name').value = inv.name;
   document.getElementById('cf-email').value = inv.email;
   const cfSelect = document.getElementById('cf-project');
   cfSelect.innerHTML = '<option value="">— Selecciona un proyecto —</option>';
-  portfolio.forEach(p => {
-    const opt = document.createElement('option');
-    opt.value = p.name; opt.textContent = p.name;
-    cfSelect.appendChild(opt);
+  portfolio.forEach(p => { const opt=document.createElement('option'); opt.value=p.name; opt.textContent=p.name; cfSelect.appendChild(opt); });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// ADMIN DASHBOARD
+// ═══════════════════════════════════════════════════════════════
+function showAdminDashboard() {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('dashboard').style.display = 'block';
+  document.getElementById('admin-section').style.display = 'block';
+
+  // Topbar — admin mode
+  document.getElementById('user-badge').style.display = 'none';
+  const adminBadge = document.getElementById('admin-badge');
+  adminBadge.style.display = 'flex';
+  document.getElementById('topbar-subtitle').textContent = 'Panel Administrador';
+  document.getElementById('topbar-view-label').textContent = 'Vista Global';
+  document.getElementById('today-date').textContent = new Date().toLocaleDateString('es-ES',{day:'numeric',month:'long',year:'numeric'});
+
+  // KPI labels — admin mode
+  document.getElementById('kpi-total-label').textContent = 'Capital Total Club';
+  document.getElementById('kpi2-icon').textContent = '🏢';
+  document.getElementById('kpi2-label').textContent = 'Startups en Portfolio';
+  document.getElementById('kpi3-label').textContent = 'Startups con Exit';
+  document.getElementById('kpi4-label').textContent = 'Mejor TIR';
+  document.getElementById('table-panel-title').innerHTML = '📋 Portfolio Completo <span class="admin-badge-pill">⚙️ ADMIN</span>';
+  document.getElementById('top-panel-title').innerHTML = '🔝 Top Startups por Capital <span class="admin-badge-pill">⚙️ ADMIN</span>';
+
+  // All startups as portfolio
+  const allStartups = Object.entries(STARTUPS).map(([key, s]) => ({ ...s, key, investorAmount: s.capital }));
+  allStartups.sort((a,b) => b.capital - a.capital);
+
+  const totalCapital = allStartups.reduce((s,p) => s+p.capital, 0);
+  const activeCount  = allStartups.filter(p=>p.status==='active').length;
+  const exitCount    = allStartups.filter(p=>p.status==='exit').length;
+  const failCount    = allStartups.filter(p=>p.status==='fail').length;
+  const bestTir      = allStartups.filter(p=>p.tir).sort((a,b)=>b.tir-a.tir)[0];
+
+  animateCounter(document.getElementById('kpi-total'), totalCapital);
+  document.getElementById('kpi-total-sub').textContent = `En ${allStartups.length} startups`;
+  document.getElementById('kpi-active').textContent = activeCount;
+  document.getElementById('kpi-active-sub').textContent = `${Math.round(activeCount/allStartups.length*100)}% del portfolio`;
+  document.getElementById('kpi-exits').textContent = exitCount;
+  document.getElementById('kpi-exits-sub').textContent = `${exitCount} desinversión${exitCount>1?'es':''}`;
+  document.getElementById('kpi-tir').textContent = bestTir ? `+${bestTir.tir}%` : '—';
+  document.getElementById('kpi-tir-sub').textContent = bestTir ? bestTir.name : 'Sin TIR disponible';
+
+  // Main table (all startups, investor amount = club total)
+  const tbody = document.getElementById('inv-table-body');
+  tbody.innerHTML = '';
+  const maxCap = allStartups[0].capital;
+  allStartups.forEach((p, idx) => {
+    const barW = (p.capital/maxCap*100).toFixed(0);
+    const pct  = (p.capital/totalCapital*100).toFixed(1);
+    const statusLabel = p.status==='exit' ? '✅ EXIT' : p.status==='fail' ? '❌ FAIL' : '● ACTIVA';
+    const statusClass = p.status==='exit' ? 'status-exit' : p.status==='fail' ? 'status-fail' : 'status-active';
+    const nameEl = p.web ? `<a href="${p.web}" target="_blank" class="startup-name">${p.name} <span class="link-icon">↗</span></a>` : `<span class="startup-name" style="cursor:default;">${p.name}</span>`;
+    const tirEl  = p.tir ? `<span class="tir-value">+${p.tir}%</span>` : `<span style="color:var(--muted);font-size:10px;">—</span>`;
+    const webEl  = p.web ? `<a href="${p.web}" target="_blank" style="color:var(--blue-bright);font-size:11px;text-decoration:none;">↗ Web</a>` : `<span style="color:var(--muted);font-size:10px;">—</span>`;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${nameEl}</td>
+      <td><span class="amount-cell">€${p.capital.toLocaleString('es-ES')}</span>
+        <div class="bar-mini"><div class="bar-mini-fill" style="width:${barW}%;animation-delay:${idx*0.03+0.3}s"></div></div>
+        <div class="investor-amount">${pct}% del portfolio</div></td>
+      <td>—</td>
+      <td><span class="equity-tag">${p.equity}</span></td>
+      <td><span class="status-badge ${statusClass}">${statusLabel}</span></td>
+      <td>${tirEl}</td>
+      <td>${webEl}</td>`;
+    tbody.appendChild(tr);
+  });
+
+  renderDonut(allStartups, totalCapital);
+  renderStats(allStartups, activeCount, exitCount, failCount);
+
+  // Top by capital (main toplist)
+  const topList = document.getElementById('top-list');
+  topList.innerHTML = '';
+  allStartups.slice(0,5).forEach((p, i) => {
+    const pct = (p.capital/maxCap*100).toFixed(0);
+    const nameEl = p.web
+      ? `<a href="${p.web}" target="_blank" style="font-family:'Syne',sans-serif;font-weight:700;font-size:14px;color:var(--text);text-decoration:none;" onmouseover="this.style.color='var(--blue-bright)'" onmouseout="this.style.color='var(--text)'">${p.name} ↗</a>`
+      : `<span style="font-family:'Syne',sans-serif;font-weight:700;font-size:14px;color:var(--text);">${p.name}</span>`;
+    const div = document.createElement('div');
+    div.style.cssText = 'display:flex;align-items:center;gap:12px;';
+    div.innerHTML = `
+      <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:20px;color:rgba(30,136,229,0.25);width:30px;flex-shrink:0;">${String(i+1).padStart(2,'0')}</div>
+      <div style="flex:1;">${nameEl}<div style="font-size:11px;color:var(--muted);margin-top:2px;">€${p.capital.toLocaleString('es-ES')} · ${p.equity}</div></div>
+      <div style="width:80px;"><div style="height:4px;background:rgba(30,136,229,0.10);border-radius:4px;overflow:hidden;">
+        <div style="height:100%;border-radius:4px;background:linear-gradient(90deg,var(--blue),var(--blue-bright));width:${pct}%;animation:growBar 1.2s ease both;animation-delay:${i*0.1+0.5}s"></div></div></div>`;
+    topList.appendChild(div);
+  });
+
+  // Contact form — all startups
+  document.getElementById('cf-name').value = 'Equipo AngelClub';
+  document.getElementById('cf-email').value = ADMIN_USER;
+  const cfSelect = document.getElementById('cf-project');
+  cfSelect.innerHTML = '<option value="">— Selecciona un proyecto —</option>';
+  allStartups.forEach(p => { const opt=document.createElement('option'); opt.value=p.name; opt.textContent=p.name; cfSelect.appendChild(opt); });
+
+  // ── ADMIN EXTRA PANELS ──
+  renderAdminExtras(allStartups, totalCapital);
+}
+
+function renderAdminExtras(allStartups, totalCapital) {
+  // Build investor summary from INVESTOR_DB
+  const investorSummary = []; // { name, email, totalAmount, startupCount, startups[] }
+  Object.entries(INVESTOR_DB).forEach(([email, rec]) => {
+    let total = 0;
+    const startupNames = [];
+    rec.investments.forEach((amt, key) => {
+      total += amt || 0;
+      const s = STARTUPS[key];
+      if (s) startupNames.push(s.name);
+    });
+    const name = [...rec.names].sort((a,b)=>b.length-a.length)[0];
+    investorSummary.push({ name, email, totalAmount: total, startupCount: rec.investments.size, startups: startupNames });
+  });
+  investorSummary.sort((a,b) => b.totalAmount - a.totalAmount);
+
+  // Admin KPIs extra
+  const totalInvestorsWithCapital = investorSummary.filter(i=>i.totalAmount>0).length;
+  const totalInvestorCapital = investorSummary.reduce((s,i)=>s+i.totalAmount,0);
+  const avgPerInvestor = totalInvestorsWithCapital > 0 ? Math.round(totalInvestorCapital/totalInvestorsWithCapital) : 0;
+
+  // Top startup by investor count
+  const startupInvestorCount = {};
+  RAW_INVESTORS.forEach(([name,email,startup]) => {
+    const key = normalizeStartup(startup);
+    startupInvestorCount[key] = (startupInvestorCount[key]||0) + 1;
+  });
+  const topByCount = Object.entries(startupInvestorCount).sort((a,b)=>b[1]-a[1])[0];
+  const topCountStartup = topByCount ? (STARTUPS[topByCount[0]]?.name || topByCount[0]) : '—';
+
+  document.getElementById('adm-investors').textContent = totalInvestorsWithCapital;
+  animateCounter(document.getElementById('adm-avg'), avgPerInvestor);
+  document.getElementById('adm-top-startup').textContent = topCountStartup;
+  document.getElementById('adm-top-startup-sub').textContent = topByCount ? `${topByCount[1]} inversores` : '—';
+  animateCounter(document.getElementById('adm-total-capital'), totalCapital);
+
+  // Admin Startup Table
+  const admStartupTbody = document.getElementById('admin-startup-tbody');
+  admStartupTbody.innerHTML = '';
+  allStartups.forEach((p, idx) => {
+    const investorCount = startupInvestorCount[p.key] || 0;
+    const statusLabel = p.status==='exit' ? '✅ EXIT' : p.status==='fail' ? '❌ FAIL' : '● ACTIVA';
+    const statusClass = p.status==='exit' ? 'status-exit' : p.status==='fail' ? 'status-fail' : 'status-active';
+    const nameEl = p.web ? `<a href="${p.web}" target="_blank" class="startup-name">${p.name} <span class="link-icon">↗</span></a>` : `<span class="startup-name" style="cursor:default;">${p.name}</span>`;
+    const tirEl  = p.tir ? `<span class="tir-value">+${p.tir}%</span>` : `<span style="color:var(--muted);font-size:10px;">—</span>`;
+    const webEl  = p.web ? `<a href="${p.web}" target="_blank" style="color:var(--blue-bright);font-size:11px;text-decoration:none;">↗</a>` : `<span style="color:var(--muted);">—</span>`;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td style="color:var(--muted);font-size:11px;">${idx+1}</td>
+      <td>${nameEl}</td>
+      <td><span class="amount-cell">€${p.capital.toLocaleString('es-ES')}</span></td>
+      <td><span class="equity-tag">${p.equity}</span></td>
+      <td><span class="status-badge ${statusClass}">${statusLabel}</span></td>
+      <td>${tirEl}</td>
+      <td><span style="font-family:'Syne',sans-serif;font-weight:700;color:var(--blue-bright);">${investorCount}</span></td>
+      <td>${webEl}</td>`;
+    admStartupTbody.appendChild(tr);
+  });
+
+  // Investor ranking
+  const rankEl = document.getElementById('adm-investor-ranking');
+  rankEl.innerHTML = '';
+  const maxAmt = investorSummary.length > 0 ? investorSummary[0].totalAmount : 1;
+  investorSummary.slice(0,20).forEach((inv, i) => {
+    const pct = maxAmt > 0 ? (inv.totalAmount/maxAmt*100).toFixed(0) : 0;
+    const medalEl = i===0 ? '🥇' : i===1 ? '🥈' : i===2 ? '🥉' : String(i+1).padStart(2,'0');
+    const div = document.createElement('div');
+    div.className = 'adm-rank-item';
+    div.innerHTML = `
+      <div class="adm-rank-num">${medalEl}</div>
+      <div style="flex:1;min-width:0;">
+        <div class="adm-rank-name" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${inv.name}</div>
+        <div class="adm-rank-email">${inv.email}</div>
+        <div class="adm-rank-startups">${inv.startupCount} startup${inv.startupCount!==1?'s':''}: ${inv.startups.slice(0,3).join(', ')}${inv.startups.length>3?' …':''}</div>
+      </div>
+      <div style="text-align:right;flex-shrink:0;">
+        <div class="adm-rank-amt">${inv.totalAmount>0?'€'+inv.totalAmount.toLocaleString('es-ES'):'Part.'}</div>
+        <div style="width:70px;height:3px;background:rgba(30,136,229,0.10);border-radius:3px;overflow:hidden;margin-top:5px;margin-left:auto;">
+          <div style="height:100%;background:linear-gradient(90deg,var(--gold),#F9C846);width:${pct}%;border-radius:3px;"></div>
+        </div>
+      </div>`;
+    rankEl.appendChild(div);
+  });
+
+  // Admin donut (top 10 by capital)
+  const top10 = allStartups.slice(0,10);
+  const top10Total = top10.reduce((s,p)=>s+p.capital,0);
+  const svgG = document.getElementById('admin-donut-segments');
+  const legend = document.getElementById('admin-donut-legend');
+  svgG.innerHTML = ''; legend.innerHTML = '';
+  document.getElementById('admin-donut-center-val').textContent = '€'+Math.round(totalCapital/1000)+'K';
+  const r=72,cx=100,cy=100,circ=2*Math.PI*r;
+  let ang=-90;
+  top10.forEach((p,i) => {
+    const share = p.capital/Math.max(top10Total,1);
+    const dashLen = share*circ;
+    const offset = (ang/360)*circ;
+    const c = document.createElementNS('http://www.w3.org/2000/svg','circle');
+    c.setAttribute('cx',cx); c.setAttribute('cy',cy); c.setAttribute('r',r);
+    c.setAttribute('stroke',COLORS[i%COLORS.length]);
+    c.setAttribute('stroke-dasharray',`${dashLen} ${circ-dashLen}`);
+    c.setAttribute('stroke-dashoffset',-offset);
+    c.style.strokeWidth='18'; c.style.fill='none'; c.style.transition='stroke-width 0.3s';c.style.cursor='pointer';
+    c.addEventListener('mouseenter',()=>c.style.strokeWidth='22');
+    c.addEventListener('mouseleave',()=>c.style.strokeWidth='18');
+    svgG.appendChild(c);
+    const li=document.createElement('div'); li.className='legend-item';
+    li.innerHTML=`<div class="legend-dot" style="background:${COLORS[i%COLORS.length]}"></div><span class="legend-label">${p.name}</span><span class="legend-pct">${(share*100).toFixed(1)}%</span>`;
+    legend.appendChild(li);
+    ang += share*360;
+  });
+
+  // Investor detail table with filter
+  window._admInvestorRows = [];
+  RAW_INVESTORS.forEach(([name,email,startup,amount]) => {
+    if (!name || !email) return;
+    const key = normalizeStartup(startup);
+    const s = STARTUPS[key];
+    const statusLabel = s ? (s.status==='exit'?'✅ EXIT':s.status==='fail'?'❌ FAIL':'● ACTIVA') : '—';
+    const statusClass = s ? (s.status==='exit'?'status-exit':s.status==='fail'?'status-fail':'status-active') : '';
+    window._admInvestorRows.push({ name, email, startup: s?.name||startup, amount: amount||0, statusLabel, statusClass });
+  });
+  window._admInvestorRows.sort((a,b) => b.amount - a.amount);
+
+  // Populate startup filter
+  const admFilterStartup = document.getElementById('adm-filter-startup');
+  admFilterStartup.innerHTML = '<option value="">Todas las startups</option>';
+  allStartups.forEach(p => { const opt=document.createElement('option'); opt.value=p.name; opt.textContent=p.name; admFilterStartup.appendChild(opt); });
+
+  document.getElementById('adm-investor-count-label').textContent = `${window._admInvestorRows.length} registros`;
+  renderAdminInvestorTable(window._admInvestorRows);
+}
+
+function filterAdminTable() {
+  const q = document.getElementById('adm-search').value.toLowerCase();
+  const sf = document.getElementById('adm-filter-startup').value.toLowerCase();
+  const filtered = window._admInvestorRows.filter(r => {
+    const matchQ = !q || r.name.toLowerCase().includes(q) || r.email.toLowerCase().includes(q) || r.startup.toLowerCase().includes(q);
+    const matchS = !sf || r.startup.toLowerCase() === sf;
+    return matchQ && matchS;
+  });
+  document.getElementById('adm-investor-count-label').textContent = `${filtered.length} / ${window._admInvestorRows.length} registros`;
+  renderAdminInvestorTable(filtered);
+}
+
+function renderAdminInvestorTable(rows) {
+  const tbody = document.getElementById('adm-investors-tbody');
+  tbody.innerHTML = '';
+  rows.forEach((r, i) => {
+    const amtEl = r.amount > 0
+      ? `<span style="color:var(--gold);font-family:'Syne',sans-serif;font-weight:700;">€${r.amount.toLocaleString('es-ES')}</span>`
+      : `<span style="color:var(--muted);font-size:10px;">Sin importe</span>`;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td style="color:var(--muted);font-size:11px;">${i+1}</td>
+      <td style="font-family:'Syne',sans-serif;font-weight:700;font-size:13px;">${r.name}</td>
+      <td style="font-size:11px;color:var(--muted);">${r.email}</td>
+      <td style="font-family:'Syne',sans-serif;font-weight:600;font-size:12px;">${r.startup}</td>
+      <td>${amtEl}</td>
+      <td><span class="status-badge ${r.statusClass}">${r.statusLabel}</span></td>`;
+    tbody.appendChild(tr);
   });
 }
 
