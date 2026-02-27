@@ -639,6 +639,7 @@
               <th>#</th>
               <th>Startup</th>
               <th>Capital Total</th>
+              <th>Valoración</th>
               <th>Equity</th>
               <th>Estado</th>
               <th>TIR</th>
@@ -2306,6 +2307,10 @@ function showDashboard() {
   document.getElementById('kpi4-label').textContent = 'Mejor TIR';
   document.getElementById('table-panel-title').innerHTML = '📋 Mis Inversiones';
   document.getElementById('top-panel-title').innerHTML = '🔝 Top Inversiones Propias';
+  // Restore shared table header for investor context
+  const invThs = document.querySelectorAll('#inv-table-body')
+    [0]?.closest('table')?.querySelectorAll('thead th');
+  if (invThs && invThs.length >= 3) invThs[2].textContent = 'Mi Aportación';
 
   // Build portfolio
   const portfolio = [];
@@ -2414,6 +2419,10 @@ function showAdminDashboard() {
   document.getElementById('kpi4-label').textContent = 'Mejor TIR';
   document.getElementById('table-panel-title').innerHTML = '📋 Portfolio Completo <span class="admin-badge-pill">⚙️ ADMIN</span>';
   document.getElementById('top-panel-title').innerHTML = '🔝 Top Startups por Capital <span class="admin-badge-pill">⚙️ ADMIN</span>';
+  // Adjust shared table header for admin context
+  const sharedThs = document.querySelectorAll('#inv-table-body')
+    [0]?.closest('table')?.querySelectorAll('thead th');
+  if (sharedThs && sharedThs.length >= 3) sharedThs[2].textContent = 'Capital Club';
 
   // All startups as portfolio
   const allStartups = Object.entries(STARTUPS).map(([key, s]) => ({ ...s, key, investorAmount: s.capital }));
@@ -2446,6 +2455,17 @@ function showAdminDashboard() {
     const nameEl = p.web ? `<a href="${p.web}" target="_blank" class="startup-name">${p.name} <span class="link-icon">↗</span></a>` : `<span class="startup-name" style="cursor:default;">${p.name}</span>`;
     const tirEl  = p.tir ? `<span class="tir-value">+${p.tir}%</span>` : `<span style="color:var(--muted);font-size:10px;">—</span>`;
     const webEl  = p.web ? `<a href="${p.web}" target="_blank" style="color:var(--blue-bright);font-size:11px;text-decoration:none;">↗ Web</a>` : `<span style="color:var(--muted);font-size:10px;">—</span>`;
+    // Valor actual del club en esta startup (admin ve el valor total del club, no individual)
+    const admValuation = STARTUP_VALUATIONS[p.key] || null;
+    let admValorEl = `<span style="color:var(--muted);font-size:10px;">—</span>`;
+    if (admValuation && p.capital > 0 && p.equity) {
+      const equityPct = parseFloat(p.equity) / 100 || 0;
+      const clubStake = Math.round(equityPct * admValuation);
+      admValorEl = `<div style="display:flex;flex-direction:column;gap:2px;">
+        <span style="color:var(--green);font-family:'Syne',sans-serif;font-weight:700;font-size:13px;">€${clubStake.toLocaleString('es-ES')}</span>
+        <span style="font-size:10px;color:var(--muted);">val. compañía</span>
+      </div>`;
+    }
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td>${nameEl}</td>
@@ -2453,6 +2473,7 @@ function showAdminDashboard() {
         <div class="bar-mini"><div class="bar-mini-fill" style="width:${barW}%;animation-delay:${idx*0.03+0.3}s"></div></div>
         <div class="investor-amount">${pct}% del portfolio</div></td>
       <td>—</td>
+      <td>${admValorEl}</td>
       <td><span class="equity-tag">${p.equity}</span></td>
       <td><span class="status-badge ${statusClass}">${statusLabel}</span></td>
       <td>${tirEl}</td>
@@ -2538,11 +2559,23 @@ function renderAdminExtras(allStartups, totalCapital) {
     const nameEl = p.web ? `<a href="${p.web}" target="_blank" class="startup-name">${p.name} <span class="link-icon">↗</span></a>` : `<span class="startup-name" style="cursor:default;">${p.name}</span>`;
     const tirEl  = p.tir ? `<span class="tir-value">+${p.tir}%</span>` : `<span style="color:var(--muted);font-size:10px;">—</span>`;
     const webEl  = p.web ? `<a href="${p.web}" target="_blank" style="color:var(--blue-bright);font-size:11px;text-decoration:none;">↗</a>` : `<span style="color:var(--muted);">—</span>`;
+    // Valoración de la compañía (si existe)
+    const admSVal = STARTUP_VALUATIONS[p.key] || null;
+    let admSValEl = `<span style="color:var(--muted);font-size:10px;">—</span>`;
+    if (admSVal) {
+      const equityPct = parseFloat(p.equity) / 100 || 0;
+      const clubStake = Math.round(equityPct * admSVal);
+      admSValEl = `<div style="display:flex;flex-direction:column;gap:1px;">
+        <span style="color:var(--green);font-family:'Syne',sans-serif;font-weight:700;font-size:12px;">€${clubStake.toLocaleString('es-ES')}</span>
+        <span style="font-size:10px;color:var(--muted);">${(admSVal/1000000).toFixed(0)}M val.</span>
+      </div>`;
+    }
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td style="color:var(--muted);font-size:11px;">${idx+1}</td>
       <td>${nameEl}</td>
       <td><span class="amount-cell">€${p.capital.toLocaleString('es-ES')}</span></td>
+      <td>${admSValEl}</td>
       <td><span class="equity-tag">${p.equity}</span></td>
       <td><span class="status-badge ${statusClass}">${statusLabel}</span></td>
       <td>${tirEl}</td>
