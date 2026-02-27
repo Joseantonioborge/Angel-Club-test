@@ -337,6 +337,112 @@
   ::-webkit-scrollbar-thumb { background: rgba(30,136,229,0.25); border-radius: 3px; }
   .table-scroll { max-height: 480px; overflow-y: auto; }
 
+  /* ── UPDATE BUTTON ── */
+  .update-btn {
+    display: inline-flex; align-items: center; gap: 5px;
+    background: linear-gradient(135deg, #7C3AED, #A855F7);
+    color: white; border: none; border-radius: 8px;
+    padding: 5px 11px; font-family: 'Syne', sans-serif;
+    font-weight: 800; font-size: 10px; letter-spacing: 0.08em;
+    text-transform: uppercase; cursor: pointer;
+    transition: transform 0.18s, box-shadow 0.18s;
+    box-shadow: 0 2px 10px rgba(124,58,237,0.35);
+    white-space: nowrap;
+  }
+  .update-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 18px rgba(124,58,237,0.50); }
+  .update-btn.no-update {
+    background: rgba(90,122,159,0.12); color: var(--muted);
+    box-shadow: none; cursor: default; font-weight: 600;
+  }
+  .update-btn.no-update:hover { transform: none; box-shadow: none; }
+
+  /* ── UPDATE MODAL ── */
+  #update-modal {
+    position: fixed; inset: 0; z-index: 500;
+    background: rgba(20,35,70,0.55); backdrop-filter: blur(6px);
+    display: flex; align-items: center; justify-content: center;
+    padding: 24px; animation: fadeIn 0.2s ease both;
+  }
+  .update-modal-card {
+    background: rgba(255,255,255,0.97); border-radius: 20px;
+    padding: 36px 40px; max-width: 680px; width: 100%;
+    box-shadow: 0 24px 80px rgba(21,101,192,0.22);
+    position: relative; animation: fadeUp 0.25s ease both;
+  }
+  .update-modal-close {
+    position: absolute; top: 18px; right: 20px;
+    background: none; border: none; font-size: 22px;
+    cursor: pointer; color: var(--muted); line-height: 1;
+    transition: color 0.15s;
+  }
+  .update-modal-close:hover { color: var(--text); }
+  .update-modal-startup {
+    font-family: 'Syne', sans-serif; font-weight: 800; font-size: 22px;
+    color: var(--blue); margin-bottom: 6px;
+  }
+  .update-modal-subtitle {
+    font-size: 11px; color: var(--muted); margin-bottom: 24px; letter-spacing: 0.05em;
+  }
+  .update-embed-wrap {
+    width: 100%; border-radius: 14px; overflow: hidden;
+    background: rgba(30,136,229,0.04); border: 1px solid var(--border);
+    min-height: 320px; display: flex; align-items: center; justify-content: center;
+  }
+  .update-embed-wrap iframe { width: 100%; height: 400px; border: none; }
+  .update-embed-wrap .update-embed-link {
+    display: flex; flex-direction: column; align-items: center; gap: 12px;
+    padding: 40px; text-align: center;
+  }
+  .update-embed-link-icon { font-size: 40px; }
+  .update-embed-link a {
+    color: var(--blue-bright); font-family: 'Syne', sans-serif;
+    font-weight: 700; font-size: 15px; text-decoration: none;
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 12px 24px; border-radius: 12px;
+    background: linear-gradient(135deg,var(--blue),var(--blue-bright));
+    color: white; box-shadow: 0 4px 16px rgba(21,101,192,0.25);
+    transition: transform 0.18s, box-shadow 0.18s;
+  }
+  .update-embed-link a:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(21,101,192,0.35); }
+  .update-embed-link p { font-size: 11px; color: var(--muted); }
+
+  /* ── ADMIN UPDATE PANEL ── */
+  .upd-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 16px; margin-top: 4px;
+  }
+  .upd-card {
+    background: rgba(30,136,229,0.04); border: 1px solid var(--border);
+    border-radius: 14px; padding: 18px 20px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .upd-card:hover { border-color: rgba(124,58,237,0.30); box-shadow: 0 4px 16px rgba(124,58,237,0.08); }
+  .upd-card-name {
+    font-family: 'Syne', sans-serif; font-weight: 700; font-size: 13px;
+    color: var(--text); margin-bottom: 12px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .upd-has-link { color: #7C3AED; font-size: 10px; font-weight: 600; letter-spacing: 0.05em; }
+  .upd-input {
+    width: 100%; background: rgba(255,255,255,0.80); border: 1px solid var(--border);
+    border-radius: 10px; padding: 10px 14px; font-family: 'DM Mono', monospace;
+    font-size: 11px; color: var(--text); outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    margin-bottom: 10px;
+  }
+  .upd-input:focus { border-color: #A855F7; box-shadow: 0 0 0 3px rgba(168,85,247,0.12); }
+  .upd-save-btn {
+    width: 100%; background: linear-gradient(135deg,#7C3AED,#A855F7);
+    color: white; border: none; border-radius: 10px; padding: 9px 0;
+    font-family: 'Syne', sans-serif; font-weight: 700; font-size: 11px;
+    letter-spacing: 0.06em; cursor: pointer; text-transform: uppercase;
+    transition: transform 0.15s, box-shadow 0.15s;
+    box-shadow: 0 2px 10px rgba(124,58,237,0.30);
+  }
+  .upd-save-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(124,58,237,0.40); }
+  .upd-save-btn:active { transform: none; }
+  .upd-saved-msg { font-size: 10px; color: var(--green); margin-top: 6px; text-align: center; display: none; }
+
   /* ANIMATIONS */
   @keyframes fadeDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
   @keyframes fadeUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
@@ -430,6 +536,20 @@
 </div>
 
 <!-- ═══════════════════════════════════════════════════
+     UPDATE MODAL (investor view)
+═══════════════════════════════════════════════════ -->
+<div id="update-modal" style="display:none;">
+  <div class="update-modal-card">
+    <button class="update-modal-close" onclick="closeUpdateModal()">✕</button>
+    <div class="update-modal-startup" id="update-modal-name">—</div>
+    <div class="update-modal-subtitle" id="update-modal-subtitle">Actualización de la compañía</div>
+    <div class="update-embed-wrap" id="update-embed-wrap">
+      <div class="update-embed-link" id="update-embed-content"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
      DASHBOARD
 ═══════════════════════════════════════════════════ -->
 <div id="dashboard">
@@ -511,7 +631,7 @@
               <th>Equity</th>
               <th>Estado</th>
               <th>TIR</th>
-              <th>Web</th>
+              <th style="color:#A855F7;">UPDATE</th>
             </tr>
           </thead>
           <tbody id="inv-table-body"></tbody>
@@ -699,6 +819,19 @@
           </thead>
           <tbody id="adm-investors-tbody"></tbody>
         </table>
+      </div>
+    </div>
+
+    <!-- ACTUALIZACIONES POR STARTUP -->
+    <div class="panel" id="admin-updates-panel" style="margin-top:24px;animation-delay:0.35s;">
+      <div class="panel-title">
+        📡 Actualizaciones por Startup
+        <span style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;margin-left:8px;">
+          Añade un enlace (URL de documento, vídeo o web) por startup. Será visible para los inversores de esa compañía.
+        </span>
+      </div>
+      <div class="upd-grid" id="upd-cards-grid">
+        <!-- Populated by JS -->
       </div>
     </div>
 
@@ -2175,8 +2308,136 @@ RAW_INVESTORS.forEach(([name, email, startup, valuation, amount]) => {
 });
 
 // ═══════════════════════════════════════════════════════════════
-// LOGIN MODE TOGGLE
+// STARTUP UPDATES — admin-managed links per startup
+// Persisted in localStorage so they survive page reloads
 // ═══════════════════════════════════════════════════════════════
+const UPDATES_STORAGE_KEY = 'angelclub_startup_updates_v1';
+let STARTUP_UPDATES = {}; // startupKey -> URL string
+
+function loadUpdates() {
+  try {
+    const raw = localStorage.getItem(UPDATES_STORAGE_KEY);
+    STARTUP_UPDATES = raw ? JSON.parse(raw) : {};
+  } catch(e) { STARTUP_UPDATES = {}; }
+}
+
+function saveUpdate(startupKey, url) {
+  if (url && url.trim()) {
+    STARTUP_UPDATES[startupKey] = url.trim();
+  } else {
+    delete STARTUP_UPDATES[startupKey];
+  }
+  try { localStorage.setItem(UPDATES_STORAGE_KEY, JSON.stringify(STARTUP_UPDATES)); } catch(e) {}
+}
+
+loadUpdates();
+
+// ═══════════════════════════════════════════════════════════════
+// UPDATE MODAL (investor)
+// ═══════════════════════════════════════════════════════════════
+function openUpdateModal(startupKey, startupName, url) {
+  const modal = document.getElementById('update-modal');
+  document.getElementById('update-modal-name').textContent = startupName;
+  document.getElementById('update-modal-subtitle').textContent = 'Actualización de la compañía';
+  const wrap = document.getElementById('update-embed-wrap');
+  const content = document.getElementById('update-embed-content');
+
+  // Detect content type and embed accordingly
+  const u = url.toLowerCase();
+  const isYoutube = u.includes('youtube.com') || u.includes('youtu.be');
+  const isVimeo   = u.includes('vimeo.com');
+  const isDrive   = u.includes('drive.google.com') || u.includes('docs.google.com');
+  const isLoom    = u.includes('loom.com');
+
+  if (isYoutube || isVimeo || isDrive || isLoom) {
+    // Build embeddable src
+    let embedSrc = url;
+    if (isYoutube) {
+      const vid = url.match(/(?:v=|youtu\.be\/|embed\/)([a-zA-Z0-9_-]{11})/);
+      if (vid) embedSrc = `https://www.youtube.com/embed/${vid[1]}?rel=0&modestbranding=1`;
+    } else if (isVimeo) {
+      const vid = url.match(/vimeo\.com\/(\d+)/);
+      if (vid) embedSrc = `https://player.vimeo.com/video/${vid[1]}`;
+    } else if (isDrive) {
+      embedSrc = url.replace('/view', '/preview').replace('/edit', '/preview');
+    } else if (isLoom) {
+      embedSrc = url.replace('loom.com/share/', 'loom.com/embed/');
+    }
+    wrap.innerHTML = `<iframe src="${embedSrc}" allowfullscreen allow="autoplay; fullscreen"></iframe>`;
+  } else {
+    // Generic link — show a styled button
+    const ext = url.split('.').pop().toLowerCase().split('?')[0];
+    const icon = ['pdf'].includes(ext) ? '📄' : ['mp4','mov','avi'].includes(ext) ? '🎬' : '🔗';
+    wrap.innerHTML = `<div class="update-embed-link">
+      <div class="update-embed-link-icon">${icon}</div>
+      <p style="color:var(--muted);font-size:12px;margin-bottom:8px;">${startupName} — Actualización disponible</p>
+      <a href="${url}" target="_blank" rel="noopener">Ver documento / contenido ↗</a>
+      <p style="margin-top:10px;font-size:10px;">Se abrirá en una nueva pestaña</p>
+    </div>`;
+  }
+
+  modal.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+
+function closeUpdateModal() {
+  const modal = document.getElementById('update-modal');
+  modal.style.display = 'none';
+  document.getElementById('update-embed-wrap').innerHTML = '';
+  document.body.style.overflow = '';
+}
+
+// Close modal on backdrop click
+document.getElementById('update-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeUpdateModal();
+});
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeUpdateModal(); });
+
+// ═══════════════════════════════════════════════════════════════
+// ADMIN UPDATE PANEL renderer
+// ═══════════════════════════════════════════════════════════════
+function renderAdminUpdatesPanel(allStartups) {
+  const grid = document.getElementById('upd-cards-grid');
+  if (!grid) return;
+  grid.innerHTML = '';
+  allStartups.forEach(p => {
+    const currentUrl = STARTUP_UPDATES[p.key] || '';
+    const hasLink = !!currentUrl;
+    const card = document.createElement('div');
+    card.className = 'upd-card';
+    card.innerHTML = `
+      <div class="upd-card-name">
+        <span>${p.name}</span>
+        ${hasLink ? '<span class="upd-has-link">● PUBLICADO</span>' : '<span style="color:var(--muted);font-size:10px;">Sin enlace</span>'}
+      </div>
+      <input class="upd-input" id="upd-input-${p.key}"
+        type="url" placeholder="https://… (YouTube, Drive, PDF, Vimeo…)"
+        value="${currentUrl.replace(/"/g,'&quot;')}">
+      <button class="upd-save-btn" onclick="adminSaveUpdate('${p.key}','${p.name.replace(/'/g,"\\'")}')">
+        ${hasLink ? '✎ Actualizar enlace' : '+ Añadir enlace'}
+      </button>
+      <div class="upd-saved-msg" id="upd-msg-${p.key}">✓ Guardado correctamente</div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+function adminSaveUpdate(startupKey, startupName) {
+  const input = document.getElementById(`upd-input-${startupKey}`);
+  if (!input) return;
+  const url = input.value.trim();
+  saveUpdate(startupKey, url);
+
+  // Re-render the card to reflect new state
+  const allStartups = Object.entries(STARTUPS).map(([key,s])=>({...s,key})).sort((a,b)=>a.name.localeCompare(b.name));
+  renderAdminUpdatesPanel(allStartups);
+
+  // Show saved message briefly
+  setTimeout(() => {
+    const msg = document.getElementById(`upd-msg-${startupKey}`);
+    if (msg) { msg.style.display = 'block'; setTimeout(() => msg.style.display='none', 2500); }
+  }, 50);
+}
 let loginMode = 'investor';
 
 function setLoginMode(mode) {
@@ -2401,6 +2662,11 @@ function showDashboard() {
       : `<span class="startup-name" style="cursor:default;">${p.name}</span>`;
     const tirEl = p.tir ? `<span class="tir-value">+${p.tir}%</span>` : `<span style="color:var(--muted);font-size:10px;">—</span>`;
     const webEl = p.web ? `<a href="${p.web}" target="_blank" style="color:var(--blue-bright);font-size:11px;text-decoration:none;">↗ Web</a>` : `<span style="color:var(--muted);font-size:10px;">—</span>`;
+    // UPDATE button
+    const updLink = STARTUP_UPDATES[p.key] || null;
+    const updateEl = updLink
+      ? `<button class="update-btn" onclick="openUpdateModal('${p.key}','${p.name.replace(/'/g,"\\'")}','${updLink.replace(/'/g,"\\'")}')">▶ UPDATE</button>`
+      : `<button class="update-btn no-update" disabled>— sin update</button>`;
     const myAmountEl = p.investorAmount > 0
       ? `<span style="color:var(--gold);font-family:'Syne',sans-serif;font-weight:700;">€${p.investorAmount.toLocaleString('es-ES')}</span>`
       : `<span style="color:var(--muted);font-size:10px;">Part.</span>`;
@@ -2431,7 +2697,7 @@ function showDashboard() {
       <td><span class="equity-tag">${p.equity}</span></td>
       <td><span class="status-badge ${statusClass}">${statusLabel}</span></td>
       <td>${tirEl}</td>
-      <td>${webEl}</td>`;
+      <td>${updateEl}</td>`;
     tbody.appendChild(tr);
   });
 
@@ -2474,6 +2740,7 @@ function showAdminDashboard() {
   const sharedThs = document.querySelectorAll('#inv-table-body')
     [0]?.closest('table')?.querySelectorAll('thead th');
   if (sharedThs && sharedThs.length >= 3) sharedThs[2].textContent = 'Capital Club';
+  if (sharedThs && sharedThs.length >= 8) { sharedThs[7].textContent = 'Update'; sharedThs[7].style.color = '#A855F7'; }
 
   // All startups as portfolio
   const allStartups = Object.entries(STARTUPS).map(([key, s]) => ({ ...s, key, investorAmount: s.capital }));
@@ -2506,6 +2773,11 @@ function showAdminDashboard() {
     const nameEl = p.web ? `<a href="${p.web}" target="_blank" class="startup-name">${p.name} <span class="link-icon">↗</span></a>` : `<span class="startup-name" style="cursor:default;">${p.name}</span>`;
     const tirEl  = p.tir ? `<span class="tir-value">+${p.tir}%</span>` : `<span style="color:var(--muted);font-size:10px;">—</span>`;
     const webEl  = p.web ? `<a href="${p.web}" target="_blank" style="color:var(--blue-bright);font-size:11px;text-decoration:none;">↗ Web</a>` : `<span style="color:var(--muted);font-size:10px;">—</span>`;
+    // Update status for admin view
+    const admUpdLink = STARTUP_UPDATES[p.key] || null;
+    const admUpdEl = admUpdLink
+      ? `<span style="color:#7C3AED;font-size:10px;font-weight:700;">✓ Publicado</span>`
+      : `<span style="color:var(--muted);font-size:10px;">—</span>`;
     // Valor actual del club en esta startup (admin ve el valor total del club, no individual)
     const admValuation = STARTUP_VALUATIONS[p.key] || null;
     let admValorEl = `<span style="color:var(--muted);font-size:10px;">—</span>`;
@@ -2528,7 +2800,7 @@ function showAdminDashboard() {
       <td><span class="equity-tag">${p.equity}</span></td>
       <td><span class="status-badge ${statusClass}">${statusLabel}</span></td>
       <td>${tirEl}</td>
-      <td>${webEl}</td>`;
+      <td>${admUpdEl}</td>`;
     tbody.appendChild(tr);
   });
 
@@ -2707,6 +2979,10 @@ function renderAdminExtras(allStartups, totalCapital) {
 
   document.getElementById('adm-investor-count-label').textContent = `${window._admInvestorRows.length} registros`;
   renderAdminInvestorTable(window._admInvestorRows);
+
+  // Render updates panel
+  const allSorted = allStartups.slice().sort((a,b) => a.name.localeCompare(b.name));
+  renderAdminUpdatesPanel(allSorted);
 }
 
 function filterAdminTable() {
