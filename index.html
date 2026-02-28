@@ -443,6 +443,60 @@
   .upd-save-btn:active { transform: none; }
   .upd-saved-msg { font-size: 10px; color: var(--green); margin-top: 6px; text-align: center; display: none; }
 
+  /* ── EQUITY ADMIN PANEL ── */
+  .eq-card {
+    background: rgba(30,136,229,0.04); border: 1px solid var(--border);
+    border-radius: 14px; padding: 18px 20px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .eq-card:hover { border-color: rgba(46,125,50,0.35); box-shadow: 0 4px 16px rgba(46,125,50,0.08); }
+  .eq-card-name {
+    font-family: 'Syne', sans-serif; font-weight: 700; font-size: 13px;
+    color: var(--text); margin-bottom: 4px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .eq-current {
+    font-size: 10px; font-weight: 600; letter-spacing: 0.05em;
+    color: var(--green); font-family: 'DM Mono', monospace;
+  }
+  .eq-hint {
+    font-size: 10px; color: var(--muted); margin-bottom: 10px; line-height: 1.5;
+  }
+  .eq-input-wrap {
+    display: flex; align-items: center; gap: 8px; margin-bottom: 10px;
+  }
+  .eq-input {
+    flex: 1; background: rgba(255,255,255,0.80); border: 1px solid var(--border);
+    border-radius: 10px; padding: 10px 14px; font-family: 'DM Mono', monospace;
+    font-size: 13px; color: var(--text); outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .eq-input:focus { border-color: var(--green); box-shadow: 0 0 0 3px rgba(46,125,50,0.12); }
+  .eq-pct-label {
+    font-family: 'Syne', sans-serif; font-weight: 800; font-size: 16px;
+    color: var(--green); flex-shrink: 0;
+  }
+  .eq-save-btn {
+    width: 100%; background: linear-gradient(135deg, #1B5E20, #2E7D32);
+    color: white; border: none; border-radius: 10px; padding: 9px 0;
+    font-family: 'Syne', sans-serif; font-weight: 700; font-size: 11px;
+    letter-spacing: 0.06em; cursor: pointer; text-transform: uppercase;
+    transition: transform 0.15s, box-shadow 0.15s;
+    box-shadow: 0 2px 10px rgba(46,125,50,0.30);
+  }
+  .eq-save-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(46,125,50,0.40); }
+  .eq-save-btn:active { transform: none; }
+  .eq-saved-msg { font-size: 10px; color: var(--green); margin-top: 6px; text-align: center; display: none; }
+
+  /* ── INVESTOR EQUITY DISPLAY ── */
+  .eq-investor-tag {
+    font-family: 'Syne', sans-serif; font-weight: 700; font-size: 13px;
+    color: var(--green);
+  }
+  .eq-investor-sub {
+    font-size: 10px; color: var(--muted); margin-top: 2px;
+  }
+
   /* ANIMATIONS */
   @keyframes fadeDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
   @keyframes fadeUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
@@ -831,6 +885,19 @@
         </span>
       </div>
       <div class="upd-grid" id="upd-cards-grid">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+
+    <!-- EQUITY POR STARTUP -->
+    <div class="panel" id="admin-equity-panel" style="margin-top:24px;animation-delay:0.40s;">
+      <div class="panel-title">
+        📊 Equity por Startup
+        <span style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;margin-left:8px;">
+          Define el porcentaje de participación total del club en cada startup. El inversor verá su % individual calculado proporcionalmente a su aportación.
+        </span>
+      </div>
+      <div class="upd-grid" id="eq-cards-grid">
         <!-- Populated by JS -->
       </div>
     </div>
@@ -2333,6 +2400,110 @@ function saveUpdate(startupKey, url) {
 loadUpdates();
 
 // ═══════════════════════════════════════════════════════════════
+// STARTUP EQUITY OVERRIDES — admin-managed equity % per startup
+// Overrides the hardcoded equity in STARTUPS object
+// Persisted in localStorage
+// ═══════════════════════════════════════════════════════════════
+const EQUITY_STORAGE_KEY = 'angelclub_startup_equity_v1';
+let STARTUP_EQUITY = {}; // startupKey -> equity string e.g. "3.5%"
+
+function loadEquity() {
+  try {
+    const raw = localStorage.getItem(EQUITY_STORAGE_KEY);
+    STARTUP_EQUITY = raw ? JSON.parse(raw) : {};
+  } catch(e) { STARTUP_EQUITY = {}; }
+}
+
+function saveEquity(startupKey, value) {
+  const clean = value.trim().replace(/[^0-9.]/g, '');
+  if (clean && parseFloat(clean) >= 0) {
+    STARTUP_EQUITY[startupKey] = parseFloat(clean).toFixed(4) + '%';
+  } else {
+    delete STARTUP_EQUITY[startupKey];
+  }
+  try { localStorage.setItem(EQUITY_STORAGE_KEY, JSON.stringify(STARTUP_EQUITY)); } catch(e) {}
+}
+
+// Returns effective equity for a startup key (override > hardcoded)
+function getEffectiveEquity(startupKey) {
+  return STARTUP_EQUITY[startupKey] || STARTUPS[startupKey]?.equity || '—';
+}
+
+// Returns investor's individual equity % = (investorAmount / clubCapital) * clubEquity%
+function getInvestorEquity(startupKey, investorAmount, clubCapital) {
+  const eq = getEffectiveEquity(startupKey);
+  const eqPct = parseFloat(eq);
+  if (!eqPct || !investorAmount || !clubCapital) return null;
+  const investorEq = (investorAmount / clubCapital) * eqPct;
+  // Format: show up to 4 decimals but trim trailing zeros
+  const formatted = investorEq < 0.01
+    ? investorEq.toFixed(6).replace(/\.?0+$/, '')
+    : investorEq < 0.1
+      ? investorEq.toFixed(4).replace(/\.?0+$/, '')
+      : investorEq.toFixed(2).replace(/\.?0+$/, '');
+  return { pct: investorEq, str: formatted + '%', clubEq: eq };
+}
+
+loadEquity();
+
+// ═══════════════════════════════════════════════════════════════
+// ADMIN EQUITY PANEL renderer
+// ═══════════════════════════════════════════════════════════════
+function renderAdminEquityPanel(allStartups) {
+  const grid = document.getElementById('eq-cards-grid');
+  if (!grid) return;
+  grid.innerHTML = '';
+  allStartups.forEach(p => {
+    const hardcoded = STARTUPS[p.key]?.equity || '—';
+    const override  = STARTUP_EQUITY[p.key] || '';
+    const effective = override || hardcoded;
+    const isOverridden = !!override;
+
+    const card = document.createElement('div');
+    card.className = 'eq-card';
+    card.innerHTML = `
+      <div class="eq-card-name">
+        <span>${p.name}</span>
+        <span class="eq-current">${effective}</span>
+      </div>
+      <div class="eq-hint">
+        ${isOverridden
+          ? `<span style="color:var(--green);">✓ Personalizado</span> · base hardcoded: <em>${hardcoded}</em>`
+          : `Valor actual del código: <em>${hardcoded}</em>`
+        }
+      </div>
+      <div class="eq-input-wrap">
+        <input class="eq-input" id="eq-input-${p.key}"
+          type="number" min="0" max="100" step="0.01"
+          placeholder="${parseFloat(hardcoded) || ''}"
+          value="${override ? parseFloat(override) : ''}">
+        <span class="eq-pct-label">%</span>
+      </div>
+      <button class="eq-save-btn" onclick="adminSaveEquity('${p.key}','${p.name.replace(/'/g,"\\'")}')">
+        💾 Guardar equity
+      </button>
+      <div class="eq-saved-msg" id="eq-msg-${p.key}">✓ Equity actualizado</div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+function adminSaveEquity(startupKey, startupName) {
+  const input = document.getElementById(`eq-input-${startupKey}`);
+  if (!input) return;
+  saveEquity(startupKey, input.value);
+
+  // Re-render equity panel
+  const allStartups = Object.entries(STARTUPS).map(([key,s])=>({...s,key})).sort((a,b)=>a.name.localeCompare(b.name));
+  renderAdminEquityPanel(allStartups);
+
+  setTimeout(() => {
+    const msg = document.getElementById(`eq-msg-${startupKey}`);
+    if (msg) { msg.style.display = 'block'; setTimeout(() => msg.style.display='none', 2500); }
+  }, 50);
+}
+
+// ═══════════════════════════════════════════════════════════════
 // UPDATE MODAL (investor)
 // ═══════════════════════════════════════════════════════════════
 function openUpdateModal(startupKey, startupName, url) {
@@ -2670,13 +2841,22 @@ function showDashboard() {
     const myAmountEl = p.investorAmount > 0
       ? `<span style="color:var(--gold);font-family:'Syne',sans-serif;font-weight:700;">€${p.investorAmount.toLocaleString('es-ES')}</span>`
       : `<span style="color:var(--muted);font-size:10px;">Part.</span>`;
-    // Valor actual = (miAportación / capitalClub) × (equity% × valoraciónCompañía)
-    // equity está guardado como "1%", "3%", etc. → parseamos el número
+    // Equity: use admin override if set, otherwise hardcoded value
+    const effectiveEq = getEffectiveEquity(p.key);
+    // Investor individual equity = (miAportación / capitalClub) × equityClub
+    const invEq = getInvestorEquity(p.key, p.investorAmount, p.capital);
+    const equityEl = invEq
+      ? `<div style="display:flex;flex-direction:column;gap:2px;">
+           <span class="eq-investor-tag">${invEq.str}</span>
+           <span class="eq-investor-sub">club: ${effectiveEq}</span>
+         </div>`
+      : `<span class="equity-tag">${effectiveEq}</span>`;
+    // Valor actual = (miAportación / capitalClub) × (effectiveEquity% × valoraciónCompañía)
     const valuation = STARTUP_VALUATIONS[p.key] || null;
     let valorActualEl = `<span style="color:var(--muted);font-size:10px;">—</span>`;
-    if (valuation && p.investorAmount > 0 && p.capital > 0 && p.equity) {
-      const equityPct = parseFloat(p.equity) / 100 || 0;
-      const clubStakeValue = equityPct * valuation;          // valor total del club en la compañía
+    if (valuation && p.investorAmount > 0 && p.capital > 0) {
+      const equityPct = parseFloat(effectiveEq) / 100 || 0;
+      const clubStakeValue = equityPct * valuation;
       const valorActual = Math.round((p.investorAmount / p.capital) * clubStakeValue);
       const multiple = (valorActual / p.investorAmount).toFixed(1);
       const isUp = valorActual >= p.investorAmount;
@@ -2694,7 +2874,7 @@ function showDashboard() {
         <div class="investor-amount">${pct}% del club</div></td>
       <td>${myAmountEl}</td>
       <td>${valorActualEl}</td>
-      <td><span class="equity-tag">${p.equity}</span></td>
+      <td>${equityEl}</td>
       <td><span class="status-badge ${statusClass}">${statusLabel}</span></td>
       <td>${tirEl}</td>
       <td>${updateEl}</td>`;
@@ -2780,9 +2960,10 @@ function showAdminDashboard() {
       : `<span style="color:var(--muted);font-size:10px;">—</span>`;
     // Valor actual del club en esta startup (admin ve el valor total del club, no individual)
     const admValuation = STARTUP_VALUATIONS[p.key] || null;
+    const admEffEq = getEffectiveEquity(p.key);
     let admValorEl = `<span style="color:var(--muted);font-size:10px;">—</span>`;
-    if (admValuation && p.capital > 0 && p.equity) {
-      const equityPct = parseFloat(p.equity) / 100 || 0;
+    if (admValuation && p.capital > 0) {
+      const equityPct = parseFloat(admEffEq) / 100 || 0;
       const clubStake = Math.round(equityPct * admValuation);
       admValorEl = `<div style="display:flex;flex-direction:column;gap:2px;">
         <span style="color:var(--green);font-family:'Syne',sans-serif;font-weight:700;font-size:13px;">€${clubStake.toLocaleString('es-ES')}</span>
@@ -2797,7 +2978,7 @@ function showAdminDashboard() {
         <div class="investor-amount">${pct}% del portfolio</div></td>
       <td>—</td>
       <td>${admValorEl}</td>
-      <td><span class="equity-tag">${p.equity}</span></td>
+      <td><span class="equity-tag">${admEffEq}</span></td>
       <td><span class="status-badge ${statusClass}">${statusLabel}</span></td>
       <td>${tirEl}</td>
       <td>${admUpdEl}</td>`;
@@ -2884,22 +3065,27 @@ function renderAdminExtras(allStartups, totalCapital) {
     const webEl  = p.web ? `<a href="${p.web}" target="_blank" style="color:var(--blue-bright);font-size:11px;text-decoration:none;">↗</a>` : `<span style="color:var(--muted);">—</span>`;
     // Valoración de la compañía (si existe)
     const admSVal = STARTUP_VALUATIONS[p.key] || null;
+    const admSEffEq = getEffectiveEquity(p.key);
     let admSValEl = `<span style="color:var(--muted);font-size:10px;">—</span>`;
     if (admSVal) {
-      const equityPct = parseFloat(p.equity) / 100 || 0;
+      const equityPct = parseFloat(admSEffEq) / 100 || 0;
       const clubStake = Math.round(equityPct * admSVal);
       admSValEl = `<div style="display:flex;flex-direction:column;gap:1px;">
         <span style="color:var(--green);font-family:'Syne',sans-serif;font-weight:700;font-size:12px;">€${clubStake.toLocaleString('es-ES')}</span>
         <span style="font-size:10px;color:var(--muted);">${(admSVal/1000000).toFixed(0)}M val.</span>
       </div>`;
     }
+    // Equity badge: show override indicator if set
+    const admSEqDisplay = STARTUP_EQUITY[p.key]
+      ? `<span class="eq-current">${admSEffEq}</span>`
+      : `<span class="equity-tag">${admSEffEq}</span>`;
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td style="color:var(--muted);font-size:11px;">${idx+1}</td>
       <td>${nameEl}</td>
       <td><span class="amount-cell">€${p.capital.toLocaleString('es-ES')}</span></td>
       <td>${admSValEl}</td>
-      <td><span class="equity-tag">${p.equity}</span></td>
+      <td>${admSEqDisplay}</td>
       <td><span class="status-badge ${statusClass}">${statusLabel}</span></td>
       <td>${tirEl}</td>
       <td><span style="font-family:'Syne',sans-serif;font-weight:700;color:var(--blue-bright);">${investorCount}</span></td>
@@ -2983,6 +3169,7 @@ function renderAdminExtras(allStartups, totalCapital) {
   // Render updates panel
   const allSorted = allStartups.slice().sort((a,b) => a.name.localeCompare(b.name));
   renderAdminUpdatesPanel(allSorted);
+  renderAdminEquityPanel(allSorted);
 }
 
 function filterAdminTable() {
