@@ -775,6 +775,22 @@
   <!-- ═══════ ADMIN ONLY SECTION ═══════ -->
   <div id="admin-section" style="display:none;">
 
+    <!-- EXPORT BUTTON -->
+    <div style="display:flex;justify-content:flex-end;margin-top:24px;margin-bottom:-8px;">
+      <button id="export-excel-btn" onclick="exportToExcel()" style="
+        display:inline-flex;align-items:center;gap:10px;
+        background:linear-gradient(135deg,#1B5E20,#2E7D32);
+        color:white;border:none;border-radius:14px;padding:13px 28px;
+        font-family:'Syne',sans-serif;font-weight:700;font-size:13px;
+        cursor:pointer;box-shadow:0 4px 18px rgba(46,125,50,0.30);
+        transition:transform 0.2s,box-shadow 0.2s;letter-spacing:0.03em;
+      " onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 28px rgba(46,125,50,0.40)'"
+         onmouseout="this.style.transform='';this.style.boxShadow='0 4px 18px rgba(46,125,50,0.30)'">
+        <span style="font-size:18px;">📥</span>
+        <span id="export-btn-label">Exportar a Excel</span>
+      </button>
+    </div>
+
     <!-- ADMIN KPI EXTRA ROW -->
     <div class="kpi-grid" style="margin-top:24px;">
       <div class="kpi-card" style="animation-delay:0.1s;">
@@ -2501,6 +2517,217 @@ function adminSaveEquity(startupKey, startupName) {
     const msg = document.getElementById(`eq-msg-${startupKey}`);
     if (msg) { msg.style.display = 'block'; setTimeout(() => msg.style.display='none', 2500); }
   }, 50);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// EXPORTAR A EXCEL  (SheetJS via CDN)
+// ═══════════════════════════════════════════════════════════════
+function exportToExcel() {
+  const btn   = document.getElementById('export-excel-btn');
+  const label = document.getElementById('export-btn-label');
+  label.textContent = 'Generando…';
+  btn.disabled = true;
+
+  // Load SheetJS if not already loaded
+  function doExport() {
+    const XLSX = window.XLSX;
+    const wb   = XLSX.utils.book_new();
+    const date = new Date().toLocaleDateString('es-ES');
+
+    // ── helpers ──────────────────────────────────────────────
+    const euro   = v => v > 0 ? v : 0;
+    const pctNum = s => parseFloat(s) || 0;
+
+    // ── DATA BUILD ────────────────────────────────────────────
+    // All startups enriched
+    const allStartups = Object.entries(STARTUPS)
+      .map(([key, s]) => ({ ...s, key }))
+      .sort((a, b) => b.capital - a.capital);
+
+    // Investor summary
+    const investorSummary = [];
+    Object.entries(INVESTOR_DB).forEach(([email, rec]) => {
+      let total = 0;
+      const investments = [];
+      rec.investments.forEach((amt, key) => {
+        const s = STARTUPS[key];
+        if (!s) return;
+        const effEq    = getEffectiveEquity(key);
+        const eqClub   = pctNum(effEq);
+        const eqInv    = (amt > 0 && s.capital > 0) ? ((amt / s.capital) * eqClub) : 0;
+        const valuation = STARTUP_VALUATIONS[key] || null;
+        let valorActual = null;
+        if (valuation && amt > 0 && s.capital > 0) {
+          valorActual = Math.round((amt / s.capital) * (pctNum(effEq) / 100) * valuation);
+        }
+        total += amt || 0;
+        investments.push({ startup: s.name, key, amount: amt || 0, eqClub, eqInv, valorActual, status: s.status, tir: s.tir });
+      });
+      const name = [...rec.names].sort((a, b) => b.length - a.length)[0];
+      investorSummary.push({ name, email, total, investments });
+    });
+    investorSummary.sort((a, b) => b.total - a.total);
+
+    // Investor count per startup
+    const startupInvCount = {};
+    RAW_INVESTORS.forEach(([,, startup]) => {
+      const k = normalizeStartup(startup);
+      startupInvCount[k] = (startupInvCount[k] || 0) + 1;
+    });
+
+    const totalCapital = allStartups.reduce((s, p) => s + p.capital, 0);
+    const totalInvestors = investorSummary.filter(i => i.total > 0).length;
+
+    // ── HOJA 1: RESUMEN EJECUTIVO ─────────────────────────────
+    const resumeData = [
+      ['ANGELCLUB — INFORME EXPORTADO', '', date],
+      [],
+      ['KPI GLOBAL', 'Valor', ''],
+      ['Capital Total del Club (€)', totalCapital, ''],
+      ['Nº de Startups en Portfolio', allStartups.length, ''],
+      ['Startups Activas', allStartups.filter(p => p.status === 'active').length, ''],
+      ['Startups con EXIT', allStartups.filter(p => p.status === 'exit').length, ''],
+      ['Startups FAIL', allStartups.filter(p => p.status === 'fail').length, ''],
+      ['Total Inversores con Capital', totalInvestors, ''],
+      ['Capital Medio por Inversor (€)', totalInvestors > 0 ? Math.round(totalCapital / totalInvestors) : 0, ''],
+      [],
+      ['TOP 5 STARTUPS POR CAPITAL', 'Capital (€)', '% Portfolio'],
+      ...allStartups.slice(0, 5).map(p => [
+        p.name,
+        p.capital,
+        totalCapital > 0 ? parseFloat((p.capital / totalCapital * 100).toFixed(2)) : 0
+      ]),
+      [],
+      ['TOP 5 INVERSORES POR CAPITAL TOTAL', 'Capital (€)', 'Nº Startups'],
+      ...investorSummary.slice(0, 5).map(i => [i.name, i.total, i.investments.length]),
+    ];
+    const ws1 = XLSX.utils.aoa_to_sheet(resumeData);
+    ws1['!cols'] = [{ wch: 38 }, { wch: 22 }, { wch: 18 }];
+    XLSX.utils.book_append_sheet(wb, ws1, '1. Resumen');
+
+    // ── HOJA 2: PORTFOLIO STARTUPS ────────────────────────────
+    const hdr2 = [
+      'Startup', 'Estado', 'Capital Club (€)', 'Equity Club (%)',
+      'Valoración Cía (€)', 'Valor Participación Club (€)',
+      'TIR (%)', 'Nº Inversores', 'Update Publicado', 'Web'
+    ];
+    const rows2 = allStartups.map(p => {
+      const effEq   = getEffectiveEquity(p.key);
+      const eqPct   = pctNum(effEq) / 100;
+      const valuation = STARTUP_VALUATIONS[p.key] || null;
+      const valorPart = valuation ? Math.round(eqPct * valuation) : '';
+      return [
+        p.name,
+        p.status === 'exit' ? 'EXIT' : p.status === 'fail' ? 'FAIL' : 'ACTIVA',
+        p.capital,
+        pctNum(effEq),
+        valuation || '',
+        valorPart,
+        p.tir || '',
+        startupInvCount[p.key] || 0,
+        STARTUP_UPDATES[p.key] ? 'Sí — ' + STARTUP_UPDATES[p.key] : 'No',
+        p.web || ''
+      ];
+    });
+    const ws2 = XLSX.utils.aoa_to_sheet([hdr2, ...rows2]);
+    ws2['!cols'] = [20,12,18,16,22,26,10,14,40,35].map(w => ({ wch: w }));
+    XLSX.utils.book_append_sheet(wb, ws2, '2. Portfolio Startups');
+
+    // ── HOJA 3: DIRECTORIO DE INVERSORES ─────────────────────
+    const hdr3 = [
+      'Nombre', 'Email', 'Capital Total (€)',
+      'Nº Startups', 'Startups Invertidas', 'Valor Actual Total Est. (€)'
+    ];
+    const rows3 = investorSummary.map(inv => {
+      const startupNames = inv.investments.map(i => i.startup).join(', ');
+      const valorTotal   = inv.investments
+        .filter(i => i.valorActual !== null)
+        .reduce((s, i) => s + i.valorActual, 0);
+      return [
+        inv.name,
+        inv.email,
+        inv.total,
+        inv.investments.length,
+        startupNames,
+        valorTotal || ''
+      ];
+    });
+    const ws3 = XLSX.utils.aoa_to_sheet([hdr3, ...rows3]);
+    ws3['!cols'] = [30, 34, 18, 14, 60, 22].map(w => ({ wch: w }));
+    XLSX.utils.book_append_sheet(wb, ws3, '3. Inversores');
+
+    // ── HOJA 4: DETALLE INVERSIONES (1 fila por inversor × startup) ──
+    const hdr4 = [
+      'Nombre Inversor', 'Email', 'Startup', 'Estado',
+      'Aportación (€)', 'Capital Club (€)', 'Equity Club (%)',
+      'Equity Inversor (%)', 'Valoración Cía (€)', 'Valor Actual Est. (€)',
+      'Múltiplo (x)', 'TIR (%)'
+    ];
+    const rows4 = [];
+    investorSummary.forEach(inv => {
+      inv.investments
+        .sort((a, b) => b.amount - a.amount)
+        .forEach(i => {
+          const s = STARTUPS[i.key];
+          if (!s) return;
+          const multiple = (i.valorActual && i.amount > 0)
+            ? parseFloat((i.valorActual / i.amount).toFixed(2))
+            : '';
+          rows4.push([
+            inv.name,
+            inv.email,
+            i.startup,
+            i.status === 'exit' ? 'EXIT' : i.status === 'fail' ? 'FAIL' : 'ACTIVA',
+            i.amount,
+            s.capital,
+            parseFloat(i.eqClub.toFixed(4)),
+            parseFloat(i.eqInv.toFixed(6)),
+            STARTUP_VALUATIONS[i.key] || '',
+            i.valorActual || '',
+            multiple,
+            i.tir || ''
+          ]);
+        });
+    });
+    const ws4 = XLSX.utils.aoa_to_sheet([hdr4, ...rows4]);
+    ws4['!cols'] = [28,34,18,10,16,16,16,18,22,20,12,10].map(w => ({ wch: w }));
+    XLSX.utils.book_append_sheet(wb, ws4, '4. Detalle Inversiones');
+
+    // ── HOJA 5: CONFIGURACIÓN ADMIN ──────────────────────────
+    const hdr5 = ['Startup', 'Equity Configurado (%)', 'Equity Base Código (%)', 'URL Actualización'];
+    const rows5 = Object.entries(STARTUPS)
+      .map(([key, s]) => {
+        const override  = STARTUP_EQUITY[key] ? parseFloat(STARTUP_EQUITY[key]) : '';
+        const hardcoded = pctNum(s.equity);
+        const update    = STARTUP_UPDATES[key] || '';
+        return [s.name, override, hardcoded, update];
+      })
+      .sort((a, b) => a[0].localeCompare(b[0]));
+    const ws5 = XLSX.utils.aoa_to_sheet([hdr5, ...rows5]);
+    ws5['!cols'] = [22, 22, 22, 50].map(w => ({ wch: w }));
+    XLSX.utils.book_append_sheet(wb, ws5, '5. Config Admin');
+
+    // ── EXPORT ───────────────────────────────────────────────
+    const fileName = `AngelClub_Export_${new Date().toISOString().slice(0,10)}.xlsx`;
+    XLSX.writeFile(wb, fileName);
+
+    label.textContent = '✓ Descargado';
+    setTimeout(() => { label.textContent = 'Exportar a Excel'; btn.disabled = false; }, 3000);
+  }
+
+  // Load SheetJS from CDN if needed
+  if (window.XLSX) {
+    doExport();
+  } else {
+    const script = document.createElement('script');
+    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+    script.onload = () => doExport();
+    script.onerror = () => {
+      label.textContent = 'Error al cargar librería';
+      btn.disabled = false;
+    };
+    document.head.appendChild(script);
+  }
 }
 
 // ═══════════════════════════════════════════════════════════════
