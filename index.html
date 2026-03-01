@@ -1007,6 +1007,204 @@
 </div>
 
 <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+(function(){
+'use strict';
+
+// ═══════════════════════════════════════════════════════════════
+// SECURITY LAYER v1.0
+// ═══════════════════════════════════════════════════════════════
+
+// ── SHA-256 (pure JS, no dependencies) ─────────────────────────
+function _sha256(str) {
+  function rightRotate(value, amount) {
+    return (value >>> amount) | (value << (32 - amount));
+  }
+  const mathPow = Math.pow;
+  const maxWord = mathPow(2, 32);
+  let lengthProperty = 'length';
+  let i, j, result = '';
+  const words = [];
+  const asciiBitLength = str[lengthProperty] * 8;
+  const hash = _sha256.h = _sha256.h || [];
+  const k    = _sha256.k = _sha256.k || [];
+  let primeCounter = k[lengthProperty];
+  const isComposite = {};
+  for (let candidate = 2; primeCounter < 64; candidate++) {
+    if (!isComposite[candidate]) {
+      for (i = 0; i < 313; i += candidate) isComposite[i] = candidate;
+      hash[primeCounter] = (mathPow(candidate, 0.5) * maxWord) | 0;
+      k[primeCounter++]  = (mathPow(candidate, 1/3) * maxWord) | 0;
+    }
+  }
+  str += '\x80';
+  while (str[lengthProperty] % 64 - 56) str += '\x00';
+  for (i = 0; i < str[lengthProperty]; i++) {
+    j = str.charCodeAt(i);
+    if (j >> 8) return '';
+    words[i >> 2] |= j << ((3 - i) % 4) * 8;
+  }
+  words[words[lengthProperty]] = ((asciiBitLength / maxWord) | 0);
+  words[words[lengthProperty]] = (asciiBitLength);
+  for (j = 0; j < words[lengthProperty]; ) {
+    const w = words.slice(j, j += 16);
+    const oldHash = hash.slice(0);
+    for (i = 0; i < 64; i++) {
+      const w15 = w[i - 15], w2 = w[i - 2];
+      const a = hash[0], e = hash[4];
+      const temp1 = hash[7]
+        + (rightRotate(e, 6) ^ rightRotate(e, 11) ^ rightRotate(e, 25))
+        + ((e & hash[5]) ^ (~e & hash[6]))
+        + k[i]
+        + (w[i] = (i < 16) ? w[i] : (
+            w[i - 16]
+            + (rightRotate(w15, 7) ^ rightRotate(w15, 18) ^ (w15 >>> 3))
+            + w[i - 7]
+            + (rightRotate(w2, 17) ^ rightRotate(w2, 19) ^ (w2 >>> 10))
+          ) | 0);
+      const temp2 = (rightRotate(a, 2) ^ rightRotate(a, 13) ^ rightRotate(a, 22))
+        + ((a & hash[1]) ^ (a & hash[2]) ^ (hash[1] & hash[2]));
+      hash[0]  = (temp1 + temp2) | 0;
+      hash[4]  = (hash[3] + temp1) | 0;
+      hash[3]  = hash[2];
+      hash[2]  = hash[1];
+      hash[1]  = a;
+      hash[7]  = hash[6];
+      hash[6]  = hash[5];
+      hash[5]  = hash[4 - 1];
+    }
+    for (i = 0; i < 8; i++) hash[i] = (hash[i] + oldHash[i]) | 0;
+  }
+  for (i = 0; i < 8; i++) {
+    for (j = 3; j + 1; j--) {
+      const b = (hash[i] >> (j * 8)) & 255;
+      result += ((b < 16) ? '0' : '') + b.toString(16);
+    }
+  }
+  return result;
+}
+
+// ── DevTools detection + session lock ──────────────────────────
+(function() {
+  let _devtoolsOpen = false;
+  let _sessionLocked = false;
+
+  function _lockSession() {
+    if (_sessionLocked) return;
+    _sessionLocked = true;
+    // Force logout and show warning
+    try {
+      const dash = document.getElementById('dashboard');
+      const login = document.getElementById('login-screen');
+      if (dash)  dash.style.display  = 'none';
+      if (login) login.style.display = 'flex';
+    } catch(e) {}
+    // Overlay
+    const overlay = document.createElement('div');
+    overlay.id = '_sec_overlay';
+    overlay.style.cssText = [
+      'position:fixed','inset:0','z-index:99999',
+      'background:rgba(10,20,50,0.97)',
+      'display:flex','flex-direction:column',
+      'align-items:center','justify-content:center',
+      'font-family:monospace','color:#fff','gap:16px',
+      'backdrop-filter:blur(8px)'
+    ].join(';');
+    overlay.innerHTML = [
+      '<div style="font-size:48px;">🔒</div>',
+      '<div style="font-size:20px;font-weight:bold;letter-spacing:0.05em;">Sesión Suspendida</div>',
+      '<div style="font-size:13px;color:rgba(255,255,255,0.6);text-align:center;max-width:340px;line-height:1.7;">',
+      'Se han detectado herramientas de inspección de código.',
+      '<br>Por seguridad, la sesión ha sido cerrada.',
+      '</div>',
+      '<button onclick="location.reload()" style="',
+        'margin-top:8px;padding:12px 32px;border:1px solid rgba(255,255,255,0.3);',
+        'background:rgba(255,255,255,0.10);color:#fff;border-radius:12px;',
+        'font-size:13px;cursor:pointer;letter-spacing:0.05em;',
+      '">↺ Recargar página</button>'
+    ].join('');
+    document.body.appendChild(overlay);
+  }
+
+  // Method 1: window size difference (reliable cross-browser)
+  function _checkSize() {
+    const threshold = 160;
+    const widthDiff  = window.outerWidth  - window.innerWidth;
+    const heightDiff = window.outerHeight - window.innerHeight;
+    if (widthDiff > threshold || heightDiff > threshold) {
+      if (!_devtoolsOpen) { _devtoolsOpen = true; _lockSession(); }
+    } else {
+      _devtoolsOpen = false;
+    }
+  }
+
+  // Method 2: console.log timing trick
+  let _dt = false;
+  const _el = new Image();
+  Object.defineProperty(_el, 'id', {
+    get: function() { _dt = true; }
+  });
+
+  function _checkConsole() {
+    _dt = false;
+    console.log(_el);  // triggers getter only when devtools console is open
+    if (_dt && !_devtoolsOpen) { _devtoolsOpen = true; _lockSession(); }
+  }
+
+  // Method 3: debugger statement timing
+  function _checkDebugger() {
+    const t0 = performance.now();
+    (function(){ try { (function(){}).constructor('debugger')(); } catch(e){} })();
+    if (performance.now() - t0 > 80) {
+      if (!_devtoolsOpen) { _devtoolsOpen = true; _lockSession(); }
+    }
+  }
+
+  // Run checks periodically
+  setInterval(_checkSize, 1000);
+  setInterval(_checkConsole, 2500);
+  setInterval(_checkDebugger, 3000);
+
+  // Disable right-click context menu
+  document.addEventListener('contextmenu', function(e) { e.preventDefault(); });
+
+  // Disable F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U (view source)
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'F12') { e.preventDefault(); return false; }
+    if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C' || e.key === 'K')) {
+      e.preventDefault(); return false;
+    }
+    if (e.ctrlKey && e.key === 'u') { e.preventDefault(); return false; }
+    if (e.ctrlKey && e.key === 's') { e.preventDefault(); return false; }
+  });
+
+  // Disable text selection on sensitive elements (prevents easy copy)
+  document.addEventListener('DOMContentLoaded', function() {
+    const style = document.createElement('style');
+    style.textContent = [
+      '.investments-table td { user-select: none; -webkit-user-select: none; }',
+      '.amount-cell, .equity-tag, .tir-value, .kpi-value { user-select: none; -webkit-user-select: none; }',
+    ].join('\n');
+    document.head.appendChild(style);
+  });
+})();
+
+// ── Session integrity token ─────────────────────────────────────
+// A per-load random token stored in closure — cannot be spoofed from console
+const _SESSION_TOKEN = (function() {
+  const arr = new Uint8Array(16);
+  crypto.getRandomValues(arr);
+  return Array.from(arr, b => b.toString(16).padStart(2,'0')).join('');
+})();
+let _currentSessionToken = null;  // set on login, cleared on logout
+
+function _validateSession(expectedRole) {
+  if (!_currentSessionToken || _currentSessionToken !== _SESSION_TOKEN + expectedRole) {
+    doLogout();
+    return false;
+  }
+  return true;
+}
+
 // ═══════════════════════════════════════════════════════════════
 // MASTER STARTUP DATA
 // ═══════════════════════════════════════════════════════════════
@@ -3075,7 +3273,7 @@ document.getElementById('admin-pass').addEventListener('keydown', e => { if(e.ke
 // ADMIN CREDENTIALS
 // ═══════════════════════════════════════════════════════════════
 const ADMIN_USER = 'equipo@angelclub.es';
-const ADMIN_PASS = 'soytuangel2026';
+const ADMIN_PASS_HASH = '1fde92a0f16fae949f0632f4de8e13d42cd7c6bd2b313e4df8879a56729879c4'; // SHA-256
 
 // ── Inyección anti-ofuscación Cloudflare ──────────────────────
 // El email se construye en JS para que Cloudflare no lo detecte en el HTML
@@ -3120,11 +3318,12 @@ function doLogin() {
       errEl.textContent = '⚠️ Por favor, introduce usuario y contraseña.';
       errEl.style.display = 'block'; return;
     }
-    if (user !== ADMIN_USER || pass !== ADMIN_PASS) {
+    if (user !== ADMIN_USER || _sha256(pass) !== ADMIN_PASS_HASH) {
       errEl.textContent = '❌ Credenciales incorrectas. Acceso denegado.';
       errEl.style.display = 'block'; return;
     }
     currentInvestor = { role: 'admin', name: 'Administrador', email: ADMIN_USER };
+    _currentSessionToken = _SESSION_TOKEN + 'admin';
     showAdminDashboard();
     return;
   }
@@ -3160,10 +3359,12 @@ function doLogin() {
   const displayName = [...record.names].sort((a,b)=>b.length-a.length)[0];
   currentInvestor = { role: 'investor', name: displayName, email: emailInput, investments: record.investments };
   registerAccess(currentInvestor);
+  _currentSessionToken = _SESSION_TOKEN + 'investor';
   showDashboard();
 }
 
 function doLogout() {
+  _currentSessionToken = null;
   currentInvestor = null;
   document.getElementById('dashboard').style.display = 'none';
   document.getElementById('admin-section').style.display = 'none';
@@ -3182,6 +3383,7 @@ function doLogout() {
 const COLORS = ['#1976D2','#2196F3','#42A5F5','#64B5F6','#1565C0','#0D47A1','#00BCD4','#0097A7','#006064','#01579B','#00838F','#00ACC1'];
 
 function showDashboard() {
+  if (!_validateSession('investor')) return;
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('dashboard').style.display = 'block';
   document.getElementById('admin-section').style.display = 'none';
@@ -3312,6 +3514,7 @@ function showDashboard() {
 // ADMIN DASHBOARD
 // ═══════════════════════════════════════════════════════════════
 function showAdminDashboard() {
+  if (!_validateSession('admin')) return;
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('dashboard').style.display = 'block';
   document.getElementById('admin-section').style.display = 'block';
@@ -3433,6 +3636,7 @@ function showAdminDashboard() {
   renderAdminExtras(allStartups, totalCapital);
 }
 
+let _admInvestorRows = [];
 function renderAdminExtras(allStartups, totalCapital) {
   // Build investor summary from INVESTOR_DB
   const investorSummary = []; // { name, email, totalAmount, startupCount, startups[] }
@@ -3563,24 +3767,24 @@ function renderAdminExtras(allStartups, totalCapital) {
   });
 
   // Investor detail table with filter
-  window._admInvestorRows = [];
+  _admInvestorRows = [];
   RAW_INVESTORS.forEach(([name,email,startup,amount]) => {
     if (!name || !email) return;
     const key = normalizeStartup(startup);
     const s = STARTUPS[key];
     const statusLabel = s ? (s.status==='exit'?'✅ EXIT':s.status==='fail'?'❌ FAIL':'● ACTIVA') : '—';
     const statusClass = s ? (s.status==='exit'?'status-exit':s.status==='fail'?'status-fail':'status-active') : '';
-    window._admInvestorRows.push({ name, email, startup: s?.name||startup, amount: amount||0, statusLabel, statusClass });
+    _admInvestorRows.push({ name, email, startup: s?.name||startup, amount: amount||0, statusLabel, statusClass });
   });
-  window._admInvestorRows.sort((a,b) => b.amount - a.amount);
+  _admInvestorRows.sort((a,b) => b.amount - a.amount);
 
   // Populate startup filter
   const admFilterStartup = document.getElementById('adm-filter-startup');
   admFilterStartup.innerHTML = '<option value="">Todas las startups</option>';
   allStartups.forEach(p => { const opt=document.createElement('option'); opt.value=p.name; opt.textContent=p.name; admFilterStartup.appendChild(opt); });
 
-  document.getElementById('adm-investor-count-label').textContent = `${window._admInvestorRows.length} registros`;
-  renderAdminInvestorTable(window._admInvestorRows);
+  document.getElementById('adm-investor-count-label').textContent = `${_admInvestorRows.length} registros`;
+  renderAdminInvestorTable(_admInvestorRows);
 
   // Render updates panel
   const allSorted = allStartups.slice().sort((a,b) => a.name.localeCompare(b.name));
@@ -3592,12 +3796,12 @@ function renderAdminExtras(allStartups, totalCapital) {
 function filterAdminTable() {
   const q = document.getElementById('adm-search').value.toLowerCase();
   const sf = document.getElementById('adm-filter-startup').value.toLowerCase();
-  const filtered = window._admInvestorRows.filter(r => {
+  const filtered = _admInvestorRows.filter(r => {
     const matchQ = !q || r.name.toLowerCase().includes(q) || r.email.toLowerCase().includes(q) || r.startup.toLowerCase().includes(q);
     const matchS = !sf || r.startup.toLowerCase() === sf;
     return matchQ && matchS;
   });
-  document.getElementById('adm-investor-count-label').textContent = `${filtered.length} / ${window._admInvestorRows.length} registros`;
+  document.getElementById('adm-investor-count-label').textContent = `${filtered.length} / ${_admInvestorRows.length} registros`;
   renderAdminInvestorTable(filtered);
 }
 
@@ -3747,6 +3951,22 @@ function sendContactForm() {
   feedback.style.display = 'block';
   setTimeout(()=>{ btn.disabled=false; document.getElementById('cf-btn-text').textContent='Enviar solicitud'; document.getElementById('cf-message').value=''; feedback.style.display='none'; }, 5000);
 }
+// ── Expose only what inline HTML handlers need ──────────────────
+window.doLogin          = doLogin;
+window.doLogout         = doLogout;
+window.setLoginMode     = setLoginMode;
+window.togglePass       = togglePass;
+window.sendContactForm  = sendContactForm;
+window.openUpdateModal  = openUpdateModal;
+window.closeUpdateModal = closeUpdateModal;
+window.filterAdminTable = filterAdminTable;
+window.filterAccessLog  = filterAccessLog;
+window.clearAccessLog   = clearAccessLog;
+window.adminSaveUpdate  = adminSaveUpdate;
+window.adminSaveEquity  = adminSaveEquity;
+window.exportToExcel    = exportToExcel;
+
+})();
 </script>
 </body>
 </html>
