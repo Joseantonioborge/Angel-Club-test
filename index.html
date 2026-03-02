@@ -1145,6 +1145,10 @@ async function _sha256(str) {
 (function() {
   let _devtoolsOpen = false;
   let _sessionLocked = false;
+  // Counters to avoid false positives: require N consecutive hits before locking
+  let _sizeHits     = 0;
+  let _debuggerHits = 0;
+  const HITS_NEEDED = 3;
 
   function _lockSession() {
     if (_sessionLocked) return;
@@ -1183,43 +1187,42 @@ async function _sha256(str) {
     document.body.appendChild(overlay);
   }
 
-  // Method 1: window size difference (reliable cross-browser)
+  // Method 1: window size difference
+  // Threshold raised to 250px to avoid false positives from bookmark bars,
+  // extension sidepanels, OS scrollbars, and browser chrome on mobile.
   function _checkSize() {
-    const threshold = 160;
+    const threshold = 250;
     const widthDiff  = window.outerWidth  - window.innerWidth;
     const heightDiff = window.outerHeight - window.innerHeight;
     if (widthDiff > threshold || heightDiff > threshold) {
-      if (!_devtoolsOpen) { _devtoolsOpen = true; _lockSession(); }
+      _sizeHits++;
+      if (_sizeHits >= HITS_NEEDED && !_devtoolsOpen) {
+        _devtoolsOpen = true; _lockSession();
+      }
     } else {
+      _sizeHits = 0;
       _devtoolsOpen = false;
     }
   }
 
-  // Method 2: console.log timing trick
-  let _dt = false;
-  const _el = new Image();
-  Object.defineProperty(_el, 'id', {
-    get: function() { _dt = true; }
-  });
-
-  function _checkConsole() {
-    _dt = false;
-    console.log(_el);  // triggers getter only when devtools console is open
-    if (_dt && !_devtoolsOpen) { _devtoolsOpen = true; _lockSession(); }
-  }
-
-  // Method 3: debugger statement timing
+  // Method 2: debugger statement timing
+  // Threshold raised to 200ms to avoid false positives on slow devices
+  // or when the browser is busy rendering/executing other tasks.
   function _checkDebugger() {
     const t0 = performance.now();
     (function(){ try { (function(){}).constructor('debugger')(); } catch(e){} })();
-    if (performance.now() - t0 > 80) {
-      if (!_devtoolsOpen) { _devtoolsOpen = true; _lockSession(); }
+    if (performance.now() - t0 > 200) {
+      _debuggerHits++;
+      if (_debuggerHits >= HITS_NEEDED && !_devtoolsOpen) {
+        _devtoolsOpen = true; _lockSession();
+      }
+    } else {
+      _debuggerHits = 0;
     }
   }
 
   // Run checks periodically
-  setInterval(_checkSize, 1000);
-  setInterval(_checkConsole, 2500);
+  setInterval(_checkSize, 1500);
   setInterval(_checkDebugger, 3000);
 
   // Disable right-click context menu
@@ -3825,8 +3828,8 @@ function adminRenderPasswordsTable() {
   }
 
   let rows = withPass.map((r, i) => {
-    const localBadge  = r.local  ? '<span style="background:rgba(30,136,229,0.12);color:var(--blue-bright);border-radius:6px;padding:2px 8px;font-size:10px;font-family:'DM Mono',monospace;">local</span>' : '';
-    const presetBadge = r.preset ? '<span style="background:rgba(56,142,60,0.12);color:#388E3C;border-radius:6px;padding:2px 8px;font-size:10px;font-family:'DM Mono',monospace;">global</span>' : '<span style="background:rgba(198,40,40,0.10);color:var(--red);border-radius:6px;padding:2px 8px;font-size:10px;font-family:'DM Mono',monospace;">solo local</span>';
+    const localBadge  = r.local  ? '<span style="background:rgba(30,136,229,0.12);color:var(--blue-bright);border-radius:6px;padding:2px 8px;font-size:10px;font-family:\'DM Mono\',monospace;">local</span>' : '';
+    const presetBadge = r.preset ? '<span style="background:rgba(56,142,60,0.12);color:#388E3C;border-radius:6px;padding:2px 8px;font-size:10px;font-family:\'DM Mono\',monospace;">global</span>' : '<span style="background:rgba(198,40,40,0.10);color:var(--red);border-radius:6px;padding:2px 8px;font-size:10px;font-family:\'DM Mono\',monospace;">solo local</span>';
     return `<tr>
       <td style="font-family:'DM Mono',monospace;font-size:11px;">${i+1}</td>
       <td style="font-size:12px;">${r.email}</td>
@@ -3869,8 +3872,7 @@ function adminExportPasswords() {
   const lines = Object.entries(combined)
     .sort(([a],[b]) => a.localeCompare(b))
     .map(([email, hash]) => `  "${email}": "${hash}"`)
-    .join(',
-');
+    .join(',\n');
   const block = `const PRESET_PASSWORDS = {
 ${lines}
 };`;
