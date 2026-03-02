@@ -1301,6 +1301,55 @@ function _validateSession(expectedRole) {
   return true;
 }
 
+// ── Session persistence across page refreshes ───────────────────
+// Uses sessionStorage: survives F5/Ctrl+R but clears when tab/browser closes.
+const _SESSION_STORAGE_KEY = 'AC_SESSION_v1';
+
+function _saveSession(role, email) {
+  try {
+    sessionStorage.setItem(_SESSION_STORAGE_KEY, JSON.stringify({ role, email }));
+  } catch(e) {}
+}
+
+function _clearSavedSession() {
+  try { sessionStorage.removeItem(_SESSION_STORAGE_KEY); } catch(e) {}
+}
+
+function _tryRestoreSession() {
+  try {
+    const raw = sessionStorage.getItem(_SESSION_STORAGE_KEY);
+    if (!raw) return false;
+    const saved = JSON.parse(raw);
+    if (!saved || !saved.role || !saved.email) return false;
+    const role  = saved.role;
+    const email = saved.email.toLowerCase();
+
+    if (role === 'investor') {
+      const record = INVESTOR_DB[email];
+      if (!record) return false;
+      const displayName = [...record.names].sort((a,b) => b.length - a.length)[0];
+      currentInvestor = {
+        role:        'investor',
+        name:        displayName,
+        email:       email,
+        investments: record.investments
+      };
+      _currentSessionToken = _SESSION_TOKEN + 'investor';
+      showDashboard();
+      return true;
+    }
+
+    if (role === 'admin') {
+      if (email !== ADMIN_USER.toLowerCase()) return false;
+      currentInvestor = { role: 'admin', name: 'Administrador', email: ADMIN_USER };
+      _currentSessionToken = _SESSION_TOKEN + 'admin';
+      showAdminDashboard();
+      return true;
+    }
+  } catch(e) {}
+  return false;
+}
+
 // ═══════════════════════════════════════════════════════════════
 // MASTER STARTUP DATA
 // ═══════════════════════════════════════════════════════════════
@@ -3537,6 +3586,7 @@ async function doLogin() {
     }
     currentInvestor = { role: 'admin', name: 'Administrador', email: ADMIN_USER };
     _currentSessionToken = _SESSION_TOKEN + 'admin';
+    _saveSession('admin', ADMIN_USER);
     showAdminDashboard();
     return;
   }
@@ -3676,6 +3726,7 @@ function _finishInvestorLogin(record) {
   };
   _pendingLoginRecord = null;
   _currentSessionToken = _SESSION_TOKEN + 'investor';
+  _saveSession('investor', record.email);
   registerAccess(currentInvestor);
   showDashboard();
 }
@@ -3684,6 +3735,7 @@ function doLogout() {
   _currentSessionToken = null;
   currentInvestor = null;
   _pendingLoginRecord = null;
+  _clearSavedSession();
   document.getElementById('dashboard').style.display = 'none';
   document.getElementById('admin-section').style.display = 'none';
   document.getElementById('login-screen').style.display = 'flex';
@@ -4478,6 +4530,11 @@ window.clearAccessLog   = clearAccessLog;
 window.adminSaveUpdate  = adminSaveUpdate;
 window.adminSaveEquity  = adminSaveEquity;
 window.exportToExcel    = exportToExcel;
+
+// ── Auto-restore session on page load/refresh ───────────────────
+document.addEventListener('DOMContentLoaded', function() {
+  _tryRestoreSession();
+});
 
 })();
 </script>
