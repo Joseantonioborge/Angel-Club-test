@@ -569,17 +569,17 @@
     </div>
 
     <div id="login-title" class="login-title">Portal del Inversor <span style="font-size:11px;font-family:'DM Mono',monospace;font-weight:400;color:var(--muted);letter-spacing:0.08em;">v1.0</span></div>
-    <div id="login-sub" class="login-sub">Introduce tu nombre completo y correo electrónico<br>tal como figuran en tu ficha de inversor</div>
+    <div id="login-sub" class="login-sub">Introduce tu correo electrónico para continuar</div>
 
     <!-- INVESTOR FIELDS — STEP 1: nombre + email -->
     <div id="investor-fields">
-      <div class="login-field">
+      <div class="login-field" id="login-name-row">
         <label class="login-label">Nombre y apellidos</label>
         <input class="login-input" id="login-name" type="text" placeholder="Ej: Ana García López" autocomplete="name">
       </div>
       <div class="login-field">
         <label class="login-label">Correo electrónico</label>
-        <input class="login-input" id="login-email" type="email" placeholder="tu@email.com" autocomplete="email">
+        <input class="login-input" id="login-email" type="email" placeholder="tu@email.com" autocomplete="email" oninput="_onEmailChange()">
       </div>
     </div>
 
@@ -3253,6 +3253,9 @@ function setLoginMode(mode) {
   _pendingLoginRecord = null;
   document.getElementById('investor-fields').style.display = isAdmin ? 'none' : 'block';
   document.getElementById('investor-step2').style.display  = 'none';
+  // Reset name row visibility for investor mode
+  const nameRow = document.getElementById('login-name-row');
+  if (nameRow) nameRow.style.display = isAdmin ? 'none' : 'block';
   document.getElementById('admin-fields').style.display    = isAdmin ? 'block' : 'none';
   document.getElementById('login-title').innerHTML = isAdmin ? 'Acceso Administrador' : 'Portal del Inversor <span style="font-size:11px;font-family:\'DM Mono\',monospace;font-weight:400;color:var(--muted);letter-spacing:0.08em;">v1.0</span>';
   document.getElementById('login-sub').textContent   = isAdmin
@@ -3338,8 +3341,31 @@ function normalize(s) {
 
 // ── Password storage helpers (localStorage) ──────────────────────
 function _pwKey(email) { return 'AC_INV_PW_' + email.toLowerCase(); }
-function _getStoredPwHash(email) { try { return localStorage.getItem(_pwKey(email)); } catch(e) { return null; } }
-function _setStoredPwHash(email, hash) { try { localStorage.setItem(_pwKey(email), hash); } catch(e) {} }
+function _getStoredPwHash(email) {
+  try { return localStorage.getItem(_pwKey(email)) || null; } catch(e) { return null; }
+}
+function _setStoredPwHash(email, hash) {
+  try {
+    localStorage.setItem(_pwKey(email), hash);
+    // Verify it was actually stored
+    return localStorage.getItem(_pwKey(email)) === hash;
+  } catch(e) { return false; }
+}
+
+// ── Detect returning users on email field change ──────────────────
+function _onEmailChange() {
+  if (typeof loginMode !== 'undefined' && loginMode !== 'investor') return;
+  const emailVal = document.getElementById('login-email').value.trim().toLowerCase();
+  const nameRow  = document.getElementById('login-name-row');
+  const loginSub = document.getElementById('login-sub');
+  if (!nameRow || !loginSub) return;
+  // Check if this email has a stored password (returning user)
+  const hasHash = emailVal.includes('@') && !!_getStoredPwHash(emailVal);
+  nameRow.style.display  = hasHash ? 'none' : 'block';
+  loginSub.textContent = hasHash
+    ? 'Bienvenido de nuevo. Introduce tu email y haz clic en Continuar.'
+    : 'Introduce tu nombre completo y correo electrónico tal como figuran en tu ficha de inversor';
+}
 
 // Intermediate state between step 1 and step 2
 let _pendingLoginRecord = null;
@@ -3362,6 +3388,8 @@ function doBackToStep1() {
   ['inv-new-pass','inv-confirm-pass','inv-enter-pass'].forEach(id => {
     const el = document.getElementById(id); if (el) el.value = '';
   });
+  // Restore name row visibility based on current email value
+  _onEmailChange();
 }
 
 function showForgotPassword() {
@@ -3413,8 +3441,16 @@ async function doLogin() {
         errEl.textContent = '❌ Las contraseñas no coinciden. Inténtalo de nuevo.';
         errEl.style.display = 'block'; return;
       }
-      const hash = await _sha256(np);
-      _setStoredPwHash(record.email, hash);
+      let hash;
+      try { hash = await _sha256(np); } catch(e) {
+        errEl.textContent = '❌ Error al procesar la contraseña. Inténtalo de nuevo.';
+        errEl.style.display = 'block'; return;
+      }
+      const stored = _setStoredPwHash(record.email, hash);
+      if (!stored) {
+        errEl.textContent = '⚠️ No se pudo guardar la contraseña (almacenamiento bloqueado). Inténtalo en modo normal del navegador.';
+        errEl.style.display = 'block'; return;
+      }
       _finishInvestorLogin(record);
     } else {
       // Checking existing password
@@ -3423,7 +3459,11 @@ async function doLogin() {
         errEl.textContent = '⚠️ Por favor, introduce tu contraseña.';
         errEl.style.display = 'block'; return;
       }
-      const hash = await _sha256(ep);
+      let hash;
+      try { hash = await _sha256(ep); } catch(e) {
+        errEl.textContent = '❌ Error al procesar la contraseña. Inténtalo de nuevo.';
+        errEl.style.display = 'block'; return;
+      }
       if (hash !== storedHash) {
         errEl.textContent = '❌ Contraseña incorrecta. Inténtalo de nuevo.';
         errEl.style.display = 'block'; return;
@@ -3433,45 +3473,59 @@ async function doLogin() {
     return;
   }
 
-  // ── STEP 1: name + email validation ──────────────────────────
+  // ── STEP 1: email (+ name if first time) validation ─────────────
   const nameInput  = document.getElementById('login-name').value.trim();
   const emailInput = document.getElementById('login-email').value.trim().toLowerCase();
 
-  if (!nameInput || !emailInput) {
-    errEl.textContent = '⚠️ Por favor, introduce tu nombre y correo electrónico.';
+  if (!emailInput) {
+    errEl.textContent = '⚠️ Por favor, introduce tu correo electrónico.';
     errEl.style.display = 'block'; return;
   }
 
   const record = INVESTOR_DB[emailInput];
   if (!record) {
-    errEl.textContent = '❌ Datos no encontrados. Comprueba tu nombre y email exactamente como figuran en tu ficha de inversor.';
+    errEl.textContent = '❌ Email no encontrado. Comprueba que es el email con el que figuran en tu ficha de inversor.';
     errEl.style.display = 'block'; return;
   }
 
-  const normInput = normalize(nameInput);
-  let matched = false;
-  record.names.forEach(n => {
-    if (normalize(n) === normInput) matched = true;
-    if (normalize(n).includes(normInput) || normInput.includes(normalize(n).split(' ')[0])) matched = true;
-  });
+  const storedHash = _getStoredPwHash(emailInput);
 
-  if (!matched) {
-    errEl.textContent = '❌ Datos no encontrados. Comprueba tu nombre y email exactamente como figuran en tu ficha de inversor.';
-    errEl.style.display = 'block'; return;
+  if (!storedHash) {
+    // ── PRIMER ACCESO: requiere nombre para verificar identidad ──
+    if (!nameInput) {
+      errEl.textContent = '⚠️ En tu primer acceso debes introducir también tu nombre y apellidos.';
+      errEl.style.display = 'block';
+      // Ensure name row is visible
+      const nr = document.getElementById('login-name-row');
+      if (nr) nr.style.display = 'block';
+      document.getElementById('login-sub').textContent =
+        'Introduce tu nombre completo y correo electrónico tal como figuran en tu ficha de inversor';
+      return;
+    }
+    const normInput = normalize(nameInput);
+    let matched = false;
+    record.names.forEach(n => {
+      if (normalize(n) === normInput) matched = true;
+      if (normalize(n).includes(normInput) || normInput.includes(normalize(n).split(' ')[0])) matched = true;
+    });
+    if (!matched) {
+      errEl.textContent = '❌ Datos no encontrados. Comprueba tu nombre y email exactamente como figuran en tu ficha de inversor.';
+      errEl.style.display = 'block'; return;
+    }
   }
+  // For returning users (storedHash exists): skip name validation
+  // The password is the authentication factor
 
-  // Credentials OK — go to step 2
-  _pendingLoginRecord = record;
+  // ── Credentials OK — go to step 2 ────────────────────────────
+  // Use a clean copy to avoid mutating INVESTOR_DB entries
   const displayName = [...record.names].sort((a,b)=>b.length-a.length)[0];
-  _pendingLoginRecord.displayName = displayName;
-  _pendingLoginRecord.email = emailInput;
+  _pendingLoginRecord = { _record: record, displayName, email: emailInput, investments: record.investments };
 
   const initials = displayName.split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase();
   document.getElementById('inv-step2-avatar').textContent = initials;
   document.getElementById('inv-step2-name').textContent   = displayName;
   document.getElementById('inv-step2-email').textContent  = emailInput;
 
-  const storedHash = _getStoredPwHash(emailInput);
   document.getElementById('create-pass-block').style.display = storedHash ? 'none' : 'block';
   document.getElementById('enter-pass-block').style.display  = storedHash ? 'block' : 'none';
 
@@ -3493,10 +3547,15 @@ async function doLogin() {
 }
 
 function _finishInvestorLogin(record) {
-  currentInvestor = { role: 'investor', name: record.displayName, email: record.email, investments: record.investments };
+  currentInvestor = {
+    role:        'investor',
+    name:        record.displayName,
+    email:       record.email,
+    investments: record.investments || (record._record && record._record.investments) || new Map()
+  };
   _pendingLoginRecord = null;
-  registerAccess(currentInvestor);
   _currentSessionToken = _SESSION_TOKEN + 'investor';
+  registerAccess(currentInvestor);
   showDashboard();
 }
 
@@ -3514,6 +3573,9 @@ function doLogout() {
   document.getElementById('investor-fields').style.display = 'block';
   document.getElementById('investor-step2').style.display = 'none';
   document.getElementById('login-error').style.display = 'none';
+  // Reset name row in case it was hidden for a returning user
+  const nameRow = document.getElementById('login-name-row');
+  if (nameRow) nameRow.style.display = 'block';
   setLoginMode('investor');
 }
 
@@ -4096,9 +4158,10 @@ window.doLogin          = doLogin;
 window.doLogout         = doLogout;
 window.setLoginMode     = setLoginMode;
 window.togglePass       = togglePass;
-window.togglePassField  = togglePassField;
-window.doBackToStep1    = doBackToStep1;
+window.togglePassField    = togglePassField;
+window.doBackToStep1      = doBackToStep1;
 window.showForgotPassword = showForgotPassword;
+window._onEmailChange     = _onEmailChange;
 window.sendContactForm  = sendContactForm;
 window.openUpdateModal  = openUpdateModal;
 window.closeUpdateModal = closeUpdateModal;
