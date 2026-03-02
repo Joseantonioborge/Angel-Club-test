@@ -571,15 +571,11 @@
     <div id="login-title" class="login-title">Portal del Inversor <span style="font-size:11px;font-family:'DM Mono',monospace;font-weight:400;color:var(--muted);letter-spacing:0.08em;">v1.0</span></div>
     <div id="login-sub" class="login-sub">Introduce tu correo electrónico para continuar</div>
 
-    <!-- INVESTOR FIELDS — STEP 1: nombre + email -->
+    <!-- INVESTOR FIELDS — STEP 1: email -->
     <div id="investor-fields">
-      <div class="login-field" id="login-name-row">
-        <label class="login-label">Nombre y apellidos</label>
-        <input class="login-input" id="login-name" type="text" placeholder="Ej: Ana García López" autocomplete="name">
-      </div>
       <div class="login-field">
         <label class="login-label">Correo electrónico</label>
-        <input class="login-input" id="login-email" type="email" placeholder="tu@email.com" autocomplete="email" oninput="_onEmailChange()">
+        <input class="login-input" id="login-email" type="email" placeholder="tu@email.com" autocomplete="email">
       </div>
     </div>
 
@@ -595,33 +591,10 @@
         <button onclick="doBackToStep1()" style="flex-shrink:0;background:none;border:1px solid var(--border);color:var(--muted);cursor:pointer;font-size:11px;font-family:'DM Mono',monospace;padding:5px 10px;border-radius:8px;transition:all 0.15s;" onmouseover="this.style.color='var(--text)';this.style.borderColor='rgba(30,136,229,0.4)'" onmouseout="this.style.color='var(--muted)';this.style.borderColor='var(--border)'">← Volver</button>
       </div>
 
-      <!-- BLOQUE: Crear contraseña (primer acceso) -->
-      <div id="create-pass-block">
-        <div style="text-align:center;margin-bottom:20px;">
-          <div style="font-size:32px;margin-bottom:8px;">🔑</div>
-          <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:15px;color:var(--text);margin-bottom:6px;">Primer acceso — Crea tu contraseña</div>
-          <div style="font-size:11px;color:var(--muted);line-height:1.7;">Establece una contraseña personal para proteger tu cartera.<br>Solo tú podrás acceder con ella.</div>
-        </div>
+      <!-- Introducir contraseña asignada por el administrador -->
+      <div id="enter-pass-block">
         <div class="login-field">
-          <label class="login-label">Nueva contraseña <span style="color:var(--red);font-size:9px;">(mín. 8 caracteres)</span></label>
-          <div style="position:relative;">
-            <input class="login-input" id="inv-new-pass" type="password" placeholder="Crea tu contraseña segura" autocomplete="new-password" style="padding-right:46px;">
-            <button type="button" onclick="togglePassField('inv-new-pass','eye-new')" style="position:absolute;right:14px;top:13px;background:none;border:none;cursor:pointer;font-size:15px;color:var(--muted);padding:0;" id="eye-new">👁</button>
-          </div>
-        </div>
-        <div class="login-field">
-          <label class="login-label">Confirmar contraseña</label>
-          <div style="position:relative;">
-            <input class="login-input" id="inv-confirm-pass" type="password" placeholder="Repite la contraseña" autocomplete="new-password" style="padding-right:46px;">
-            <button type="button" onclick="togglePassField('inv-confirm-pass','eye-confirm')" style="position:absolute;right:14px;top:13px;background:none;border:none;cursor:pointer;font-size:15px;color:var(--muted);padding:0;" id="eye-confirm">👁</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- BLOQUE: Introducir contraseña (accesos siguientes) -->
-      <div id="enter-pass-block" style="display:none;">
-        <div class="login-field">
-          <label class="login-label">Tu contraseña</label>
+          <label class="login-label">Contraseña</label>
           <div style="position:relative;">
             <input class="login-input" id="inv-enter-pass" type="password" placeholder="••••••••" autocomplete="current-password" style="padding-right:46px;">
             <button type="button" onclick="togglePassField('inv-enter-pass','eye-enter')" style="position:absolute;right:14px;top:13px;background:none;border:none;cursor:pointer;font-size:15px;color:var(--muted);padding:0;" id="eye-enter">👁</button>
@@ -3406,18 +3379,14 @@ let loginMode = 'investor';
 function setLoginMode(mode) {
   loginMode = mode;
   const isAdmin = mode === 'admin';
-  // Reset step 2 if switching modes
   _pendingLoginRecord = null;
   document.getElementById('investor-fields').style.display = isAdmin ? 'none' : 'block';
   document.getElementById('investor-step2').style.display  = 'none';
-  // Reset name row visibility for investor mode
-  const nameRow = document.getElementById('login-name-row');
-  if (nameRow) nameRow.style.display = isAdmin ? 'none' : 'block';
   document.getElementById('admin-fields').style.display    = isAdmin ? 'block' : 'none';
   document.getElementById('login-title').innerHTML = isAdmin ? 'Acceso Administrador' : 'Portal del Inversor <span style="font-size:11px;font-family:\'DM Mono\',monospace;font-weight:400;color:var(--muted);letter-spacing:0.08em;">v1.0</span>';
-  document.getElementById('login-sub').textContent   = isAdmin
+  document.getElementById('login-sub').textContent = isAdmin
     ? 'Acceso exclusivo para el equipo de AngelClub'
-    : 'Introduce tu nombre completo y correo electrónico tal como figuran en tu ficha de inversor';
+    : 'Introduce tu correo electrónico para acceder';
   document.getElementById('login-btn-text').textContent = isAdmin ? 'Entrar como Admin' : 'Continuar';
   document.getElementById('login-hint').style.display = isAdmin ? 'none' : 'block';
   document.getElementById('login-error').style.display = 'none';
@@ -3449,13 +3418,9 @@ function togglePass() {
 }
 
 // Allow Enter key
-document.getElementById('login-name').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
 document.getElementById('login-email').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
 document.getElementById('admin-user').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
 document.getElementById('admin-pass').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
-// Step 2 password fields
-document.getElementById('inv-new-pass').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
-document.getElementById('inv-confirm-pass').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
 document.getElementById('inv-enter-pass').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
 
 // ═══════════════════════════════════════════════════════════════
@@ -3522,20 +3487,6 @@ function _setStoredPwHash(email, hash) {
   } catch(e) { return false; }
 }
 
-// ── Detect returning users on email field change ──────────────────
-function _onEmailChange() {
-  if (typeof loginMode !== 'undefined' && loginMode !== 'investor') return;
-  const emailVal = document.getElementById('login-email').value.trim().toLowerCase();
-  const nameRow  = document.getElementById('login-name-row');
-  const loginSub = document.getElementById('login-sub');
-  if (!nameRow || !loginSub) return;
-  // Check if this email has a stored password (returning user)
-  const hasHash = emailVal.includes('@') && !!_getStoredPwHash(emailVal);
-  nameRow.style.display  = hasHash ? 'none' : 'block';
-  loginSub.textContent = hasHash
-    ? 'Bienvenido de nuevo. Introduce tu email y haz clic en Continuar.'
-    : 'Introduce tu nombre completo y correo electrónico tal como figuran en tu ficha de inversor';
-}
 
 // Intermediate state between step 1 and step 2
 let _pendingLoginRecord = null;
@@ -3554,12 +3505,8 @@ function doBackToStep1() {
   document.getElementById('investor-step2').style.display = 'none';
   document.getElementById('login-error').style.display = 'none';
   document.getElementById('login-btn-text').textContent = 'Continuar';
-  // Clear step2 fields
-  ['inv-new-pass','inv-confirm-pass','inv-enter-pass'].forEach(id => {
-    const el = document.getElementById(id); if (el) el.value = '';
-  });
-  // Restore name row visibility based on current email value
-  _onEmailChange();
+  const ep = document.getElementById('inv-enter-pass'); if (ep) ep.value = '';
+  setTimeout(() => { const el = document.getElementById('login-email'); if (el) el.focus(); }, 60);
 }
 
 function showForgotPassword() {
@@ -3591,61 +3538,29 @@ async function doLogin() {
     return;
   }
 
-  // ── STEP 2: password phase ────────────────────────────────────
+  // ── STEP 2: verificar contraseña ─────────────────────────────
   if (_pendingLoginRecord) {
-    const record = _pendingLoginRecord;
+    const record     = _pendingLoginRecord;
     const storedHash = _getStoredPwHash(record.email);
-
-    if (!storedHash) {
-      // Creating new password
-      const np  = document.getElementById('inv-new-pass').value;
-      const npc = document.getElementById('inv-confirm-pass').value;
-      if (!np || !npc) {
-        errEl.textContent = '⚠️ Por favor, completa ambos campos de contraseña.';
-        errEl.style.display = 'block'; return;
-      }
-      if (np.length < 8) {
-        errEl.textContent = '⚠️ La contraseña debe tener al menos 8 caracteres.';
-        errEl.style.display = 'block'; return;
-      }
-      if (np !== npc) {
-        errEl.textContent = '❌ Las contraseñas no coinciden. Inténtalo de nuevo.';
-        errEl.style.display = 'block'; return;
-      }
-      let hash;
-      try { hash = await _sha256(np); } catch(e) {
-        errEl.textContent = '❌ Error al procesar la contraseña. Inténtalo de nuevo.';
-        errEl.style.display = 'block'; return;
-      }
-      const stored = _setStoredPwHash(record.email, hash);
-      if (!stored) {
-        errEl.textContent = '⚠️ No se pudo guardar la contraseña (almacenamiento bloqueado). Inténtalo en modo normal del navegador.';
-        errEl.style.display = 'block'; return;
-      }
-      _finishInvestorLogin(record);
-    } else {
-      // Checking existing password
-      const ep = document.getElementById('inv-enter-pass').value;
-      if (!ep) {
-        errEl.textContent = '⚠️ Por favor, introduce tu contraseña.';
-        errEl.style.display = 'block'; return;
-      }
-      let hash;
-      try { hash = await _sha256(ep); } catch(e) {
-        errEl.textContent = '❌ Error al procesar la contraseña. Inténtalo de nuevo.';
-        errEl.style.display = 'block'; return;
-      }
-      if (hash !== storedHash) {
-        errEl.textContent = '❌ Contraseña incorrecta. Inténtalo de nuevo.';
-        errEl.style.display = 'block'; return;
-      }
-      _finishInvestorLogin(record);
+    const ep = document.getElementById('inv-enter-pass').value;
+    if (!ep) {
+      errEl.textContent = '⚠️ Por favor, introduce tu contraseña.';
+      errEl.style.display = 'block'; return;
     }
+    let hash;
+    try { hash = await _sha256(ep); } catch(e) {
+      errEl.textContent = '❌ Error al procesar la contraseña. Inténtalo de nuevo.';
+      errEl.style.display = 'block'; return;
+    }
+    if (hash !== storedHash) {
+      errEl.textContent = '❌ Contraseña incorrecta. Inténtalo de nuevo.';
+      errEl.style.display = 'block'; return;
+    }
+    _finishInvestorLogin(record);
     return;
   }
 
-  // ── STEP 1: email (+ name if first time) validation ─────────────
-  const nameInput  = document.getElementById('login-name').value.trim();
+  // ── STEP 1: validar email ─────────────────────────────────────
   const emailInput = document.getElementById('login-email').value.trim().toLowerCase();
 
   if (!emailInput) {
@@ -3655,41 +3570,18 @@ async function doLogin() {
 
   const record = INVESTOR_DB[emailInput];
   if (!record) {
-    errEl.textContent = '❌ Email no encontrado. Comprueba que es el email con el que figuran en tu ficha de inversor.';
+    errEl.textContent = '❌ Email no encontrado en la base de datos de inversores.';
     errEl.style.display = 'block'; return;
   }
 
   const storedHash = _getStoredPwHash(emailInput);
-
   if (!storedHash) {
-    // ── PRIMER ACCESO: requiere nombre para verificar identidad ──
-    if (!nameInput) {
-      errEl.textContent = '⚠️ En tu primer acceso debes introducir también tu nombre y apellidos.';
-      errEl.style.display = 'block';
-      // Ensure name row is visible
-      const nr = document.getElementById('login-name-row');
-      if (nr) nr.style.display = 'block';
-      document.getElementById('login-sub').textContent =
-        'Introduce tu nombre completo y correo electrónico tal como figuran en tu ficha de inversor';
-      return;
-    }
-    const normInput = normalize(nameInput);
-    let matched = false;
-    record.names.forEach(n => {
-      if (normalize(n) === normInput) matched = true;
-      if (normalize(n).includes(normInput) || normInput.includes(normalize(n).split(' ')[0])) matched = true;
-    });
-    if (!matched) {
-      errEl.textContent = '❌ Datos no encontrados. Comprueba tu nombre y email exactamente como figuran en tu ficha de inversor.';
-      errEl.style.display = 'block'; return;
-    }
+    errEl.textContent = '⚠️ Aún no tienes acceso activado. Contacta con el equipo para que te asignen una contraseña.';
+    errEl.style.display = 'block'; return;
   }
-  // For returning users (storedHash exists): skip name validation
-  // The password is the authentication factor
 
-  // ── Credentials OK — go to step 2 ────────────────────────────
-  // Use a clean copy to avoid mutating INVESTOR_DB entries
-  const displayName = [...record.names].sort((a,b)=>b.length-a.length)[0];
+  // ── Email válido y contraseña asignada — ir a step 2 ─────────
+  const displayName = [...record.names].sort((a,b) => b.length - a.length)[0];
   _pendingLoginRecord = { _record: record, displayName, email: emailInput, investments: record.investments };
 
   const initials = displayName.split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase();
@@ -3697,24 +3589,15 @@ async function doLogin() {
   document.getElementById('inv-step2-name').textContent   = displayName;
   document.getElementById('inv-step2-email').textContent  = emailInput;
 
-  document.getElementById('create-pass-block').style.display = storedHash ? 'none' : 'block';
-  document.getElementById('enter-pass-block').style.display  = storedHash ? 'block' : 'none';
-
-  // Clear step2 fields
-  ['inv-new-pass','inv-confirm-pass','inv-enter-pass'].forEach(id => {
-    const el = document.getElementById(id); if (el) el.value = '';
-  });
+  // Clear password field
+  const ep = document.getElementById('inv-enter-pass'); if (ep) ep.value = '';
 
   document.getElementById('investor-fields').style.display = 'none';
-  document.getElementById('investor-step2').style.display = 'block';
-  document.getElementById('login-btn-text').textContent = storedHash ? 'Entrar al Portal' : 'Guardar contraseña y entrar';
+  document.getElementById('investor-step2').style.display  = 'block';
+  document.getElementById('login-btn-text').textContent = 'Entrar al Portal';
   errEl.style.display = 'none';
 
-  // Focus the right input
-  setTimeout(() => {
-    const focusId = storedHash ? 'inv-enter-pass' : 'inv-new-pass';
-    const el = document.getElementById(focusId); if (el) el.focus();
-  }, 80);
+  setTimeout(() => { const el = document.getElementById('inv-enter-pass'); if (el) el.focus(); }, 80);
 }
 
 function _finishInvestorLogin(record) {
@@ -3740,15 +3623,12 @@ function doLogout() {
   document.getElementById('admin-section').style.display = 'none';
   document.getElementById('login-screen').style.display = 'flex';
   // Reset all fields
-  ['login-name','login-email','admin-user','admin-pass','inv-new-pass','inv-confirm-pass','inv-enter-pass'].forEach(id => {
+  ['login-email','admin-user','admin-pass','inv-enter-pass'].forEach(id => {
     const el = document.getElementById(id); if (el) el.value = '';
   });
   document.getElementById('investor-fields').style.display = 'block';
   document.getElementById('investor-step2').style.display = 'none';
   document.getElementById('login-error').style.display = 'none';
-  // Reset name row in case it was hidden for a returning user
-  const nameRow = document.getElementById('login-name-row');
-  if (nameRow) nameRow.style.display = 'block';
   setLoginMode('investor');
 }
 
@@ -4514,7 +4394,6 @@ window.togglePass       = togglePass;
 window.togglePassField         = togglePassField;
 window.doBackToStep1           = doBackToStep1;
 window.showForgotPassword      = showForgotPassword;
-window._onEmailChange          = _onEmailChange;
 window.adminExportPasswords      = adminExportPasswords;
 window.adminCopyExport           = adminCopyExport;
 window.adminSetPassword          = adminSetPassword;
