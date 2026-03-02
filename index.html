@@ -1026,6 +1026,76 @@
       </div>
     </div>
 
+    <!-- PANEL: Gestión de contraseñas cross-device -->
+    <div class="panel" id="admin-passwords-panel" style="margin-top:24px;animation-delay:0.50s;">
+      <div class="panel-title" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+        <span>🔑 Contraseñas de Inversores</span>
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+          <button onclick="adminExportPasswords()" style="
+            background:rgba(30,136,229,0.10);border:1px solid rgba(30,136,229,0.25);
+            color:var(--blue-bright);border-radius:10px;padding:7px 16px;
+            font-family:'Syne',sans-serif;font-weight:700;font-size:10px;
+            letter-spacing:0.05em;cursor:pointer;text-transform:uppercase;
+            transition:background 0.2s;white-space:nowrap;"
+            onmouseover="this.style.background='rgba(30,136,229,0.18)'"
+            onmouseout="this.style.background='rgba(30,136,229,0.10)'">
+            📋 Exportar contraseñas
+          </button>
+          <button onclick="adminClearPassword()" style="
+            background:rgba(198,40,40,0.10);border:1px solid rgba(198,40,40,0.25);
+            color:var(--red);border-radius:10px;padding:7px 14px;
+            font-family:'Syne',sans-serif;font-weight:700;font-size:10px;
+            letter-spacing:0.05em;cursor:pointer;text-transform:uppercase;
+            transition:background 0.2s;white-space:nowrap;"
+            onmouseover="this.style.background='rgba(198,40,40,0.18)'"
+            onmouseout="this.style.background='rgba(198,40,40,0.10)'">
+            🗑 Borrar contraseña
+          </button>
+        </div>
+      </div>
+      <div id="admin-passwords-info" style="
+        font-size:11px;color:var(--muted);line-height:1.8;
+        padding:10px 0 4px 0;border-bottom:1px solid var(--border);margin-bottom:14px;">
+        Las contraseñas se guardan en el navegador del inversor. Para que funcionen en <strong>cualquier dispositivo</strong>,
+        usa <em>Exportar contraseñas</em>, copia el bloque generado y pégalo en el HTML (reemplazando el contenido de <code>PRESET_PASSWORDS</code>).
+        El campo <em>Borrar contraseña</em> elimina el acceso de un inversor específico para que deba crear una nueva.
+      </div>
+      <div id="admin-passwords-table-wrap"></div>
+      <div id="admin-passwords-export-box" style="display:none;margin-top:16px;">
+        <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:11px;color:var(--text);margin-bottom:8px;">
+          Copia este bloque y reemplaza el contenido de <code style="font-family:'DM Mono',monospace;background:rgba(30,136,229,0.08);padding:2px 6px;border-radius:4px;">PRESET_PASSWORDS</code> en el HTML:
+        </div>
+        <textarea id="admin-passwords-export-text" readonly style="
+          width:100%;box-sizing:border-box;min-height:160px;resize:vertical;
+          font-family:'DM Mono',monospace;font-size:11px;line-height:1.6;
+          background:rgba(0,0,0,0.04);border:1px solid var(--border);
+          border-radius:10px;padding:12px;color:var(--text);outline:none;"></textarea>
+        <button onclick="adminCopyExport()" style="
+          margin-top:10px;background:linear-gradient(135deg,var(--blue),var(--blue-bright));
+          border:none;color:white;border-radius:10px;padding:9px 22px;
+          font-family:'Syne',sans-serif;font-weight:700;font-size:11px;
+          letter-spacing:0.05em;cursor:pointer;">
+          📋 Copiar al portapapeles
+        </button>
+        <span id="admin-copy-msg" style="display:none;margin-left:12px;font-size:11px;color:var(--blue-bright);font-family:'DM Mono',monospace;">✓ Copiado</span>
+      </div>
+      <!-- Clear password dialog -->
+      <div id="admin-clear-pw-form" style="display:none;margin-top:16px;padding:14px;background:rgba(198,40,40,0.05);border:1px solid rgba(198,40,40,0.2);border-radius:10px;">
+        <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:12px;margin-bottom:10px;color:var(--red);">Borrar contraseña de un inversor</div>
+        <input id="admin-clear-pw-email" type="email" placeholder="email@inversor.com"
+          style="width:100%;box-sizing:border-box;border:1px solid var(--border);border-radius:8px;padding:9px 14px;font-size:12px;font-family:'DM Mono',monospace;background:var(--surface);color:var(--text);outline:none;margin-bottom:10px;">
+        <button onclick="adminConfirmClearPassword()" style="
+          background:rgba(198,40,40,0.80);border:none;color:white;
+          border-radius:8px;padding:8px 18px;font-family:'Syne',sans-serif;
+          font-weight:700;font-size:11px;cursor:pointer;margin-right:8px;">Borrar</button>
+        <button onclick="document.getElementById('admin-clear-pw-form').style.display='none'" style="
+          background:none;border:1px solid var(--border);color:var(--muted);
+          border-radius:8px;padding:8px 18px;font-family:'Syne',sans-serif;
+          font-weight:700;font-size:11px;cursor:pointer;">Cancelar</button>
+        <span id="admin-clear-pw-msg" style="display:none;margin-left:10px;font-size:11px;font-family:'DM Mono',monospace;"></span>
+      </div>
+    </div>
+
   </div>
   <!-- END ADMIN SECTION -->
 
@@ -3339,10 +3409,23 @@ function normalize(s) {
     .replace(/\s+/g,' ');
 }
 
-// ── Password storage helpers (localStorage) ──────────────────────
+// ── Password storage helpers (localStorage + preset hashes) ─────
+// PRESET_PASSWORDS: admin-managed hashes that work across all devices.
+// To add/update: run "Exportar contraseñas" in the admin panel, copy
+// the block shown and replace the content between the braces below.
+const PRESET_PASSWORDS = {
+};
+
 function _pwKey(email) { return 'AC_INV_PW_' + email.toLowerCase(); }
 function _getStoredPwHash(email) {
-  try { return localStorage.getItem(_pwKey(email)) || null; } catch(e) { return null; }
+  const key = email.toLowerCase();
+  // 1. Check localStorage first (most recent, device-local)
+  try {
+    const local = localStorage.getItem(_pwKey(key));
+    if (local) return local;
+  } catch(e) {}
+  // 2. Fall back to PRESET_PASSWORDS (admin-embedded, cross-device)
+  return PRESET_PASSWORDS[key] || null;
 }
 function _setStoredPwHash(email, hash) {
   try {
@@ -3715,6 +3798,138 @@ function showDashboard() {
 // ═══════════════════════════════════════════════════════════════
 // ADMIN DASHBOARD
 // ═══════════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════
+// ADMIN PASSWORD MANAGEMENT
+// ══════════════════════════════════════════════════════════════
+
+function adminRenderPasswordsTable() {
+  const wrap = document.getElementById('admin-passwords-table-wrap');
+  if (!wrap) return;
+
+  // Collect all emails from INVESTOR_DB
+  const allEmails = Object.keys(INVESTOR_DB).sort();
+
+  // Find which ones have passwords (localStorage or preset)
+  const withPass = [];
+  allEmails.forEach(email => {
+    const local   = (() => { try { return localStorage.getItem(_pwKey(email)); } catch(e) { return null; } })();
+    const preset  = PRESET_PASSWORDS[email] || null;
+    if (local || preset) {
+      withPass.push({ email, local: !!local, preset: !!preset });
+    }
+  });
+
+  if (withPass.length === 0) {
+    wrap.innerHTML = '<div style="padding:24px;text-align:center;color:var(--muted);font-size:12px;">Ningún inversor ha creado contraseña todavía.</div>';
+    return;
+  }
+
+  let rows = withPass.map((r, i) => {
+    const localBadge  = r.local  ? '<span style="background:rgba(30,136,229,0.12);color:var(--blue-bright);border-radius:6px;padding:2px 8px;font-size:10px;font-family:'DM Mono',monospace;">local</span>' : '';
+    const presetBadge = r.preset ? '<span style="background:rgba(56,142,60,0.12);color:#388E3C;border-radius:6px;padding:2px 8px;font-size:10px;font-family:'DM Mono',monospace;">global</span>' : '<span style="background:rgba(198,40,40,0.10);color:var(--red);border-radius:6px;padding:2px 8px;font-size:10px;font-family:'DM Mono',monospace;">solo local</span>';
+    return `<tr>
+      <td style="font-family:'DM Mono',monospace;font-size:11px;">${i+1}</td>
+      <td style="font-size:12px;">${r.email}</td>
+      <td style="white-space:nowrap;">${localBadge} ${presetBadge}</td>
+    </tr>`;
+  }).join('');
+
+  wrap.innerHTML = `
+    <div style="font-size:11px;color:var(--muted);margin-bottom:10px;">
+      ${withPass.length} inversor${withPass.length!==1?'es':''} con contraseña.
+      <strong style="color:#388E3C;">global</strong> = disponible en todos los dispositivos.
+      <strong style="color:var(--red);">solo local</strong> = pendiente de exportar.
+    </div>
+    <div class="table-scroll" style="max-height:320px;">
+      <table class="investments-table">
+        <thead><tr><th>#</th><th>Email</th><th>Estado</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>`;
+}
+
+function adminExportPasswords() {
+  // Gather all hashes: localStorage takes priority over preset
+  const allEmails = Object.keys(INVESTOR_DB).sort();
+  const combined  = Object.assign({}, PRESET_PASSWORDS);
+
+  allEmails.forEach(email => {
+    try {
+      const local = localStorage.getItem(_pwKey(email));
+      if (local) combined[email] = local;
+    } catch(e) {}
+  });
+
+  if (Object.keys(combined).length === 0) {
+    alert('No hay contraseñas guardadas todavía.');
+    return;
+  }
+
+  // Build JS block
+  const lines = Object.entries(combined)
+    .sort(([a],[b]) => a.localeCompare(b))
+    .map(([email, hash]) => `  "${email}": "${hash}"`)
+    .join(',
+');
+  const block = `const PRESET_PASSWORDS = {
+${lines}
+};`;
+
+  const box  = document.getElementById('admin-passwords-export-box');
+  const text = document.getElementById('admin-passwords-export-text');
+  if (box && text) {
+    text.value = block;
+    box.style.display = 'block';
+    text.select();
+  }
+  // Re-render table to reflect current state
+  adminRenderPasswordsTable();
+}
+
+function adminCopyExport() {
+  const text = document.getElementById('admin-passwords-export-text');
+  const msg  = document.getElementById('admin-copy-msg');
+  if (!text) return;
+  text.select();
+  try {
+    navigator.clipboard.writeText(text.value).then(() => {
+      if (msg) { msg.style.display = 'inline'; setTimeout(() => msg.style.display = 'none', 2500); }
+    });
+  } catch(e) {
+    document.execCommand('copy');
+    if (msg) { msg.style.display = 'inline'; setTimeout(() => msg.style.display = 'none', 2500); }
+  }
+}
+
+function adminClearPassword() {
+  document.getElementById('admin-passwords-export-box').style.display = 'none';
+  document.getElementById('admin-clear-pw-form').style.display = 'block';
+  const inp = document.getElementById('admin-clear-pw-email');
+  const msg = document.getElementById('admin-clear-pw-msg');
+  if (inp) inp.value = '';
+  if (msg) msg.style.display = 'none';
+}
+
+function adminConfirmClearPassword() {
+  const inp   = document.getElementById('admin-clear-pw-email');
+  const msg   = document.getElementById('admin-clear-pw-msg');
+  if (!inp) return;
+  const email = inp.value.trim().toLowerCase();
+  if (!email) { 
+    if (msg) { msg.textContent = '⚠️ Introduce un email.'; msg.style.color = 'var(--red)'; msg.style.display = 'inline'; }
+    return;
+  }
+  // Remove from localStorage
+  try { localStorage.removeItem(_pwKey(email)); } catch(e) {}
+  if (msg) {
+    msg.textContent = `✓ Contraseña local de ${email} eliminada. Actualiza también PRESET_PASSWORDS en el HTML si estaba exportada.`;
+    msg.style.color = 'var(--blue-bright)';
+    msg.style.display = 'inline';
+  }
+  if (inp) inp.value = '';
+  adminRenderPasswordsTable();
+}
+
 function showAdminDashboard() {
   if (!_validateSession('admin')) return;
   document.getElementById('login-screen').style.display = 'none';
@@ -3992,6 +4207,7 @@ function renderAdminExtras(allStartups, totalCapital) {
   const allSorted = allStartups.slice().sort((a,b) => a.name.localeCompare(b.name));
   renderAdminUpdatesPanel(allSorted);
   renderAdminEquityPanel(allSorted);
+  adminRenderPasswordsTable();
   refreshAccessLogPanel();
 }
 
@@ -4158,10 +4374,14 @@ window.doLogin          = doLogin;
 window.doLogout         = doLogout;
 window.setLoginMode     = setLoginMode;
 window.togglePass       = togglePass;
-window.togglePassField    = togglePassField;
-window.doBackToStep1      = doBackToStep1;
-window.showForgotPassword = showForgotPassword;
-window._onEmailChange     = _onEmailChange;
+window.togglePassField         = togglePassField;
+window.doBackToStep1           = doBackToStep1;
+window.showForgotPassword      = showForgotPassword;
+window._onEmailChange          = _onEmailChange;
+window.adminExportPasswords    = adminExportPasswords;
+window.adminCopyExport         = adminCopyExport;
+window.adminClearPassword      = adminClearPassword;
+window.adminConfirmClearPassword = adminConfirmClearPassword;
 window.sendContactForm  = sendContactForm;
 window.openUpdateModal  = openUpdateModal;
 window.closeUpdateModal = closeUpdateModal;
