@@ -3809,7 +3809,7 @@ function adminCopyExport() {
   }
 }
 
-async function adminDownloadHtml() {
+function adminDownloadHtml() {
   // Gather all hashes: localStorage takes priority over preset
   const allEmails = Object.keys(INVESTOR_DB).sort();
   const combined  = Object.assign({}, PRESET_PASSWORDS);
@@ -3832,17 +3832,9 @@ async function adminDownloadHtml() {
     .join(',\n');
   const newBlock = `const PRESET_PASSWORDS = {\n${pwLines}\n};`;
 
-  // Fetch the current HTML source
-  let src;
-  try {
-    const resp = await fetch(window.location.href, { cache: 'no-store' });
-    if (!resp.ok) throw new Error('HTTP ' + resp.status);
-    src = await resp.text();
-  } catch(e) {
-    // file:// protocol or network error — fall back to showing the block
-    alert('No se pudo obtener el HTML automáticamente (posiblemente archivo local).\n\nCopia el bloque del área de texto y pégalo manualmente en el HTML.');
-    return;
-  }
+  // Get HTML source directly from the live DOM — works in file://, any server, any hosting
+  // '<!DOCTYPE html>\n' is prepended because outerHTML doesn't include the doctype
+  const src = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
 
   // Replace PRESET_PASSWORDS block in source
   const presetRe = /const PRESET_PASSWORDS = \{[\s\S]*?\};/;
