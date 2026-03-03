@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AngelClub — Portal Inversor v1.0</title>
+<title>AngelClub — Portal Inversor v2.1</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -388,9 +388,10 @@
   .update-embed-wrap {
     width: 100%; border-radius: 14px; overflow: hidden;
     background: rgba(30,136,229,0.04); border: 1px solid var(--border);
-    min-height: 320px; display: flex; align-items: center; justify-content: center;
+    min-height: 320px; display: flex; flex-direction: column;
+    align-items: stretch; justify-content: center;
   }
-  .update-embed-wrap iframe { width: 100%; height: 400px; border: none; }
+  .update-embed-wrap iframe { width: 100%; height: 400px; min-height: 320px; border: none; display: block; flex-shrink: 0; }
   .update-embed-wrap .update-embed-link {
     display: flex; flex-direction: column; align-items: center; gap: 12px;
     padding: 40px; text-align: center;
@@ -570,7 +571,7 @@
       <button id="tab-admin" onclick="setLoginMode('admin')" style="flex:1;padding:9px 0;border:none;border-radius:9px;font-family:'Syne',sans-serif;font-weight:700;font-size:12px;cursor:pointer;transition:all 0.2s;background:transparent;color:var(--muted);">⚙️ Administrador</button>
     </div>
 
-    <div id="login-title" class="login-title">Portal del Inversor <span style="font-size:11px;font-family:'DM Mono',monospace;font-weight:400;color:var(--muted);letter-spacing:0.08em;">v1.0</span></div>
+    <div id="login-title" class="login-title">Portal del Inversor <span style="font-size:11px;font-family:'DM Mono',monospace;font-weight:400;color:var(--muted);letter-spacing:0.08em;">v2.1</span></div>
     <div id="login-sub" class="login-sub">Introduce tu correo electrónico para continuar</div>
 
     <!-- INVESTOR FIELDS — STEP 1: email -->
@@ -658,7 +659,7 @@
       <div class="logo-icon">A</div>
       <div>
         <div class="logo-text">ANGEL<span>CLUB</span></div>
-        <div id="topbar-subtitle" style="font-size:10px;color:var(--muted);letter-spacing:0.15em;text-transform:uppercase;margin-top:2px;">Portal Inversor <span style="letter-spacing:0.05em;opacity:0.7;">v1.0</span></div>
+        <div id="topbar-subtitle" style="font-size:10px;color:var(--muted);letter-spacing:0.15em;text-transform:uppercase;margin-top:2px;">Portal Inversor <span style="letter-spacing:0.05em;opacity:0.7;">v2.1</span></div>
       </div>
     </div>
     <div class="topbar-right">
@@ -1136,12 +1137,12 @@
 </div>
 </div>
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+<script>
 (function(){
 'use strict';
 
 // ═══════════════════════════════════════════════════════════════
-// SECURITY LAYER v1.0
+// SECURITY LAYER v2.1
 // ═══════════════════════════════════════════════════════════════
 
 // ── SHA-256 (pure JS, no dependencies) ─────────────────────────
@@ -1151,94 +1152,18 @@ async function _sha256(str) {
   return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
 }
 
-// ── DevTools detection + session lock ──────────────────────────
+// ── Protección básica: bloqueo de atajos de teclado ────────────
+// La detección automática por tamaño de ventana se ha eliminado
+// definitivamente: outerWidth/outerHeight difiere según DPI, zoom
+// del navegador, barras de extensiones y escalado de Windows, lo
+// que generaba cierres de sesión falsos de forma continua.
+// La protección se limita a: bloqueo de atajos de teclado comunes,
+// desactivación del menú contextual y protección de selección de texto.
 (function() {
-  let _devtoolsOpen = false;
-  let _sessionLocked = false;
-  // Counters to avoid false positives: require N consecutive hits before locking
-  let _sizeHits     = 0;
-  let _debuggerHits = 0;
-  const HITS_NEEDED = 3;
-
-  function _lockSession() {
-    if (_sessionLocked) return;
-    _sessionLocked = true;
-    // Force logout and show warning
-    try {
-      const dash = document.getElementById('dashboard');
-      const login = document.getElementById('login-screen');
-      if (dash)  dash.style.display  = 'none';
-      if (login) login.style.display = 'flex';
-    } catch(e) {}
-    // Overlay
-    const overlay = document.createElement('div');
-    overlay.id = '_sec_overlay';
-    overlay.style.cssText = [
-      'position:fixed','inset:0','z-index:99999',
-      'background:rgba(10,20,50,0.97)',
-      'display:flex','flex-direction:column',
-      'align-items:center','justify-content:center',
-      'font-family:monospace','color:#fff','gap:16px',
-      'backdrop-filter:blur(8px)'
-    ].join(';');
-    overlay.innerHTML = [
-      '<div style="font-size:48px;">🔒</div>',
-      '<div style="font-size:20px;font-weight:bold;letter-spacing:0.05em;">Sesión Suspendida</div>',
-      '<div style="font-size:13px;color:rgba(255,255,255,0.6);text-align:center;max-width:340px;line-height:1.7;">',
-      'Se han detectado herramientas de inspección de código.',
-      '<br>Por seguridad, la sesión ha sido cerrada.',
-      '</div>',
-      '<button onclick="location.reload()" style="',
-        'margin-top:8px;padding:12px 32px;border:1px solid rgba(255,255,255,0.3);',
-        'background:rgba(255,255,255,0.10);color:#fff;border-radius:12px;',
-        'font-size:13px;cursor:pointer;letter-spacing:0.05em;',
-      '">↺ Recargar página</button>'
-    ].join('');
-    document.body.appendChild(overlay);
-  }
-
-  // Method 1: window size difference
-  // Threshold raised to 250px to avoid false positives from bookmark bars,
-  // extension sidepanels, OS scrollbars, and browser chrome on mobile.
-  function _checkSize() {
-    const threshold = 250;
-    const widthDiff  = window.outerWidth  - window.innerWidth;
-    const heightDiff = window.outerHeight - window.innerHeight;
-    if (widthDiff > threshold || heightDiff > threshold) {
-      _sizeHits++;
-      if (_sizeHits >= HITS_NEEDED && !_devtoolsOpen) {
-        _devtoolsOpen = true; _lockSession();
-      }
-    } else {
-      _sizeHits = 0;
-      _devtoolsOpen = false;
-    }
-  }
-
-  // Method 2: debugger statement timing
-  // Threshold raised to 200ms to avoid false positives on slow devices
-  // or when the browser is busy rendering/executing other tasks.
-  function _checkDebugger() {
-    const t0 = performance.now();
-    (function(){ try { (function(){}).constructor('debugger')(); } catch(e){} })();
-    if (performance.now() - t0 > 200) {
-      _debuggerHits++;
-      if (_debuggerHits >= HITS_NEEDED && !_devtoolsOpen) {
-        _devtoolsOpen = true; _lockSession();
-      }
-    } else {
-      _debuggerHits = 0;
-    }
-  }
-
-  // Run checks periodically
-  setInterval(_checkSize, 1500);
-  setInterval(_checkDebugger, 3000);
-
   // Disable right-click context menu
   document.addEventListener('contextmenu', function(e) { e.preventDefault(); });
 
-  // Disable F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U (view source)
+  // Block common DevTools keyboard shortcuts
   document.addEventListener('keydown', function(e) {
     if (e.key === 'F12') { e.preventDefault(); return false; }
     if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C' || e.key === 'K')) {
@@ -1248,7 +1173,7 @@ async function _sha256(str) {
     if (e.ctrlKey && e.key === 's') { e.preventDefault(); return false; }
   });
 
-  // Disable text selection on sensitive elements (prevents easy copy)
+  // Disable text selection on sensitive elements
   document.addEventListener('DOMContentLoaded', function() {
     const style = document.createElement('style');
     style.textContent = [
@@ -1329,37 +1254,37 @@ function _tryRestoreSession() {
 // MASTER STARTUP DATA
 // ═══════════════════════════════════════════════════════════════
 const STARTUPS = {
-  'badi':           { name:'BADI',            web:'https://badi.com/es/',                       capital:81700,   equity:'0%',  status:'active', tir:null },
-  'mailtrack':      { name:'MAILTRACK',        web:'https://mailtrack.email/',                   capital:104000,  equity:'0%',  status:'exit',   tir:74   },
-  'vitcord':        { name:'VITCORD',          web:null,                                          capital:107400,  equity:'1%',  status:'active', tir:null },
-  'cabify':         { name:'CABIFY',           web:'https://cabify.com/es/prensa',               capital:340000,  equity:'1%',  status:'active', tir:null },
-  'goin':           { name:'GOIN',             web:'https://www.goin.app/',                      capital:131200,  equity:'2%',  status:'active', tir:null },
-  'coverfy':        { name:'COVERFY',          web:'https://www.coverfy.com/',                   capital:147000,  equity:'3%',  status:'active', tir:null },
-  'housers':        { name:'HOUSERS',          web:'https://www.housers.com/es/',                capital:72000,   equity:'1%',  status:'active', tir:null },
-  'kasitoko':       { name:'KASITOKO',         web:'http://kasitoko.com/',                       capital:104700,  equity:'3%',  status:'fail',   tir:null },
-  'chicisimo':      { name:'CHICISIMO',        web:'https://chicisimo.com/',                     capital:141000,  equity:'3%',  status:'fail',   tir:null },
-  'charplanet':     { name:'CHARPLANET',       web:'https://www.nisgo.com/es/',                  capital:62500,   equity:'3%',  status:'active', tir:null },
-  'mytriplea':      { name:'MYTRIPLEA',        web:'https://mytriplea.com/',                     capital:71240,   equity:'2%',  status:'active', tir:null },
-  'orbitalads':     { name:'ORBITALADS',       web:'https://www.orbitalads.com/',                capital:85848,   equity:'3%',  status:'active', tir:null },
+  'badi':           { name:'BADI',            web:'https://badi.com/es/',                       capital:30000,   equity:'0%',  status:'active', tir:null },
+  'mailtrack':      { name:'MAILTRACK',        web:'https://mailtrack.email/',                   capital:1000,  equity:'0%',  status:'exit',   tir:74   },
+  'vitcord':        { name:'VITCORD',          web:null,                                          capital:0,  equity:'1%',  status:'active', tir:null },
+  'cabify':         { name:'CABIFY',           web:'https://cabify.com/es/prensa',               capital:320900,  equity:'1%',  status:'active', tir:null },
+  'goin':           { name:'GOIN',             web:'https://www.goin.app/',                      capital:1000,  equity:'2%',  status:'active', tir:null },
+  'coverfy':        { name:'COVERFY',          web:'https://www.coverfy.com/',                   capital:1000,  equity:'3%',  status:'active', tir:null },
+  'housers':        { name:'HOUSERS',          web:'https://www.housers.com/es/',                capital:65000,   equity:'1%',  status:'active', tir:null },
+  'kasitoko':       { name:'KASITOKO',         web:'http://kasitoko.com/',                       capital:103700,  equity:'3%',  status:'fail',   tir:null },
+  'chicisimo':      { name:'CHICISIMO',        web:'https://chicisimo.com/',                     capital:129000,  equity:'3%',  status:'fail',   tir:null },
+  'charplanet':     { name:'CHARPLANET',       web:'https://www.nisgo.com/es/',                  capital:61500,   equity:'3%',  status:'active', tir:null },
+  'mytriplea':      { name:'MYTRIPLEA',        web:'https://mytriplea.com/',                     capital:71000,   equity:'2%',  status:'active', tir:null },
+  'orbitalads':     { name:'ORBITALADS',       web:'https://www.orbitalads.com/',                capital:83848,   equity:'3%',  status:'active', tir:null },
   'gomapi':         { name:'GOMAPI',           web:'http://gomapi.io/',                          capital:91600,   equity:'4%',  status:'active', tir:null },
-  'accurate':       { name:'ACCURATE',         web:'https://atranslations.com/',                 capital:107100,  equity:'3%',  status:'active', tir:null },
-  'lobster':        { name:'LOBSTER',          web:'https://projectlobster.com/',                capital:46700,   equity:'14%', status:'fail',   tir:null },
+  'accurate':       { name:'ACCURATE',         web:'https://atranslations.com/',                 capital:32600,  equity:'3%',  status:'active', tir:null },
+  'lobster':        { name:'LOBSTER',          web:'https://projectlobster.com/',                capital:505142,   equity:'14%', status:'fail',   tir:null },
   'myhair':         { name:'MYHAIR/STIMUSIL',  web:'https://www.myhair.ai/es',                  capital:47000,   equity:'2%',  status:'active', tir:null },
   'mox':            { name:'MOX',              web:'https://www.linkedin.com/company/grupo-mox/',capital:74925,   equity:'3%',  status:'active', tir:null },
-  'kasaz':          { name:'KASAZ',            web:'https://www.kasaz.es/',                      capital:81955,   equity:'4%',  status:'active', tir:null },
+  'kasaz':          { name:'KASAZ',            web:'https://www.kasaz.es/',                      capital:88600,   equity:'4%',  status:'active', tir:null },
   'oncoheroes':     { name:'ONCOHEROES',       web:'https://www.oncoheroes.com/',                capital:49765,   equity:'3%',  status:'active', tir:null },
-  'bnext':          { name:'BNEXT',            web:'https://bnext.es/b2b/es',                   capital:142744,  equity:'3%',  status:'active', tir:null },
-  'roams':          { name:'ROAMS',            web:null,                                          capital:46000,   equity:'4%',  status:'active', tir:null },
+  'bnext':          { name:'BNEXT',            web:'https://bnext.es/b2b/es',                   capital:153318,  equity:'3%',  status:'active', tir:null },
+  'roams':          { name:'ROAMS',            web:null,                                          capital:48725,   equity:'4%',  status:'active', tir:null },
   'greendatachain': { name:'GREEN DATA CHAIN', web:null,                                          capital:113550,  equity:'3%',  status:'active', tir:null },
   'evil zeppelin':  { name:'EVIL ZEPPELIN',   web:null,                                          capital:74150,   equity:'1%',  status:'active', tir:null },
-  'luda':           { name:'LUDA',             web:null,                                          capital:178000,  equity:'2%',  status:'active', tir:null },
-  'zapiens.ai':     { name:'ZAPIENS',          web:null,                                          capital:232000,  equity:'5%',  status:'active', tir:null },
-  'claps':          { name:'CLAPS',            web:null,                                          capital:202000,  equity:'5%',  status:'active', tir:null },
-  'wellbeingos':    { name:'WELLBEINGOS',      web:null,                                          capital:89000,   equity:'4%',  status:'active', tir:null },
-  'edit.org':       { name:'EDIT ORG',         web:null,                                          capital:64865,   equity:'3%',  status:'active', tir:null },
-  'genially':       { name:'GENIALLY',         web:null,                                          capital:196000,  equity:'5%',  status:'active', tir:null },
-  'alterhome':      { name:'ALTERHOME',        web:null,                                          capital:102000,  equity:'6%',  status:'active', tir:null },
-  'froged':         { name:'FROGED',           web:null,                                          capital:43000,   equity:'4%',  status:'active', tir:null },
+  'luda':           { name:'LUDA',             web:null,                                          capital:192150,  equity:'2%',  status:'active', tir:null },
+  'zapiens.ai':     { name:'ZAPIENS',          web:null,                                          capital:241800,  equity:'5%',  status:'active', tir:null },
+  'claps':          { name:'CLAPS',            web:null,                                          capital:218501,  equity:'5%',  status:'active', tir:null },
+  'wellbeingos':    { name:'WELLBEINGOS',      web:null,                                          capital:95225,   equity:'4%',  status:'active', tir:null },
+  'edit.org':       { name:'EDIT ORG',         web:null,                                          capital:61865,   equity:'3%',  status:'active', tir:null },
+  'genially':       { name:'GENIALLY',         web:null,                                          capital:215000,  equity:'5%',  status:'active', tir:null },
+  'alterhome':      { name:'ALTERHOME',        web:null,                                          capital:118826,  equity:'6%',  status:'active', tir:null },
+  'froged':         { name:'FROGED',           web:null,                                          capital:45900,   equity:'4%',  status:'active', tir:null },
   'goin ii':        { name:'GOIN II',          web:null,                                          capital:25500,   equity:'3%',  status:'active', tir:null },
 };
 
@@ -1407,8 +1332,9 @@ function normalizeStartup(n) {
 // INVESTOR DATABASE (from CSV)
 // ═══════════════════════════════════════════════════════════════
 // 1371 entries — [name, email, startup, valuation, amount]
+// 1371 entries — [name, email, startup, valuation, amount]
 const RAW_INVESTORS = [
-["Juan ortiz Camarero","juanortizcamarero@gmail.com","Vitcord",null,null],
+["Juan ortiz Camarero","juanortizcamarero@gmail.com","Vitcord/Camilion",null,null],
 ["Adrian Bernabéu Escudero","adrian.bernabeu1@gmail.com","Alterhome",null,1000],
 ["Adrian Bernabéu Escudero","adrian.bernabeu1@gmail.com","CLAPS",null,1000],
 ["Adrián Bernabéu Escudero","adrian.bernabeu1@gmail.com","Green Data Chain",null,2000],
@@ -1562,13 +1488,13 @@ const RAW_INVESTORS = [
 ["Babieka Kapital, S.L Ruiz Ruiz","vruiz@tbig.es","LOBSTER III",null,1000],
 ["Babieka Kapital, S.L Ruiz Ruiz","vruiz@tbig.es","Zapiens.ai",null,1000],
 ["Babieka Kapital, S.L, Ruiz Ruiz","vruiz@tbig.es","Genially",null,1000],
-["Babieka Kapital, S.L, Ruiz Ruiz","vruiz@tbig.es","ROAMS",null,1000],
+["Babieka Kapital, S.L, Ruiz Ruiz","vruiz@tbig.es","ROAMS",13900000,1000],
 ["Bartolome Rosselló Servera","trosselloservera@gmail.com","Alterhome",null,2000],
 ["Bartolomé Rosselló Servera","trosselloservera@gmail.com","EVIL ZEPPELIN",null,1000],
 ["Bartolomé Rosselló Servera","trosselloservera@gmail.com","Green Data Chain",null,1500],
 ["Bartolomé Rosselló Servera","trosselloservera@gmail.com","LOBSTER III",null,1000],
 ["Bartolomé Rosselló Servera","trosselloservera@gmail.com","LUDA",null,1500],
-["Bartolomé Rosselló Servera","trosselloservera@gmail.com","ROAMS",null,1000],
+["Bartolomé Rosselló Servera","trosselloservera@gmail.com","ROAMS",13900000,1000],
 ["Beatriz Pérez Sanz","beatriz.perez_sanz@roche.com","Oncoheroes",24000000,null],
 ["Beatriz Ríos Rivas","abarqueropayo@gmail.com","LUDA",null,1000],
 ["Begoña Beobide Azpeitia","bbeobide@gmail.com","Charplanet",null,1000],
@@ -1640,7 +1566,7 @@ const RAW_INVESTORS = [
 ["Brice Lapouble","brice.lapouble@gmail.com","Bnext",null,2000],
 ["Canteli Capital SLU","empresas@genei.es","CLAPS",null,10000],
 ["Carles Torrejón Puchol","Carles.torrejon@gmail.com","Alterhome",null,3000],
-["Carlo Magnoni","cm@aicapartners.com","ROAMS",null,2500],
+["Carlo Magnoni","cm@aicapartners.com","ROAMS",13900000,2500],
 ["Carlos Barrachina Berbís","carlos.barrachina.upv@gmail.com","Genially",null,2000],
 ["Carlos De Pedro Guri","carlos.dped@gmail.com","MyTripleA",null,5000],
 ["Carlos De Pedro Guri","carlos.dped@gmail.com","OrbitalAds",null,3000],
@@ -1696,7 +1622,7 @@ const RAW_INVESTORS = [
 ["Daniel Herrero Martínez","dani.herrero.m@gmail.com","Genially",null,2150],
 ["Daniel Herrero Martínez","dani.herrero.m@gmail.com","LOBSTER III",null,4300],
 ["Daniel Herrero Martínez","dani.herrero.m@gmail.com","LUDA",null,3225],
-["Daniel Herrero Martínez","dani.herrero.m@gmail.com","ROAMS",null,3225],
+["Daniel Herrero Martínez","dani.herrero.m@gmail.com","ROAMS",13900000,3225],
 ["Daniel Herrero Martínez","dani.herrero.m@gmail.com","WellbeingOS",null,3000],
 ["Daniel Herrero Martínez","dani.herrero.m@gmail.com","Zapiens.ai",null,3225],
 ["Daniel José García","dani.naturaforma@gmail.com","ACCURATE",null,1000],
@@ -1723,7 +1649,7 @@ const RAW_INVESTORS = [
 ["David Lozano Lucas","dlozanolu@gmail.com","LOBSTER II",null,10000],
 ["David Motos Perez","dmotosp@gmail.com","LOBSTER III",null,1000],
 ["David Motos Perez","dmotosp@gmail.com","LUDA",null,1000],
-["David Motos Perez","dmotosp@gmail.com","ROAMS",null,1000],
+["David Motos Perez","dmotosp@gmail.com","ROAMS",13900000,1000],
 ["David Periscal","davidperiscal@gmail.com","Charplanet",null,1000],
 ["David Periscal","davidperiscal@gmail.com","WellbeingOS",null,1000],
 ["David Periscal","davidperiscal@gmail.com","MyHair/Stimusil",null,1000],
@@ -1806,7 +1732,7 @@ const RAW_INVESTORS = [
 ["Esoria Investments SLU Soria","eduardoteotico@gmail.com","Lobster",null,3000],
 ["Esoria Investments SLU Soria","eduardoteotico@gmail.com","LOBSTER II",null,3000],
 ["Esoria Investments SLU Soria","eduardoteotico@gmail.com","LOBSTER III",null,2000],
-["Esoria Investments SLU Soria","eduardoteotico@gmail.com","ROAMS",null,2000],
+["Esoria Investments SLU Soria","eduardoteotico@gmail.com","ROAMS",13900000,2000],
 ["Esteban Rubini","rubini.esteban@gmail.com","EVIL ZEPPELIN",null,1000],
 ["Ester Caldentey Torner","barcelonaplace@hotmail.com","CLAPS",null,1000],
 ["Ester Caldentey Torner","barcelonaplace@hotmail.com","Genially",null,1000],
@@ -1832,7 +1758,7 @@ const RAW_INVESTORS = [
 ["Federico Castanedo","castanedofede@gmail.com","MyTripleA",null,3000],
 ["Felipe Lumbreras Ruiz","felipe.lumbreras@gmail.com","LOBSTER III",null,1000],
 ["Felipe Lumbreras Ruiz","felipe.lumbreras@gmail.com","LUDA",null,1000],
-["Felipe Lumbreras Ruiz","felipe.lumbreras@gmail.com","ROAMS",null,1000],
+["Felipe Lumbreras Ruiz","felipe.lumbreras@gmail.com","ROAMS",13900000,1000],
 ["Fermin Albiol Forés","ferminalbiol@gmail.com","Genially",null,2000],
 ["Fermin Albiol Forés","ferminalbiol@gmail.com","LUDA",null,2000],
 ["Fermin Albiol Forés","ferminalbiol@gmail.com","Zapiens.ai",null,1000],
@@ -1912,11 +1838,11 @@ const RAW_INVESTORS = [
 ["Hector","hfdli85@gmail.com","Zapiens.ai",null,null],
 ["Hector Fernandez de Liger Inchaurregui","hfdli85@gmail.com","Alterhome",null,1000],
 ["Héctor García Fernández","hector@habichuelas.es","Genially",null,2000],
-["Hector García Fernández","hector@habichuelas.es","ROAMS",null,2000],
+["Hector García Fernández","hector@habichuelas.es","ROAMS",13900000,2000],
 ["Hector José García Fernández","hector@habichuelas.es","LUDA",null,1000],
 ["Hector Perez","hi@hectorperezarenas.com","Cabify",1500000000,1000],
 ["Héctor Trujillo Pérez","elrodesmo@gmail.com","Green Data Chain",null,1000],
-["Hoboken Inversiones S.L Oliver Guardiola","francisco.oliver@wonders.com","ROAMS",null,10000],
+["Hoboken Inversiones S.L Oliver Guardiola","francisco.oliver@wonders.com","ROAMS",13900000,10000],
 ["Hoboken Inversiones S.L.","francisco.oliver@wonders.com","Alterhome",null,20000],
 ["Hokoben Inversiones S.L","francisco.oliver@wonders.com","CLAPS",null,10000],
 ["Hokoben Inversiones S.L Francisco Oliver Guardiola","francisco.oliver@wonders.com","Zapiens.ai",null,25000],
@@ -1946,7 +1872,7 @@ const RAW_INVESTORS = [
 ["IGN Alber SLU Sánchez García","Info.ignalber@gmail.com","Genially",null,5000],
 ["IGN Alber SLU Sánchez García","Info.ignalber@gmail.com","LOBSTER III",null,5000],
 ["IGN Alber SLU Sánchez García","Info.ignalber@gmail.com","LUDA",null,5000],
-["IGN Alber SLU Sánchez García","Info.ignalber@gmail.com","ROAMS",null,10000],
+["IGN Alber SLU Sánchez García","Info.ignalber@gmail.com","ROAMS",13900000,10000],
 ["Ignacio Arrieta","iarrietal@gmail.com","Genially",null,11450],
 ["Ignacio Burutaran Usandizaga","ignacioburu@hotmail.com","Bnext",null,2500],
 ["Ignacio Burutaran Usandizaga","ignacioburu@hotmail.com","CLAPS",null,3000],
@@ -1981,7 +1907,7 @@ const RAW_INVESTORS = [
 ["Inmaculada Jiménez González","inmajimeglzrdgz@gmail.com","Green Data Chain",null,3000],
 ["Inmaculada Moya García","inmamoya@protonmail.com","EVIL ZEPPELIN",null,1000],
 ["Inmaculada Moya García","inmamoya@protonmail.com","Green Data Chain",null,2000],
-["Inmobiliaria ARCE XV, SL Salvadó Monreal","salvadox@gmail.com","ROAMS",null,5000],
+["Inmobiliaria ARCE XV, SL Salvadó Monreal","salvadox@gmail.com","ROAMS",13900000,5000],
 ["Ivan Ranz Sanchez","iranz@gruposomar.es","Alterhome",null,3226],
 ["Iván Ranz Sanchez","iranz@gruposomar.es","Bnext",null,6450],
 ["Iván Ranz Sanchez","iranz@gruposomar.es","Lobster",null,3225],
@@ -2366,7 +2292,7 @@ const RAW_INVESTORS = [
 ["Medcom 2006 S.L. Oliver Guardiola","francisco.oliver.guardiola@gmail.com","EVIL ZEPPELIN",null,5000],
 ["Medcom 2006 S.L. Oliver Guardiola","francisco.oliver.guardiola@gmail.com","Genially",null,10000],
 ["Medcom 2006 S.L. Oliver Guardiola","francisco.oliver.guardiola@gmail.com","LOBSTER III",null,10000],
-["Medcom 2006 S.L. Oliver Guardiola","francisco.oliver.guardiola@gmail.com","ROAMS",null,5000],
+["Medcom 2006 S.L. Oliver Guardiola","francisco.oliver.guardiola@gmail.com","ROAMS",13900000,5000],
 ["Mercedes Royo Sanz","mercedesrs62@gmail.com","Green Data Chain",null,5000],
 ["Mercury Consultores Tecnologicos SL Aitor Gaisán Montoya","aitorgaisan82@gmail.com","Zapiens.ai",null,1500],
 ["Mercury Consultores Tecnologicos SL Gaisán Montoya","aitorgaisan82@gmail.com","Lobster",null,2000],
@@ -2394,7 +2320,7 @@ const RAW_INVESTORS = [
 ["Miguel Angel Rojas Gorrindo","ma.rojasgo@gmail.com","Lobster",null,3000],
 ["Miguel Angel Rojas Gorrindo","ma.rojasgo@gmail.com","LOBSTER II",null,3000],
 ["Miguel Angel Rojas Gorrindo","ma.rojasgo@gmail.com","Zapiens.ai",null,2140],
-["Miguel Angel Sola Freire","solafreire@hotmail.com","Bnext",null,3243.24],
+["Miguel Angel Sola Freire","solafreire@hotmail.com","Bnext",null,3243],
 ["Miguel Angel Sola Freire","solafreire@hotmail.com","LUDA",null,3225],
 ["Miguel Covas","miguel@crealink.com","Badi",null,null],
 ["Miguel Covas","miguel@crealink.com","Charplanet",null,null],
@@ -2572,7 +2498,7 @@ const RAW_INVESTORS = [
 ["Raul Onaindia","onaindiaraul@gmail.com","Genially",null,2000],
 ["Rearviewmirror Investments S.L. Von Schiller","ovonschiller@ecija.com","Genially",null,10000],
 ["Ricard Garriga","ri.garriga@gmail.com","Coverfy",null,null],
-["Ricard Garriga","ri.garriga@gmail.com","ROAMS",null,1000],
+["Ricard Garriga","ri.garriga@gmail.com","ROAMS",13900000,1000],
 ["Ricard Garriga","ri.garriga@gmail.com","Myhair/Stimusil",null,1000],
 ["Ricard Porta Valero","rportavalero@gmail.com","Lobster",null,1075],
 ["Ricard Porta Valero","rportavalero@gmail.com","LOBSTER II",null,1075],
@@ -2593,7 +2519,7 @@ const RAW_INVESTORS = [
 ["Rodolf Rius Expósito","rodolf_rius@hotmail.com","LOBSTER II",null,2000],
 ["Roger Martínez Terés","roger.runch@gmail.com","EVIL ZEPPELIN",null,1000],
 ["Roger Martínez Terés","roger.runch@gmail.com","LOBSTER III",null,1000],
-["Roger Martínez Terés","roger.runch@gmail.com","ROAMS",null,1000],
+["Roger Martínez Terés","roger.runch@gmail.com","ROAMS",13900000,1000],
 ["Roger Runch","roger.runch@gmail.com","Zapiens.ai",null,null],
 ["Román Sanchez","Info.ignalber@gmail.com","WellbeingOS",null,6000],
 ["Rosa Bonafoux Amengual","administracion@grupotrato.com","WellbeingOS",null,1000],
@@ -2690,7 +2616,7 @@ const RAW_INVESTORS = [
 ["Urko Jauregi Llona","urkojauregi@gmail.com","Genially",null,1000],
 ["Urko Jauregi Llona","urkojauregi@gmail.com","Green Data Chain",null,1000],
 ["Urko Jauregi Llona","urkojauregi@gmail.com","LUDA",null,1000],
-["Urko Jauregi Llona","urkojauregi@gmail.com","ROAMS",null,1000],
+["Urko Jauregi Llona","urkojauregi@gmail.com","ROAMS",13900000,1000],
 ["Urko Jauregi Llona","urkojauregi@gmail.com","WellbeingOS",null,1000],
 ["Urko Jauregi Llona","urkojauregi@gmail.com","Gomapi",null,1000],
 ["Urko Jauregi Llona","urkojauregi@gmail.com","MyHair/Stimusil",null,1000],
@@ -2761,7 +2687,7 @@ const RAW_INVESTORS = [
 ["Ynamis capital SLU","aguado_fernando@hotmail.com","edit.org",null,2000],
 ["Ynamis Capital SLU","fernando.aguadog@iese.net","CLAPS",null,2000],
 ["Ynamis Capital SLU Aguado García","fernando.aguadog@iese.net","LUDA",null,1500],
-["Ynamis Capital SLU Aguado García","fernando.aguadog@iese.net","ROAMS",null,2000],
+["Ynamis Capital SLU Aguado García","fernando.aguadog@iese.net","ROAMS",13900000,2000],
 ["Ynamis Capital SLU Fernando Aguado García","fernando.aguadog@iese.net","Zapiens.ai",null,2000],
 ["Yolanda García Conde","yoli.garcia@gmail.com","Green Data Chain",null,2000],
 ["Yolanda Muñoz","y.munoz.1974@gmail.com","Cabify",1500000000,1500],
@@ -3273,18 +3199,34 @@ function exportToExcel() {
 // ═══════════════════════════════════════════════════════════════
 // UPDATE MODAL (investor)
 // ═══════════════════════════════════════════════════════════════
-function openUpdateModal(startupKey, startupName, url) {
+function openUpdateModal(startupKey, startupName) {
+  // Look up URL from STARTUP_UPDATES — never pass URL through onclick attributes
+  const url = STARTUP_UPDATES[startupKey] || '';
+  if (!url) return;
+
   const modal = document.getElementById('update-modal');
   document.getElementById('update-modal-name').textContent = startupName;
   document.getElementById('update-modal-subtitle').textContent = 'Actualización de la compañía';
   const wrap = document.getElementById('update-embed-wrap');
-  const content = document.getElementById('update-embed-content');
 
-  // Show modal BEFORE inserting iframe so Chrome lays out the iframe correctly
+  // Show modal BEFORE inserting content so Chrome lays out correctly
   modal.style.display = 'flex';
   document.body.style.overflow = 'hidden';
+  wrap.innerHTML = '';
 
-  // Detect content type and embed accordingly
+  // Helper: build the "open in new tab" fallback link
+  function buildFallbackLink(iconChar) {
+    const outer = document.createElement('div');
+    outer.className = 'update-embed-link';
+    outer.innerHTML = `
+      <div class="update-embed-link-icon">${iconChar}</div>
+      <p style="color:var(--muted);font-size:12px;margin-bottom:8px;">${startupName} — Actualización disponible</p>
+      <a href="${url}" target="_blank" rel="noopener noreferrer">Abrir contenido ↗</a>
+      <p style="margin-top:10px;font-size:10px;">Se abrirá en una nueva pestaña</p>`;
+    return outer;
+  }
+
+  // Detect content type
   const u = url.toLowerCase();
   const isYoutube = u.includes('youtube.com') || u.includes('youtu.be');
   const isVimeo   = u.includes('vimeo.com');
@@ -3292,44 +3234,57 @@ function openUpdateModal(startupKey, startupName, url) {
   const isLoom    = u.includes('loom.com');
 
   if (isYoutube || isVimeo || isDrive || isLoom) {
-    // Build embeddable src
+    // Build embeddable URL
     let embedSrc = url;
     if (isYoutube) {
       const vid = url.match(/(?:v=|youtu\.be\/|embed\/)([a-zA-Z0-9_-]{11})/);
-      if (vid) embedSrc = `https://www.youtube.com/embed/${vid[1]}?rel=0&modestbranding=1`;
+      if (vid) embedSrc = 'https://www.youtube.com/embed/' + vid[1] + '?rel=0&modestbranding=1';
     } else if (isVimeo) {
       const vid = url.match(/vimeo\.com\/(\d+)/);
-      if (vid) embedSrc = `https://player.vimeo.com/video/${vid[1]}`;
+      if (vid) embedSrc = 'https://player.vimeo.com/video/' + vid[1];
     } else if (isDrive) {
       if (u.includes('/open?id=') || (u.includes('?id=') && !u.includes('/file/d/'))) {
-        // Format: drive.google.com/open?id=FILE_ID
         const idMatch = url.match(/[?&]id=([^&]+)/);
-        if (idMatch) embedSrc = `https://drive.google.com/file/d/${idMatch[1]}/preview`;
+        if (idMatch) embedSrc = 'https://drive.google.com/file/d/' + idMatch[1] + '/preview';
       } else {
-        // Standard format: …/view or …/edit → …/preview
         embedSrc = url.replace(/\/(view|edit)([?#]|$)/, '/preview$2');
       }
     } else if (isLoom) {
       embedSrc = url.replace('loom.com/share/', 'loom.com/embed/');
     }
-    wrap.innerHTML = `<iframe src="${embedSrc}" allowfullscreen referrerpolicy="no-referrer-when-downgrade" allow="autoplay; fullscreen; encrypted-media; picture-in-picture; clipboard-read; clipboard-write"></iframe>`;
+
+    // Build iframe via DOM API — avoids innerHTML encoding of & in URLs
+    const iframe = document.createElement('iframe');
+    iframe.src = embedSrc;
+    iframe.setAttribute('allowfullscreen', '');
+    iframe.setAttribute('referrerpolicy', 'no-referrer-when-downgrade');
+    iframe.setAttribute('allow', 'autoplay; fullscreen; encrypted-media; picture-in-picture');
+    iframe.style.cssText = 'width:100%;height:400px;border:none;display:block;';
+
+    // Fallback link shown BELOW the iframe (always, so user can open if iframe is blocked)
+    const fallbackBar = document.createElement('div');
+    fallbackBar.style.cssText = 'text-align:center;padding:10px 0 4px;';
+    fallbackBar.innerHTML = '<a href="' + url.replace(/"/g, '%22') + '" target="_blank" rel="noopener noreferrer" ' +
+      'style="font-size:11px;color:var(--muted);text-decoration:underline;">' +
+      '↗ Abrir en nueva pestaña</a>';
+
+    wrap.appendChild(iframe);
+    wrap.appendChild(fallbackBar);
+
   } else {
-    // Generic link — show a styled button
+    // Generic / direct link
     const ext = url.split('.').pop().toLowerCase().split('?')[0];
-    const icon = ['pdf'].includes(ext) ? '📄' : ['mp4','mov','avi'].includes(ext) ? '🎬' : '🔗';
-    wrap.innerHTML = `<div class="update-embed-link">
-      <div class="update-embed-link-icon">${icon}</div>
-      <p style="color:var(--muted);font-size:12px;margin-bottom:8px;">${startupName} — Actualización disponible</p>
-      <a href="${url}" target="_blank" rel="noopener">Ver documento / contenido ↗</a>
-      <p style="margin-top:10px;font-size:10px;">Se abrirá en una nueva pestaña</p>
-    </div>`;
+    const icon = ext === 'pdf' ? '📄' : ['mp4','mov','avi','webm'].includes(ext) ? '🎬' : '🔗';
+    wrap.appendChild(buildFallbackLink(icon));
   }
 }
 
 function closeUpdateModal() {
   const modal = document.getElementById('update-modal');
   modal.style.display = 'none';
-  document.getElementById('update-embed-wrap').innerHTML = '';
+  const wrap = document.getElementById('update-embed-wrap');
+  // Remove all children (iframes, links) cleanly
+  while (wrap.firstChild) wrap.removeChild(wrap.firstChild);
   document.body.style.overflow = '';
 }
 
@@ -3393,7 +3348,7 @@ function setLoginMode(mode) {
   document.getElementById('investor-fields').style.display = isAdmin ? 'none' : 'block';
   document.getElementById('investor-step2').style.display  = 'none';
   document.getElementById('admin-fields').style.display    = isAdmin ? 'block' : 'none';
-  document.getElementById('login-title').innerHTML = isAdmin ? 'Acceso Administrador' : 'Portal del Inversor <span style="font-size:11px;font-family:\'DM Mono\',monospace;font-weight:400;color:var(--muted);letter-spacing:0.08em;">v1.0</span>';
+  document.getElementById('login-title').innerHTML = isAdmin ? 'Acceso Administrador' : 'Portal del Inversor <span style="font-size:11px;font-family:\'DM Mono\',monospace;font-weight:400;color:var(--muted);letter-spacing:0.08em;">v2.1</span>';
   document.getElementById('login-sub').textContent = isAdmin
     ? 'Acceso exclusivo para el equipo de AngelClub'
     : 'Introduce tu correo electrónico para acceder';
@@ -3656,7 +3611,7 @@ function showDashboard() {
   // Topbar
   document.getElementById('user-badge').style.display = 'flex';
   document.getElementById('admin-badge').style.display = 'none';
-  document.getElementById('topbar-subtitle').innerHTML = 'Portal Inversor <span style="letter-spacing:0.05em;opacity:0.7;">v1.0</span>';
+  document.getElementById('topbar-subtitle').innerHTML = 'Portal Inversor <span style="letter-spacing:0.05em;opacity:0.7;">v2.1</span>';
   document.getElementById('topbar-view-label').textContent = 'Mi Portfolio';
 
   const inv = currentInvestor;
@@ -3719,7 +3674,7 @@ function showDashboard() {
     // UPDATE button
     const updLink = STARTUP_UPDATES[p.key] || null;
     const updateEl = updLink
-      ? `<button class="update-btn" onclick="openUpdateModal('${p.key}','${p.name.replace(/'/g,"\\'")}','${updLink.replace(/'/g,"\\'")}')">▶ UPDATE</button>`
+      ? `<button class="update-btn" onclick="openUpdateModal('${p.key}','${p.name.replace(/'/g,"\\'")}')">▶ UPDATE</button>`
       : `<button class="update-btn no-update" disabled>— sin update</button>`;
     const myAmountEl = p.investorAmount > 0
       ? `<span style="color:var(--gold);font-family:'Syne',sans-serif;font-weight:700;">€${p.investorAmount.toLocaleString('es-ES')}</span>`
@@ -4387,7 +4342,7 @@ function sendContactForm() {
     feedback.className = 'cf-feedback error'; feedback.textContent = '⚠️ Por favor, completa todos los campos.'; feedback.style.display='block'; return;
   }
   const subject = encodeURIComponent(`[AngelClub] Solicitud de información — ${project}`);
-  const body = encodeURIComponent(`Nombre: ${name}\nEmail: ${email}\nProyecto: ${project}\nConsulta: ${type}\n\nMensaje:\n${message}\n\n—\nEnviado desde Portal Inversor AngelClub v1.0`);
+  const body = encodeURIComponent(`Nombre: ${name}\nEmail: ${email}\nProyecto: ${project}\nConsulta: ${type}\n\nMensaje:\n${message}\n\n—\nEnviado desde Portal Inversor AngelClub v2.1`);
   window.location.href = `mailto:equipo@angelclub.es?subject=${subject}&body=${body}`;
   btn.disabled = true;
   document.getElementById('cf-btn-text').textContent = '✓ Abriendo correo…';
