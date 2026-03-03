@@ -362,12 +362,14 @@
     background: rgba(20,35,70,0.55); backdrop-filter: blur(6px);
     display: flex; align-items: center; justify-content: center;
     padding: 24px; animation: fadeIn 0.2s ease both;
+    overflow-y: auto;
   }
   .update-modal-card {
     background: rgba(255,255,255,0.97); border-radius: 20px;
     padding: 36px 40px; max-width: 680px; width: 100%;
     box-shadow: 0 24px 80px rgba(21,101,192,0.22);
     position: relative; animation: fadeUp 0.25s ease both;
+    max-height: calc(100vh - 80px); overflow-y: auto;
   }
   .update-modal-close {
     position: absolute; top: 18px; right: 20px;
@@ -3278,6 +3280,10 @@ function openUpdateModal(startupKey, startupName, url) {
   const wrap = document.getElementById('update-embed-wrap');
   const content = document.getElementById('update-embed-content');
 
+  // Show modal BEFORE inserting iframe so Chrome lays out the iframe correctly
+  modal.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+
   // Detect content type and embed accordingly
   const u = url.toLowerCase();
   const isYoutube = u.includes('youtube.com') || u.includes('youtu.be');
@@ -3295,11 +3301,18 @@ function openUpdateModal(startupKey, startupName, url) {
       const vid = url.match(/vimeo\.com\/(\d+)/);
       if (vid) embedSrc = `https://player.vimeo.com/video/${vid[1]}`;
     } else if (isDrive) {
-      embedSrc = url.replace('/view', '/preview').replace('/edit', '/preview');
+      if (u.includes('/open?id=') || (u.includes('?id=') && !u.includes('/file/d/'))) {
+        // Format: drive.google.com/open?id=FILE_ID
+        const idMatch = url.match(/[?&]id=([^&]+)/);
+        if (idMatch) embedSrc = `https://drive.google.com/file/d/${idMatch[1]}/preview`;
+      } else {
+        // Standard format: …/view or …/edit → …/preview
+        embedSrc = url.replace(/\/(view|edit)([?#]|$)/, '/preview$2');
+      }
     } else if (isLoom) {
       embedSrc = url.replace('loom.com/share/', 'loom.com/embed/');
     }
-    wrap.innerHTML = `<iframe src="${embedSrc}" allowfullscreen allow="autoplay; fullscreen"></iframe>`;
+    wrap.innerHTML = `<iframe src="${embedSrc}" allowfullscreen referrerpolicy="no-referrer-when-downgrade" allow="autoplay; fullscreen; encrypted-media; picture-in-picture; clipboard-read; clipboard-write"></iframe>`;
   } else {
     // Generic link — show a styled button
     const ext = url.split('.').pop().toLowerCase().split('?')[0];
@@ -3311,9 +3324,6 @@ function openUpdateModal(startupKey, startupName, url) {
       <p style="margin-top:10px;font-size:10px;">Se abrirá en una nueva pestaña</p>
     </div>`;
   }
-
-  modal.style.display = 'flex';
-  document.body.style.overflow = 'hidden';
 }
 
 function closeUpdateModal() {
@@ -3466,13 +3476,6 @@ function normalize(s) {
 // To add/update: run "Exportar contraseñas" in the admin panel, copy
 // the block shown and replace the content between the braces below.
 const PRESET_PASSWORDS = {
-  "enekoknorr@gmail.com": "ef797c8118f02dfb649607dd5d3f8c7623048c9c063d532cc95c5ed7a898a64f",
-  "g.perernau@gmail.com": "435b71aeb611398c11c396dbb8982494bfd0001edb1e56df512a29e4312d6e00",
-  "gemma.sebastian@argonconsultores.com": "2a5fa1d7549ad77972095746b97537d6cbea3f8d52cb9203e8464b1f640ddb20",
-  "hi@hectorperezarenas.com": "d8184731a32015afad4c7f3c2e4dce40d4ff638bd29cc1babd315b0165846c5d",
-  "javiervaquerizo@gmail.com": "89c03e6a401d9d984139a2e6774498b5b8bc27d5457ba51b0bc11c2c0aaafcbd",
-  "libanomonteiro@gmail.com": "4fcf8c4d276db1d29dded5a1b9f5b138fa0a89da0a00a53c4746dec90f702166",
-  "mikelsampedro@gmail.com": "2c025626c5140deee02232a3b1d18aab344156fe6ab211692a8d12930efe9337"
 };
 
 function _pwKey(email) { return 'AC_INV_PW_' + email.toLowerCase(); }
