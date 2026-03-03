@@ -388,10 +388,9 @@
   .update-embed-wrap {
     width: 100%; border-radius: 14px; overflow: hidden;
     background: rgba(30,136,229,0.04); border: 1px solid var(--border);
-    min-height: 320px; display: flex; flex-direction: column;
-    align-items: stretch; justify-content: center;
+    min-height: 320px; display: flex; align-items: center; justify-content: center;
   }
-  .update-embed-wrap iframe { width: 100%; height: 400px; min-height: 320px; border: none; display: block; flex-shrink: 0; }
+  .update-embed-wrap iframe { width: 100%; height: 400px; border: none; }
   .update-embed-wrap .update-embed-link {
     display: flex; flex-direction: column; align-items: center; gap: 12px;
     padding: 40px; text-align: center;
@@ -571,7 +570,7 @@
       <button id="tab-admin" onclick="setLoginMode('admin')" style="flex:1;padding:9px 0;border:none;border-radius:9px;font-family:'Syne',sans-serif;font-weight:700;font-size:12px;cursor:pointer;transition:all 0.2s;background:transparent;color:var(--muted);">⚙️ Administrador</button>
     </div>
 
-    <div id="login-title" class="login-title">Portal del Inversor <span style="font-size:11px;font-family:'DM Mono',monospace;font-weight:400;color:var(--muted);letter-spacing:0.08em;">v2.1</span></div>
+    <div id="login-title" class="login-title">Portal del Inversor <span style="font-size:13px;font-family:'DM Mono',monospace;font-weight:600;color:var(--gold);letter-spacing:0.10em;background:rgba(230,168,23,0.12);padding:2px 8px;border-radius:6px;border:1px solid rgba(230,168,23,0.35);">v2.1</span></div>
     <div id="login-sub" class="login-sub">Introduce tu correo electrónico para continuar</div>
 
     <!-- INVESTOR FIELDS — STEP 1: email -->
@@ -659,7 +658,7 @@
       <div class="logo-icon">A</div>
       <div>
         <div class="logo-text">ANGEL<span>CLUB</span></div>
-        <div id="topbar-subtitle" style="font-size:10px;color:var(--muted);letter-spacing:0.15em;text-transform:uppercase;margin-top:2px;">Portal Inversor <span style="letter-spacing:0.05em;opacity:0.7;">v2.1</span></div>
+        <div id="topbar-subtitle" style="font-size:10px;color:var(--muted);letter-spacing:0.15em;text-transform:uppercase;margin-top:2px;">Portal Inversor <span style="letter-spacing:0.08em;font-weight:600;color:var(--gold);background:rgba(230,168,23,0.13);padding:1px 7px;border-radius:5px;border:1px solid rgba(230,168,23,0.30);">v2.1</span></div>
       </div>
     </div>
     <div class="topbar-right">
@@ -1137,7 +1136,7 @@
 </div>
 </div>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 (function(){
 'use strict';
 
@@ -1152,18 +1151,12 @@ async function _sha256(str) {
   return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
 }
 
-// ── Protección básica: bloqueo de atajos de teclado ────────────
-// La detección automática por tamaño de ventana se ha eliminado
-// definitivamente: outerWidth/outerHeight difiere según DPI, zoom
-// del navegador, barras de extensiones y escalado de Windows, lo
-// que generaba cierres de sesión falsos de forma continua.
-// La protección se limita a: bloqueo de atajos de teclado comunes,
-// desactivación del menú contextual y protección de selección de texto.
+// ── Protección básica: teclado y menú contextual ───────────────
+// Detección automática por tamaño/debugger eliminada: genera
+// falsos positivos continuos en Chrome por DPI, zoom, extensiones
+// y barras del SO. Se mantienen sólo los bloqueos de teclado.
 (function() {
-  // Disable right-click context menu
   document.addEventListener('contextmenu', function(e) { e.preventDefault(); });
-
-  // Block common DevTools keyboard shortcuts
   document.addEventListener('keydown', function(e) {
     if (e.key === 'F12') { e.preventDefault(); return false; }
     if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C' || e.key === 'K')) {
@@ -1172,8 +1165,6 @@ async function _sha256(str) {
     if (e.ctrlKey && e.key === 'u') { e.preventDefault(); return false; }
     if (e.ctrlKey && e.key === 's') { e.preventDefault(); return false; }
   });
-
-  // Disable text selection on sensitive elements
   document.addEventListener('DOMContentLoaded', function() {
     const style = document.createElement('style');
     style.textContent = [
@@ -1272,7 +1263,7 @@ const STARTUPS = {
   'myhair':         { name:'MYHAIR/STIMUSIL',  web:'https://www.myhair.ai/es',                  capital:47000,   equity:'2%',  status:'active', tir:null },
   'mox':            { name:'MOX',              web:'https://www.linkedin.com/company/grupo-mox/',capital:74925,   equity:'3%',  status:'active', tir:null },
   'kasaz':          { name:'KASAZ',            web:'https://www.kasaz.es/',                      capital:88600,   equity:'4%',  status:'active', tir:null },
-  'oncoheroes':     { name:'ONCOHEROES',       web:'https://www.oncoheroes.com/',                capital:49765,   equity:'3%',  status:'active', tir:null },
+  'oncoheroes':     { name:'ONCOHEROES',       web:'https://www.oncoheroes.com/',                capital:0,   equity:'3%',  status:'active', tir:null },
   'bnext':          { name:'BNEXT',            web:'https://bnext.es/b2b/es',                   capital:153318,  equity:'3%',  status:'active', tir:null },
   'roams':          { name:'ROAMS',            web:null,                                          capital:48725,   equity:'4%',  status:'active', tir:null },
   'greendatachain': { name:'GREEN DATA CHAIN', web:null,                                          capital:113550,  equity:'3%',  status:'active', tir:null },
@@ -3199,34 +3190,18 @@ function exportToExcel() {
 // ═══════════════════════════════════════════════════════════════
 // UPDATE MODAL (investor)
 // ═══════════════════════════════════════════════════════════════
-function openUpdateModal(startupKey, startupName) {
-  // Look up URL from STARTUP_UPDATES — never pass URL through onclick attributes
-  const url = STARTUP_UPDATES[startupKey] || '';
-  if (!url) return;
-
+function openUpdateModal(startupKey, startupName, url) {
   const modal = document.getElementById('update-modal');
   document.getElementById('update-modal-name').textContent = startupName;
   document.getElementById('update-modal-subtitle').textContent = 'Actualización de la compañía';
   const wrap = document.getElementById('update-embed-wrap');
+  const content = document.getElementById('update-embed-content');
 
-  // Show modal BEFORE inserting content so Chrome lays out correctly
+  // Show modal BEFORE inserting iframe so Chrome lays out the iframe correctly
   modal.style.display = 'flex';
   document.body.style.overflow = 'hidden';
-  wrap.innerHTML = '';
 
-  // Helper: build the "open in new tab" fallback link
-  function buildFallbackLink(iconChar) {
-    const outer = document.createElement('div');
-    outer.className = 'update-embed-link';
-    outer.innerHTML = `
-      <div class="update-embed-link-icon">${iconChar}</div>
-      <p style="color:var(--muted);font-size:12px;margin-bottom:8px;">${startupName} — Actualización disponible</p>
-      <a href="${url}" target="_blank" rel="noopener noreferrer">Abrir contenido ↗</a>
-      <p style="margin-top:10px;font-size:10px;">Se abrirá en una nueva pestaña</p>`;
-    return outer;
-  }
-
-  // Detect content type
+  // Detect content type and embed accordingly
   const u = url.toLowerCase();
   const isYoutube = u.includes('youtube.com') || u.includes('youtu.be');
   const isVimeo   = u.includes('vimeo.com');
@@ -3234,57 +3209,44 @@ function openUpdateModal(startupKey, startupName) {
   const isLoom    = u.includes('loom.com');
 
   if (isYoutube || isVimeo || isDrive || isLoom) {
-    // Build embeddable URL
+    // Build embeddable src
     let embedSrc = url;
     if (isYoutube) {
       const vid = url.match(/(?:v=|youtu\.be\/|embed\/)([a-zA-Z0-9_-]{11})/);
-      if (vid) embedSrc = 'https://www.youtube.com/embed/' + vid[1] + '?rel=0&modestbranding=1';
+      if (vid) embedSrc = `https://www.youtube.com/embed/${vid[1]}?rel=0&modestbranding=1`;
     } else if (isVimeo) {
       const vid = url.match(/vimeo\.com\/(\d+)/);
-      if (vid) embedSrc = 'https://player.vimeo.com/video/' + vid[1];
+      if (vid) embedSrc = `https://player.vimeo.com/video/${vid[1]}`;
     } else if (isDrive) {
       if (u.includes('/open?id=') || (u.includes('?id=') && !u.includes('/file/d/'))) {
+        // Format: drive.google.com/open?id=FILE_ID
         const idMatch = url.match(/[?&]id=([^&]+)/);
-        if (idMatch) embedSrc = 'https://drive.google.com/file/d/' + idMatch[1] + '/preview';
+        if (idMatch) embedSrc = `https://drive.google.com/file/d/${idMatch[1]}/preview`;
       } else {
+        // Standard format: …/view or …/edit → …/preview
         embedSrc = url.replace(/\/(view|edit)([?#]|$)/, '/preview$2');
       }
     } else if (isLoom) {
       embedSrc = url.replace('loom.com/share/', 'loom.com/embed/');
     }
-
-    // Build iframe via DOM API — avoids innerHTML encoding of & in URLs
-    const iframe = document.createElement('iframe');
-    iframe.src = embedSrc;
-    iframe.setAttribute('allowfullscreen', '');
-    iframe.setAttribute('referrerpolicy', 'no-referrer-when-downgrade');
-    iframe.setAttribute('allow', 'autoplay; fullscreen; encrypted-media; picture-in-picture');
-    iframe.style.cssText = 'width:100%;height:400px;border:none;display:block;';
-
-    // Fallback link shown BELOW the iframe (always, so user can open if iframe is blocked)
-    const fallbackBar = document.createElement('div');
-    fallbackBar.style.cssText = 'text-align:center;padding:10px 0 4px;';
-    fallbackBar.innerHTML = '<a href="' + url.replace(/"/g, '%22') + '" target="_blank" rel="noopener noreferrer" ' +
-      'style="font-size:11px;color:var(--muted);text-decoration:underline;">' +
-      '↗ Abrir en nueva pestaña</a>';
-
-    wrap.appendChild(iframe);
-    wrap.appendChild(fallbackBar);
-
+    wrap.innerHTML = `<iframe src="${embedSrc}" allowfullscreen referrerpolicy="no-referrer-when-downgrade" allow="autoplay; fullscreen; encrypted-media; picture-in-picture; clipboard-read; clipboard-write"></iframe>`;
   } else {
-    // Generic / direct link
+    // Generic link — show a styled button
     const ext = url.split('.').pop().toLowerCase().split('?')[0];
-    const icon = ext === 'pdf' ? '📄' : ['mp4','mov','avi','webm'].includes(ext) ? '🎬' : '🔗';
-    wrap.appendChild(buildFallbackLink(icon));
+    const icon = ['pdf'].includes(ext) ? '📄' : ['mp4','mov','avi'].includes(ext) ? '🎬' : '🔗';
+    wrap.innerHTML = `<div class="update-embed-link">
+      <div class="update-embed-link-icon">${icon}</div>
+      <p style="color:var(--muted);font-size:12px;margin-bottom:8px;">${startupName} — Actualización disponible</p>
+      <a href="${url}" target="_blank" rel="noopener">Ver documento / contenido ↗</a>
+      <p style="margin-top:10px;font-size:10px;">Se abrirá en una nueva pestaña</p>
+    </div>`;
   }
 }
 
 function closeUpdateModal() {
   const modal = document.getElementById('update-modal');
   modal.style.display = 'none';
-  const wrap = document.getElementById('update-embed-wrap');
-  // Remove all children (iframes, links) cleanly
-  while (wrap.firstChild) wrap.removeChild(wrap.firstChild);
+  document.getElementById('update-embed-wrap').innerHTML = '';
   document.body.style.overflow = '';
 }
 
@@ -3348,7 +3310,7 @@ function setLoginMode(mode) {
   document.getElementById('investor-fields').style.display = isAdmin ? 'none' : 'block';
   document.getElementById('investor-step2').style.display  = 'none';
   document.getElementById('admin-fields').style.display    = isAdmin ? 'block' : 'none';
-  document.getElementById('login-title').innerHTML = isAdmin ? 'Acceso Administrador' : 'Portal del Inversor <span style="font-size:11px;font-family:\'DM Mono\',monospace;font-weight:400;color:var(--muted);letter-spacing:0.08em;">v2.1</span>';
+  document.getElementById('login-title').innerHTML = isAdmin ? 'Acceso Administrador' : 'Portal del Inversor <span style="font-size:11px;font-family:\'DM Mono\',monospace;font-weight:600;color:var(--gold);letter-spacing:0.10em;background:rgba(230,168,23,0.12);padding:2px 8px;border-radius:6px;border:1px solid rgba(230,168,23,0.35);">v2.1</span>';
   document.getElementById('login-sub').textContent = isAdmin
     ? 'Acceso exclusivo para el equipo de AngelClub'
     : 'Introduce tu correo electrónico para acceder';
@@ -3391,17 +3353,8 @@ document.getElementById('inv-enter-pass').addEventListener('keydown', e => { if(
 // ═══════════════════════════════════════════════════════════════
 // ADMIN CREDENTIALS
 // ═══════════════════════════════════════════════════════════════
-const PRESET_PASSWORDS = {
-  "enekoknorr@gmail.com": "ef797c8118f02dfb649607dd5d3f8c7623048c9c063d532cc95c5ed7a898a64f",
-  "g.perernau@gmail.com": "435b71aeb611398c11c396dbb8982494bfd0001edb1e56df512a29e4312d6e00",
-  "gemma.sebastian@argonconsultores.com": "2a5fa1d7549ad77972095746b97537d6cbea3f8d52cb9203e8464b1f640ddb20",
-  "hi@hectorperezarenas.com": "d8184731a32015afad4c7f3c2e4dce40d4ff638bd29cc1babd315b0165846c5d",
-  "j.garcia.gavilan@gmail.com": "3a52cc58064da97f939c453a045fc653df19c0951d906eb71943bea54e28b46a",
-  "javier_amenabar@hotmail.com": "23bf8c1d45cfe9788a5db72f8c00318c9def6620d28a044f96f9ebf6a4274cd8",
-  "javiervaquerizo@gmail.com": "89c03e6a401d9d984139a2e6774498b5b8bc27d5457ba51b0bc11c2c0aaafcbd",
-  "libanomonteiro@gmail.com": "4fcf8c4d276db1d29dded5a1b9f5b138fa0a89da0a00a53c4746dec90f702166",
-  "mikelsampedro@gmail.com": "2c025626c5140deee02232a3b1d18aab344156fe6ab211692a8d12930efe9337"
-};
+const ADMIN_USER = 'equipo@angelclub.es';
+const ADMIN_PASS_HASH = '1fde92a0f16fae949f0632f4de8e13d42cd7c6bd2b313e4df8879a56729879c4'; // SHA-256
 
 // ── Inyección anti-ofuscación Cloudflare ──────────────────────
 // El email se construye en JS para que Cloudflare no lo detecte en el HTML
@@ -3620,7 +3573,7 @@ function showDashboard() {
   // Topbar
   document.getElementById('user-badge').style.display = 'flex';
   document.getElementById('admin-badge').style.display = 'none';
-  document.getElementById('topbar-subtitle').innerHTML = 'Portal Inversor <span style="letter-spacing:0.05em;opacity:0.7;">v2.1</span>';
+  document.getElementById('topbar-subtitle').innerHTML = 'Portal Inversor <span style="letter-spacing:0.08em;font-weight:600;color:var(--gold);background:rgba(230,168,23,0.13);padding:1px 7px;border-radius:5px;border:1px solid rgba(230,168,23,0.30);">v2.1</span>';
   document.getElementById('topbar-view-label').textContent = 'Mi Portfolio';
 
   const inv = currentInvestor;
@@ -3683,7 +3636,7 @@ function showDashboard() {
     // UPDATE button
     const updLink = STARTUP_UPDATES[p.key] || null;
     const updateEl = updLink
-      ? `<button class="update-btn" onclick="openUpdateModal('${p.key}','${p.name.replace(/'/g,"\\'")}')">▶ UPDATE</button>`
+      ? `<button class="update-btn" onclick="openUpdateModal('${p.key}','${p.name.replace(/'/g,"\\'")}','${updLink.replace(/'/g,"\\'")}')">▶ UPDATE</button>`
       : `<button class="update-btn no-update" disabled>— sin update</button>`;
     const myAmountEl = p.investorAmount > 0
       ? `<span style="color:var(--gold);font-family:'Syne',sans-serif;font-weight:700;">€${p.investorAmount.toLocaleString('es-ES')}</span>`
