@@ -552,6 +552,7 @@
   }
 </style>
 <style>.investments-table td { user-select: none; -webkit-user-select: none; }
+.amount-cell, .equity-tag, .tir-value, .kpi-value { user-select: none; -webkit-user-select: none; }</style><style>.investments-table td { user-select: none; -webkit-user-select: none; }
 .amount-cell, .equity-tag, .tir-value, .kpi-value { user-select: none; -webkit-user-select: none; }</style></head>
 <body>
 
@@ -1171,7 +1172,7 @@
       <textarea class="field-input field-textarea" id="cf-message" placeholder="Escribe tu consulta sobre el proyecto…"></textarea>
     </div>
     <div class="contact-actions">
-      <div class="contact-hint">📬 El mensaje se enviará a <strong><span id="contact-hint-email"><a href="mailto:equipo@angelclub.es" style="color: inherit;">equipo@angelclub.es</a></span></strong></div>
+      <div class="contact-hint">📬 El mensaje se enviará a <strong><span id="contact-hint-email"><a href="mailto:equipo@angelclub.es" style="color: inherit;">equipo@angelclub.es</a><a href="mailto:equipo@angelclub.es" style="color: inherit;">equipo@angelclub.es</a></span></strong></div>
       <button class="send-btn" id="cf-send" onclick="sendContactForm()">
         <span id="cf-btn-text">Enviar solicitud</span>
         <span class="btn-arrow">→</span>
@@ -11308,28 +11309,13 @@
       <div class="panel-title" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
         <span>🔑 Contraseñas de Inversores</span>
         <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-          <button onclick="adminExportPasswords()" style="
-            background:rgba(30,136,229,0.10);border:1px solid rgba(30,136,229,0.25);
-            color:var(--blue-bright);border-radius:10px;padding:7px 16px;
-            font-family:'Syne',sans-serif;font-weight:700;font-size:10px;
-            letter-spacing:0.05em;cursor:pointer;text-transform:uppercase;
-            transition:background 0.2s;white-space:nowrap;" onmouseover="this.style.background='rgba(30,136,229,0.18)'" onmouseout="this.style.background='rgba(30,136,229,0.10)'">
+          <button onclick="adminExportPasswords()" style="background: rgba(30, 136, 229, 0.1); border: 1px solid rgba(30, 136, 229, 0.25); color: var(--blue-bright); border-radius: 10px; padding: 7px 16px; font-family: &quot;Syne&quot;, sans-serif; font-weight: 700; font-size: 10px; letter-spacing: 0.05em; cursor: pointer; text-transform: uppercase; transition: background 0.2s; white-space: nowrap;" onmouseover="this.style.background='rgba(30,136,229,0.18)'" onmouseout="this.style.background='rgba(30,136,229,0.10)'">
             📋 Exportar contraseñas
           </button>
-          <button onclick="adminSetPassword()" style="
-            background:rgba(56,142,60,0.10);border:1px solid rgba(56,142,60,0.28);
-            color:#388E3C;border-radius:10px;padding:7px 16px;
-            font-family:'Syne',sans-serif;font-weight:700;font-size:10px;
-            letter-spacing:0.05em;cursor:pointer;text-transform:uppercase;
-            transition:background 0.2s;white-space:nowrap;" onmouseover="this.style.background='rgba(56,142,60,0.18)'" onmouseout="this.style.background='rgba(56,142,60,0.10)'">
+          <button onclick="adminSetPassword()" style="background: rgba(56, 142, 60, 0.1); border: 1px solid rgba(56, 142, 60, 0.28); color: rgb(56, 142, 60); border-radius: 10px; padding: 7px 16px; font-family: &quot;Syne&quot;, sans-serif; font-weight: 700; font-size: 10px; letter-spacing: 0.05em; cursor: pointer; text-transform: uppercase; transition: background 0.2s; white-space: nowrap;" onmouseover="this.style.background='rgba(56,142,60,0.18)'" onmouseout="this.style.background='rgba(56,142,60,0.10)'">
             ✏️ Asignar contraseña
           </button>
-          <button onclick="adminClearPassword()" style="
-            background:rgba(198,40,40,0.10);border:1px solid rgba(198,40,40,0.25);
-            color:var(--red);border-radius:10px;padding:7px 14px;
-            font-family:'Syne',sans-serif;font-weight:700;font-size:10px;
-            letter-spacing:0.05em;cursor:pointer;text-transform:uppercase;
-            transition:background 0.2s;white-space:nowrap;" onmouseover="this.style.background='rgba(198,40,40,0.18)'" onmouseout="this.style.background='rgba(198,40,40,0.10)'">
+          <button onclick="adminClearPassword()" style="background: rgba(198, 40, 40, 0.1); border: 1px solid rgba(198, 40, 40, 0.25); color: var(--red); border-radius: 10px; padding: 7px 14px; font-family: &quot;Syne&quot;, sans-serif; font-weight: 700; font-size: 10px; letter-spacing: 0.05em; cursor: pointer; text-transform: uppercase; transition: background 0.2s; white-space: nowrap;" onmouseover="this.style.background='rgba(198,40,40,0.18)'" onmouseout="this.style.background='rgba(198,40,40,0.10)'">
             🗑 Borrar contraseña
           </button>
           <button onclick="adminDownloadHtml()" id="btn-download-html" style="background: linear-gradient(135deg, rgb(27, 94, 32), rgb(46, 125, 50)); border: 1px solid rgba(46, 125, 50, 0.5); color: rgb(255, 255, 255); border-radius: 10px; padding: 7px 16px; font-family: &quot;Syne&quot;, sans-serif; font-weight: 700; font-size: 10px; letter-spacing: 0.05em; cursor: pointer; text-transform: uppercase; transition: opacity 0.2s; white-space: nowrap; box-shadow: rgba(46, 125, 50, 0.25) 0px 2px 8px; opacity: 0.85;" onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">
@@ -11346,7 +11332,7 @@
       </div>
 
       <!-- Asignar contraseña dialog -->
-      <div id="admin-set-pw-form" style="display:none;margin-bottom:16px;padding:16px;background:rgba(56,142,60,0.05);border:1px solid rgba(56,142,60,0.20);border-radius:10px;">
+      <div id="admin-set-pw-form" style="display: block; margin-bottom: 16px; padding: 16px; background: rgba(56, 142, 60, 0.05); border: 1px solid rgba(56, 142, 60, 0.2); border-radius: 10px;">
         <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:12px;margin-bottom:12px;color:#388E3C;">✏️ Asignar contraseña a inversor</div>
         <div style="display:flex;flex-direction:column;gap:8px;">
           <input id="admin-set-pw-email" type="email" placeholder="email@inversor.com" style="width:100%;box-sizing:border-box;border:1px solid var(--border);border-radius:8px;padding:9px 14px;font-size:12px;font-family:'DM Mono',monospace;background:var(--surface);color:var(--text);outline:none;">
@@ -11363,13 +11349,13 @@
               background:none;border:1px solid var(--border);color:var(--muted);
               border-radius:8px;padding:8px 16px;font-family:'Syne',sans-serif;
               font-weight:700;font-size:11px;cursor:pointer;">Cancelar</button>
-            <span id="admin-set-pw-msg" style="display:none;font-size:11px;font-family:'DM Mono',monospace;"></span>
+            <span id="admin-set-pw-msg" style="display: inline; font-size: 11px; font-family: &quot;DM Mono&quot;, monospace; color: rgb(56, 142, 60);">✓ Contraseña asignada. Ahora exporta y actualiza el HTML.</span>
           </div>
         </div>
       </div>
       <div id="admin-passwords-table-wrap">
     <div style="font-size:11px;color:var(--muted);margin-bottom:10px;">
-      9 inversores con contraseña.
+      17 inversores con contraseña.
       <strong style="color:#388E3C;">global</strong> = disponible en todos los dispositivos.
       <strong style="color:var(--red);">solo local</strong> = pendiente de exportar.
     </div>
@@ -11378,39 +11364,71 @@
         <thead><tr><th>#</th><th>Email</th><th>Estado</th></tr></thead>
         <tbody><tr>
       <td style="font-family:'DM Mono',monospace;font-size:11px;">1</td>
-      <td style="font-size:12px;">enekoknorr@gmail.com</td>
+      <td style="font-size:12px;">alberto.jimenez@smileatbaby.com</td>
       <td style="white-space:nowrap;"><span style="background:rgba(30,136,229,0.12);color:var(--blue-bright);border-radius:6px;padding:2px 8px;font-size:10px;font-family:'DM Mono',monospace;">local</span> <span style="background:rgba(198,40,40,0.10);color:var(--red);border-radius:6px;padding:2px 8px;font-size:10px;font-family:'DM Mono',monospace;">solo local</span></td>
     </tr><tr>
       <td style="font-family:'DM Mono',monospace;font-size:11px;">2</td>
-      <td style="font-size:12px;">g.perernau@gmail.com</td>
+      <td style="font-size:12px;">bernardo.martinez.gil@gmail.com</td>
       <td style="white-space:nowrap;"><span style="background:rgba(30,136,229,0.12);color:var(--blue-bright);border-radius:6px;padding:2px 8px;font-size:10px;font-family:'DM Mono',monospace;">local</span> <span style="background:rgba(198,40,40,0.10);color:var(--red);border-radius:6px;padding:2px 8px;font-size:10px;font-family:'DM Mono',monospace;">solo local</span></td>
     </tr><tr>
       <td style="font-family:'DM Mono',monospace;font-size:11px;">3</td>
-      <td style="font-size:12px;">gemma.sebastian@argonconsultores.com</td>
+      <td style="font-size:12px;">daniroig@me.com</td>
       <td style="white-space:nowrap;"><span style="background:rgba(30,136,229,0.12);color:var(--blue-bright);border-radius:6px;padding:2px 8px;font-size:10px;font-family:'DM Mono',monospace;">local</span> <span style="background:rgba(198,40,40,0.10);color:var(--red);border-radius:6px;padding:2px 8px;font-size:10px;font-family:'DM Mono',monospace;">solo local</span></td>
     </tr><tr>
       <td style="font-family:'DM Mono',monospace;font-size:11px;">4</td>
-      <td style="font-size:12px;">hi@hectorperezarenas.com</td>
-      <td style="white-space:nowrap;"><span style="background:rgba(30,136,229,0.12);color:var(--blue-bright);border-radius:6px;padding:2px 8px;font-size:10px;font-family:'DM Mono',monospace;">local</span> <span style="background:rgba(198,40,40,0.10);color:var(--red);border-radius:6px;padding:2px 8px;font-size:10px;font-family:'DM Mono',monospace;">solo local</span></td>
+      <td style="font-size:12px;">enekoknorr@gmail.com</td>
+      <td style="white-space:nowrap;"><span style="background:rgba(30,136,229,0.12);color:var(--blue-bright);border-radius:6px;padding:2px 8px;font-size:10px;font-family:'DM Mono',monospace;">local</span> <span style="background:rgba(56,142,60,0.12);color:#388E3C;border-radius:6px;padding:2px 8px;font-size:10px;font-family:'DM Mono',monospace;">global</span></td>
     </tr><tr>
       <td style="font-family:'DM Mono',monospace;font-size:11px;">5</td>
-      <td style="font-size:12px;">j.garcia.gavilan@gmail.com</td>
+      <td style="font-size:12px;">fjaviersaiz@yahoo.es</td>
       <td style="white-space:nowrap;"><span style="background:rgba(30,136,229,0.12);color:var(--blue-bright);border-radius:6px;padding:2px 8px;font-size:10px;font-family:'DM Mono',monospace;">local</span> <span style="background:rgba(198,40,40,0.10);color:var(--red);border-radius:6px;padding:2px 8px;font-size:10px;font-family:'DM Mono',monospace;">solo local</span></td>
     </tr><tr>
       <td style="font-family:'DM Mono',monospace;font-size:11px;">6</td>
-      <td style="font-size:12px;">javier_amenabar@hotmail.com</td>
-      <td style="white-space:nowrap;"><span style="background:rgba(30,136,229,0.12);color:var(--blue-bright);border-radius:6px;padding:2px 8px;font-size:10px;font-family:'DM Mono',monospace;">local</span> <span style="background:rgba(198,40,40,0.10);color:var(--red);border-radius:6px;padding:2px 8px;font-size:10px;font-family:'DM Mono',monospace;">solo local</span></td>
+      <td style="font-size:12px;">g.perernau@gmail.com</td>
+      <td style="white-space:nowrap;"><span style="background:rgba(30,136,229,0.12);color:var(--blue-bright);border-radius:6px;padding:2px 8px;font-size:10px;font-family:'DM Mono',monospace;">local</span> <span style="background:rgba(56,142,60,0.12);color:#388E3C;border-radius:6px;padding:2px 8px;font-size:10px;font-family:'DM Mono',monospace;">global</span></td>
     </tr><tr>
       <td style="font-family:'DM Mono',monospace;font-size:11px;">7</td>
-      <td style="font-size:12px;">javiervaquerizo@gmail.com</td>
-      <td style="white-space:nowrap;"><span style="background:rgba(30,136,229,0.12);color:var(--blue-bright);border-radius:6px;padding:2px 8px;font-size:10px;font-family:'DM Mono',monospace;">local</span> <span style="background:rgba(198,40,40,0.10);color:var(--red);border-radius:6px;padding:2px 8px;font-size:10px;font-family:'DM Mono',monospace;">solo local</span></td>
+      <td style="font-size:12px;">gemma.sebastian@argonconsultores.com</td>
+      <td style="white-space:nowrap;"><span style="background:rgba(30,136,229,0.12);color:var(--blue-bright);border-radius:6px;padding:2px 8px;font-size:10px;font-family:'DM Mono',monospace;">local</span> <span style="background:rgba(56,142,60,0.12);color:#388E3C;border-radius:6px;padding:2px 8px;font-size:10px;font-family:'DM Mono',monospace;">global</span></td>
     </tr><tr>
       <td style="font-family:'DM Mono',monospace;font-size:11px;">8</td>
-      <td style="font-size:12px;">libanomonteiro@gmail.com</td>
-      <td style="white-space:nowrap;"><span style="background:rgba(30,136,229,0.12);color:var(--blue-bright);border-radius:6px;padding:2px 8px;font-size:10px;font-family:'DM Mono',monospace;">local</span> <span style="background:rgba(198,40,40,0.10);color:var(--red);border-radius:6px;padding:2px 8px;font-size:10px;font-family:'DM Mono',monospace;">solo local</span></td>
+      <td style="font-size:12px;">hi@hectorperezarenas.com</td>
+      <td style="white-space:nowrap;"><span style="background:rgba(30,136,229,0.12);color:var(--blue-bright);border-radius:6px;padding:2px 8px;font-size:10px;font-family:'DM Mono',monospace;">local</span> <span style="background:rgba(56,142,60,0.12);color:#388E3C;border-radius:6px;padding:2px 8px;font-size:10px;font-family:'DM Mono',monospace;">global</span></td>
     </tr><tr>
       <td style="font-family:'DM Mono',monospace;font-size:11px;">9</td>
+      <td style="font-size:12px;">j.garcia.gavilan@gmail.com</td>
+      <td style="white-space:nowrap;"><span style="background:rgba(30,136,229,0.12);color:var(--blue-bright);border-radius:6px;padding:2px 8px;font-size:10px;font-family:'DM Mono',monospace;">local</span> <span style="background:rgba(56,142,60,0.12);color:#388E3C;border-radius:6px;padding:2px 8px;font-size:10px;font-family:'DM Mono',monospace;">global</span></td>
+    </tr><tr>
+      <td style="font-family:'DM Mono',monospace;font-size:11px;">10</td>
+      <td style="font-size:12px;">javier_amenabar@hotmail.com</td>
+      <td style="white-space:nowrap;"><span style="background:rgba(30,136,229,0.12);color:var(--blue-bright);border-radius:6px;padding:2px 8px;font-size:10px;font-family:'DM Mono',monospace;">local</span> <span style="background:rgba(56,142,60,0.12);color:#388E3C;border-radius:6px;padding:2px 8px;font-size:10px;font-family:'DM Mono',monospace;">global</span></td>
+    </tr><tr>
+      <td style="font-family:'DM Mono',monospace;font-size:11px;">11</td>
+      <td style="font-size:12px;">javiervaquerizo@gmail.com</td>
+      <td style="white-space:nowrap;"><span style="background:rgba(30,136,229,0.12);color:var(--blue-bright);border-radius:6px;padding:2px 8px;font-size:10px;font-family:'DM Mono',monospace;">local</span> <span style="background:rgba(56,142,60,0.12);color:#388E3C;border-radius:6px;padding:2px 8px;font-size:10px;font-family:'DM Mono',monospace;">global</span></td>
+    </tr><tr>
+      <td style="font-family:'DM Mono',monospace;font-size:11px;">12</td>
+      <td style="font-size:12px;">libanomonteiro@gmail.com</td>
+      <td style="white-space:nowrap;"><span style="background:rgba(30,136,229,0.12);color:var(--blue-bright);border-radius:6px;padding:2px 8px;font-size:10px;font-family:'DM Mono',monospace;">local</span> <span style="background:rgba(56,142,60,0.12);color:#388E3C;border-radius:6px;padding:2px 8px;font-size:10px;font-family:'DM Mono',monospace;">global</span></td>
+    </tr><tr>
+      <td style="font-family:'DM Mono',monospace;font-size:11px;">13</td>
+      <td style="font-size:12px;">mercedesrs62@gmail.com</td>
+      <td style="white-space:nowrap;"><span style="background:rgba(30,136,229,0.12);color:var(--blue-bright);border-radius:6px;padding:2px 8px;font-size:10px;font-family:'DM Mono',monospace;">local</span> <span style="background:rgba(198,40,40,0.10);color:var(--red);border-radius:6px;padding:2px 8px;font-size:10px;font-family:'DM Mono',monospace;">solo local</span></td>
+    </tr><tr>
+      <td style="font-family:'DM Mono',monospace;font-size:11px;">14</td>
+      <td style="font-size:12px;">miguel.fer.herencias@gmail.com</td>
+      <td style="white-space:nowrap;"><span style="background:rgba(30,136,229,0.12);color:var(--blue-bright);border-radius:6px;padding:2px 8px;font-size:10px;font-family:'DM Mono',monospace;">local</span> <span style="background:rgba(198,40,40,0.10);color:var(--red);border-radius:6px;padding:2px 8px;font-size:10px;font-family:'DM Mono',monospace;">solo local</span></td>
+    </tr><tr>
+      <td style="font-family:'DM Mono',monospace;font-size:11px;">15</td>
       <td style="font-size:12px;">mikelsampedro@gmail.com</td>
+      <td style="white-space:nowrap;"><span style="background:rgba(30,136,229,0.12);color:var(--blue-bright);border-radius:6px;padding:2px 8px;font-size:10px;font-family:'DM Mono',monospace;">local</span> <span style="background:rgba(56,142,60,0.12);color:#388E3C;border-radius:6px;padding:2px 8px;font-size:10px;font-family:'DM Mono',monospace;">global</span></td>
+    </tr><tr>
+      <td style="font-family:'DM Mono',monospace;font-size:11px;">16</td>
+      <td style="font-size:12px;">monsieurdeivid@gmail.com</td>
+      <td style="white-space:nowrap;"><span style="background:rgba(30,136,229,0.12);color:var(--blue-bright);border-radius:6px;padding:2px 8px;font-size:10px;font-family:'DM Mono',monospace;">local</span> <span style="background:rgba(198,40,40,0.10);color:var(--red);border-radius:6px;padding:2px 8px;font-size:10px;font-family:'DM Mono',monospace;">solo local</span></td>
+    </tr><tr>
+      <td style="font-family:'DM Mono',monospace;font-size:11px;">17</td>
+      <td style="font-size:12px;">rcanca@gmail.com</td>
       <td style="white-space:nowrap;"><span style="background:rgba(30,136,229,0.12);color:var(--blue-bright);border-radius:6px;padding:2px 8px;font-size:10px;font-family:'DM Mono',monospace;">local</span> <span style="background:rgba(198,40,40,0.10);color:var(--red);border-radius:6px;padding:2px 8px;font-size:10px;font-family:'DM Mono',monospace;">solo local</span></td>
     </tr></tbody>
       </table>
@@ -13736,7 +13754,11 @@ function normalize(s) {
 // To add/update: run "Exportar contraseñas" in the admin panel, copy
 // the block shown and replace the content between the braces below.
 const PRESET_PASSWORDS = {
+  "alberto.jimenez@smileatbaby.com": "4cdcb64a7cc7ce24ae35629ae3629d368021259748fd9e515e3678a7d5528714",
+  "bernardo.martinez.gil@gmail.com": "5ecf3589e180225014b6902f44824947ed3ed140d56aac1abd7308c20817d656",
+  "daniroig@me.com": "fb37fca7b9b89704dabd3dc40ab872b53a02d55cdab187b742d7da82c3bae8a8",
   "enekoknorr@gmail.com": "ef797c8118f02dfb649607dd5d3f8c7623048c9c063d532cc95c5ed7a898a64f",
+  "fjaviersaiz@yahoo.es": "f5171d1c9539b2e26bdff616cfe83d8c98104f340bcbb21827ffcfc1bdfce6b2",
   "g.perernau@gmail.com": "435b71aeb611398c11c396dbb8982494bfd0001edb1e56df512a29e4312d6e00",
   "gemma.sebastian@argonconsultores.com": "2a5fa1d7549ad77972095746b97537d6cbea3f8d52cb9203e8464b1f640ddb20",
   "hi@hectorperezarenas.com": "d8184731a32015afad4c7f3c2e4dce40d4ff638bd29cc1babd315b0165846c5d",
@@ -13744,7 +13766,11 @@ const PRESET_PASSWORDS = {
   "javier_amenabar@hotmail.com": "23bf8c1d45cfe9788a5db72f8c00318c9def6620d28a044f96f9ebf6a4274cd8",
   "javiervaquerizo@gmail.com": "89c03e6a401d9d984139a2e6774498b5b8bc27d5457ba51b0bc11c2c0aaafcbd",
   "libanomonteiro@gmail.com": "4fcf8c4d276db1d29dded5a1b9f5b138fa0a89da0a00a53c4746dec90f702166",
-  "mikelsampedro@gmail.com": "2c025626c5140deee02232a3b1d18aab344156fe6ab211692a8d12930efe9337"
+  "mercedesrs62@gmail.com": "569d0b2518df0495036eaf2d097dfa9645501c3d04357e7c2adc940327940c13",
+  "miguel.fer.herencias@gmail.com": "604f302429bd6b8b8b473dff43be478c715088a7e4ebf090894fbf55c53c7f76",
+  "mikelsampedro@gmail.com": "2c025626c5140deee02232a3b1d18aab344156fe6ab211692a8d12930efe9337",
+  "monsieurdeivid@gmail.com": "58c5c256d08d7d5fc1118a393ce1fd5a57a3937fa929d4548689540a078fe546",
+  "rcanca@gmail.com": "c411f86d5f400ce9eedc7e3732e8e767c10a1df113426fcc082bc713e6ca8fb6"
 };
 
 function _pwKey(email) { return 'AC_INV_PW_' + email.toLowerCase(); }
