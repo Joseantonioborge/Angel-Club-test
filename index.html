@@ -1041,8 +1041,8 @@
       <div id="admin-passwords-info" style="
         font-size:11px;color:var(--muted);line-height:1.8;
         padding:10px 0 4px 0;border-bottom:1px solid var(--border);margin-bottom:14px;">
-        Usa <strong style="color:#388E3C;">Asignar contraseña</strong> para crear o cambiar la contraseña de cualquier inversor desde aquí.
-        Después usa <em>Exportar contraseñas</em> y pega el bloque en el HTML para que funcione en <strong>todos los dispositivos</strong>.
+        Usa <strong style="color:#388E3C;">Asignar contraseña</strong> para crear o cambiar la contraseña de cualquier inversor.
+        Después pulsa <em>Exportar contraseñas</em> → <strong style="color:#388E3C;">⬇️ Descargar HTML actualizado</strong>: obtendrás el <code style="font-family:'DM Mono',monospace;font-size:10px;background:rgba(56,142,60,0.08);padding:1px 5px;border-radius:4px;">index.html</code> listo con todas las contraseñas embebidas. Súbelo a tu servidor y los inversores podrán acceder desde <strong>cualquier dispositivo y ubicación</strong>.
       </div>
 
       <!-- Asignar contraseña dialog -->
@@ -1080,13 +1080,25 @@
           font-family:'DM Mono',monospace;font-size:11px;line-height:1.6;
           background:rgba(0,0,0,0.04);border:1px solid var(--border);
           border-radius:10px;padding:12px;color:var(--text);outline:none;"></textarea>
-        <button onclick="adminCopyExport()" style="
-          margin-top:10px;background:linear-gradient(135deg,var(--blue),var(--blue-bright));
-          border:none;color:white;border-radius:10px;padding:9px 22px;
-          font-family:'Syne',sans-serif;font-weight:700;font-size:11px;
-          letter-spacing:0.05em;cursor:pointer;">
-          📋 Copiar al portapapeles
-        </button>
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:10px;">
+          <button onclick="adminCopyExport()" style="
+            background:linear-gradient(135deg,var(--blue),var(--blue-bright));
+            border:none;color:white;border-radius:10px;padding:9px 22px;
+            font-family:'Syne',sans-serif;font-weight:700;font-size:11px;
+            letter-spacing:0.05em;cursor:pointer;">
+            📋 Copiar al portapapeles
+          </button>
+          <button onclick="adminDownloadHtml()" style="
+            background:linear-gradient(135deg,#2E7D32,#388E3C);
+            border:none;color:white;border-radius:10px;padding:9px 22px;
+            font-family:'Syne',sans-serif;font-weight:700;font-size:11px;
+            letter-spacing:0.05em;cursor:pointer;">
+            ⬇️ Descargar HTML actualizado
+          </button>
+        </div>
+        <div style="margin-top:8px;font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;line-height:1.6;">
+          <strong style="color:#388E3C;">⬇️ Recomendado:</strong> descarga el archivo listo con las contraseñas ya embebidas y súbelo a tu servidor. Los inversores podrán acceder desde cualquier dispositivo.
+        </div>
         <span id="admin-copy-msg" style="display:none;margin-left:12px;font-size:11px;color:var(--blue-bright);font-family:'DM Mono',monospace;">✓ Copiado</span>
       </div>
       <!-- Clear password dialog -->
@@ -3794,6 +3806,68 @@ function adminCopyExport() {
   } catch(e) {
     document.execCommand('copy');
     if (msg) { msg.style.display = 'inline'; setTimeout(() => msg.style.display = 'none', 2500); }
+  }
+}
+
+async function adminDownloadHtml() {
+  // Gather all hashes: localStorage takes priority over preset
+  const allEmails = Object.keys(INVESTOR_DB).sort();
+  const combined  = Object.assign({}, PRESET_PASSWORDS);
+  allEmails.forEach(email => {
+    try {
+      const local = localStorage.getItem(_pwKey(email));
+      if (local) combined[email] = local;
+    } catch(e) {}
+  });
+
+  if (Object.keys(combined).length === 0) {
+    alert('No hay contraseñas guardadas todavía. Asigna al menos una antes de descargar.');
+    return;
+  }
+
+  // Build new PRESET_PASSWORDS block
+  const pwLines = Object.entries(combined)
+    .sort(([a],[b]) => a.localeCompare(b))
+    .map(([email, hash]) => `  "${email}": "${hash}"`)
+    .join(',\n');
+  const newBlock = `const PRESET_PASSWORDS = {\n${pwLines}\n};`;
+
+  // Fetch the current HTML source
+  let src;
+  try {
+    const resp = await fetch(window.location.href, { cache: 'no-store' });
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    src = await resp.text();
+  } catch(e) {
+    // file:// protocol or network error — fall back to showing the block
+    alert('No se pudo obtener el HTML automáticamente (posiblemente archivo local).\n\nCopia el bloque del área de texto y pégalo manualmente en el HTML.');
+    return;
+  }
+
+  // Replace PRESET_PASSWORDS block in source
+  const presetRe = /const PRESET_PASSWORDS = \{[\s\S]*?\};/;
+  if (!presetRe.test(src)) {
+    alert('No se encontró el bloque PRESET_PASSWORDS en el HTML. Usa la opción de copiar manualmente.');
+    return;
+  }
+  const updated = src.replace(presetRe, newBlock);
+
+  // Trigger download
+  const blob = new Blob([updated], { type: 'text/html;charset=utf-8' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = 'index.html';
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 1000);
+
+  // Confirm
+  const msg = document.getElementById('admin-copy-msg');
+  if (msg) {
+    msg.textContent = `✅ Descargado con ${Object.keys(combined).length} contraseñas embebidas`;
+    msg.style.display = 'inline';
+    setTimeout(() => { msg.style.display = 'none'; msg.textContent = '✅ ¡Copiado!'; }, 4000);
   }
 }
 
