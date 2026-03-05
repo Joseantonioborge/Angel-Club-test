@@ -1,12 +1,25 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+<script>
+// ── Cache-busting para Cloudflare / CDN ──────────────────────────
+// Fuerza URL con ?v= para bypassar caché del CDN sin acceso a Cloudflare.
+// IMPORTANTE: cambia _DEPLOY_VERSION cada vez que subas un nuevo index.html
+(function(){
+  var _DEPLOY_VERSION = '3.3';
+  var params = new URLSearchParams(window.location.search);
+  if (params.get('v') !== _DEPLOY_VERSION) {
+    params.set('v', _DEPLOY_VERSION);
+    window.location.replace(window.location.pathname + '?' + params.toString());
+  }
+})();
+</script>
 <meta charset="UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AngelClub — Portal Inversor v3.4</title>
+<title>AngelClub — Portal Inversor v3.3</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -4115,7 +4128,7 @@ function adminDownloadHtml() {
       }, 3000);
     } catch(e) { alert('Error al generar la descarga: ' + e); if (btn) btn.innerHTML = origBtnHtml; return; }
     if (msgEl) {
-      msgEl.textContent = '✅ index.html descargado con ' + nPw + ' contraseña' + (nPw > 1 ? 's' : '') + ' embebida' + (nPw > 1 ? 's' : '') + ' en PRESET_PASSWORDS. ⬆️ Súbelo al servidor para que sean globales.';
+      msgEl.textContent = '✅ index.html descargado con ' + nPw + ' contraseña' + (nPw > 1 ? 's' : '') + ' embebida' + (nPw > 1 ? 's' : '') + '. Súbelo a tu servidor.';
       msgEl.style.cssText = 'display:block;padding:8px 14px;border-radius:8px;font-size:11px;font-family:"DM Mono",monospace;background:rgba(46,125,50,0.10);color:#2E7D32;border:1px solid rgba(46,125,50,0.25);margin:8px 0 0 0;';
       setTimeout(function() { if (msgEl) msgEl.style.display = 'none'; }, 7000);
     }
@@ -4129,8 +4142,7 @@ function adminDownloadHtml() {
   // Esto evita cualquier modificación del DOM (Cloudflare, JS, etc.)
   // y garantiza que el archivo descargado es idéntico al subido,
   // salvo el bloque de contraseñas. Sin fetch (file://), usa fallback.
-  var _fetchUrl = location.origin + location.pathname + '?_=' + Date.now();
-  fetch(_fetchUrl, { cache: 'no-store', credentials: 'same-origin' })
+  fetch(location.href, { cache: 'no-store', credentials: 'same-origin' })
     .then(function(r) {
       if (!r.ok) throw new Error('HTTP ' + r.status);
       return r.text();
@@ -4142,11 +4154,6 @@ function adminDownloadHtml() {
       // Fallback: usar el HTML capturado antes de que JS modificara el DOM.
       // Este fallback es suficiente cuando no hay servidor (entorno local).
       console.warn('fetch falló (' + err + '), usando HTML capturado al cargar.');
-      if (msgEl) {
-        msgEl.textContent = '⚠️ Usando HTML local (fetch falló). Las contraseñas SÍ se incluyen, pero sube el archivo cuanto antes.';
-        msgEl.style.cssText = 'display:block;padding:8px 14px;border-radius:8px;font-size:11px;font-family:\'DM Mono\',monospace;background:rgba(230,168,23,0.10);color:#a07000;border:1px solid rgba(230,168,23,0.35);margin:8px 0 0 0;';
-        setTimeout(function() { if (msgEl) msgEl.style.display = 'none'; }, 12000);
-      }
       if (_ORIGINAL_HTML_SRC) {
         _applyAndDownload(_ORIGINAL_HTML_SRC);
       } else {
