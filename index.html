@@ -2887,11 +2887,53 @@ loadUpdates();
 const EQUITY_STORAGE_KEY = 'angelclub_startup_equity_v1';
 let STARTUP_EQUITY = {}; // startupKey -> equity string e.g. "3.5%"
 
+// STARTUP_EQUITY_PRESET: admin-managed equity % embedded in HTML.
+// Edited by adminDownloadHtml() — do NOT modify manually.
+const STARTUP_EQUITY_PRESET = {
+  "accurate": "0.0000%",
+  "alterhome": "0.0000%",
+  "badi": "0.0000%",
+  "bnext": "0.0000%",
+  "cabify": "0.0000%",
+  "charplanet": "0.0000%",
+  "chicisimo": "0.0000%",
+  "claps": "0.0000%",
+  "coverfy": "0.0000%",
+  "edit.org": "0.0000%",
+  "evil zeppelin": "0.0000%",
+  "evil zeppeling": "0.0000%",
+  "froged": "0.0000%",
+  "genially": "0.0000%",
+  "goin": "0.0000%",
+  "goin ii": "0.0000%",
+  "gomapi": "0.0000%",
+  "greendatachain": "0.0000%",
+  "housers": "0.0000%",
+  "kasaz": "0.0000%",
+  "kasitoko": "0.0000%",
+  "lobster": "0.0000%",
+  "luda": "0.0000%",
+  "mailtrack": "0.0000%",
+  "mox": "0.0000%",
+  "myhair": "0.0000%",
+  "mytriplea": "0.0000%",
+  "oncoheroes": "0.2836%",
+  "orbitalads": "0.0000%",
+  "roams": "0.0000%",
+  "vitcord": "0.0000%",
+  "wellbeingos": "0.0000%",
+  "zapiens.ai": "0.0000%"
+};
+
 function loadEquity() {
   try {
+    // 1. Start from preset values embedded in this HTML (cross-device)
+    STARTUP_EQUITY = Object.assign({}, STARTUP_EQUITY_PRESET);
+    // 2. Merge localStorage overrides (same-device edits not yet downloaded)
     const raw = localStorage.getItem(EQUITY_STORAGE_KEY);
-    STARTUP_EQUITY = raw ? JSON.parse(raw) : {};
-  } catch(e) { STARTUP_EQUITY = {}; }
+    const local = raw ? JSON.parse(raw) : {};
+    Object.assign(STARTUP_EQUITY, local);
+  } catch(e) { STARTUP_EQUITY = Object.assign({}, STARTUP_EQUITY_PRESET); }
 }
 
 function saveEquity(startupKey, value) {
@@ -4098,6 +4140,18 @@ function adminDownloadHtml() {
   }
   var newBlock = 'const PRESET_PASSWORDS = {\n' + pwArr.join(',\n') + '\n};';
 
+  // ── Construir bloque STARTUP_EQUITY_PRESET ────────────────────
+  var eqCombined = Object.assign({}, STARTUP_EQUITY_PRESET, STARTUP_EQUITY);
+  var eqArr = [];
+  var eqKeys = Object.keys(eqCombined).sort();
+  for (var ei2 = 0; ei2 < eqKeys.length; ei2++) {
+    eqArr.push('  "' + eqKeys[ei2] + '": "' + eqCombined[eqKeys[ei2]] + '"');
+  }
+  var newEquityBlock = eqArr.length > 0
+    ? 'const STARTUP_EQUITY_PRESET = {\n' + eqArr.join(',\n') + '\n};'
+    : 'const STARTUP_EQUITY_PRESET = {\n};';
+  var nEq = eqKeys.length;
+
   // ── Feedback visual: mostrar estado de carga ──────────────────
   var btn    = document.getElementById('btn-download-html');
   var msgEl  = document.getElementById('admin-download-msg');
@@ -4106,6 +4160,7 @@ function adminDownloadHtml() {
 
   // ── Función que aplica el reemplazo y lanza la descarga ────────
   function _applyAndDownload(src) {
+    // — Reemplazar PRESET_PASSWORDS —
     var OPEN  = 'const PRESET_PASSWORDS = {';
     var CLOSE = '\n};';
     var si = src.indexOf(OPEN);
@@ -4113,6 +4168,18 @@ function adminDownloadHtml() {
     var ei = src.indexOf(CLOSE, si);
     if (ei === -1) { alert('Bloque PRESET_PASSWORDS incompleto. Contacta con soporte.'); if (btn) btn.innerHTML = origBtnHtml; return; }
     var updated = src.slice(0, si) + newBlock + src.slice(ei + CLOSE.length);
+
+    // — Reemplazar STARTUP_EQUITY_PRESET —
+    var EQ_OPEN  = 'const STARTUP_EQUITY_PRESET = {';
+    var EQ_CLOSE = '\n};';
+    var eqSi = updated.indexOf(EQ_OPEN);
+    if (eqSi !== -1) {
+      var eqEi = updated.indexOf(EQ_CLOSE, eqSi);
+      if (eqEi !== -1) {
+        updated = updated.slice(0, eqSi) + newEquityBlock + updated.slice(eqEi + EQ_CLOSE.length);
+      }
+    }
+
     try {
       var blob = new Blob([updated], { type: 'text/html;charset=utf-8' });
       var url  = URL.createObjectURL(blob);
@@ -4128,12 +4195,12 @@ function adminDownloadHtml() {
       }, 3000);
     } catch(e) { alert('Error al generar la descarga: ' + e); if (btn) btn.innerHTML = origBtnHtml; return; }
     if (msgEl) {
-      msgEl.textContent = '✅ index.html descargado con ' + nPw + ' contraseña' + (nPw > 1 ? 's' : '') + ' embebida' + (nPw > 1 ? 's' : '') + '. Súbelo a tu servidor.';
+      msgEl.textContent = '✅ index.html descargado con ' + nPw + ' contraseña' + (nPw > 1 ? 's' : '') + ' y ' + nEq + ' equity' + (nEq !== 1 ? 's' : '') + ' embebidos. Súbelo a tu servidor.';
       msgEl.style.cssText = 'display:block;padding:8px 14px;border-radius:8px;font-size:11px;font-family:"DM Mono",monospace;background:rgba(46,125,50,0.10);color:#2E7D32;border:1px solid rgba(46,125,50,0.25);margin:8px 0 0 0;';
       setTimeout(function() { if (msgEl) msgEl.style.display = 'none'; }, 7000);
     }
     if (btn) {
-      btn.innerHTML = '✅ Descargado (' + nPw + ')';
+      btn.innerHTML = '✅ Descargado (' + nPw + ' pw · ' + nEq + ' eq)';
       setTimeout(function() { if (btn) btn.innerHTML = origBtnHtml; }, 4000);
     }
   }
