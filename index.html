@@ -5248,6 +5248,12 @@ async function investorChangePassword() {
   try { currentHash = await _sha256(currentVal); newHash = await _sha256(newVal); }
   catch(e) { return showMsg('❌ Error al procesar la contraseña.', 'var(--red)'); }
 
+  // Verificación local ANTES de llamar a la API (cubre PRESET + MongoDB + localStorage)
+  await _loadPasswordsFromMongo();
+  const _localHash = _getStoredPwHash(currentInvestor.email);
+  if (!_localHash)           return showMsg('⚠️ Aún no tienes contraseña activa. Contacta al administrador.', 'var(--muted)');
+  if (currentHash !== _localHash) return showMsg('❌ La contraseña actual es incorrecta.', 'var(--red)');
+
   showMsg('⏳ Guardando en MongoDB…', 'var(--muted)');
   try {
     const res = await fetch(API_BASE + '/investors', {
@@ -5288,6 +5294,12 @@ async function investorChangeEmail() {
   let currentHash;
   try { currentHash = await _sha256(currentVal); }
   catch(e) { return showMsg('❌ Error al procesar la contraseña.', 'var(--red)'); }
+
+  // Verificación local ANTES de llamar a la API (cubre PRESET + MongoDB + localStorage)
+  await _loadPasswordsFromMongo();
+  const _localHashE = _getStoredPwHash(currentInvestor.email);
+  if (!_localHashE)                return showMsg('⚠️ Aún no tienes contraseña activa. Contacta al administrador.', 'var(--muted)');
+  if (currentHash !== _localHashE) return showMsg('❌ La contraseña actual es incorrecta.', 'var(--red)');
 
   showMsg('⏳ Guardando en MongoDB…', 'var(--muted)');
   try {
