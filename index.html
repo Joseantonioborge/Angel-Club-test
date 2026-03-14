@@ -192,13 +192,13 @@
   .logout-btn:hover { background: rgba(198,40,40,0.14); }
   .topbar-date { font-size: 11px; color: var(--muted); letter-spacing: 0.08em; text-align: right; }
   /* ── Profile dropdown ── */
-  #user-badge-wrapper { position: relative; }
+  #user-badge-wrapper { position: relative; z-index: 9000; }
   #profile-dropdown {
     position: absolute; top: calc(100% + 8px); right: 0;
     background: rgba(255,255,255,0.98); border: 1px solid var(--border);
     border-radius: 14px; padding: 6px; min-width: 210px;
     box-shadow: 0 8px 32px rgba(21,101,192,0.18);
-    z-index: 400; display: none; animation: fadeUp 0.15s ease both;
+    z-index: 9000; display: none; animation: fadeUp 0.15s ease both;
   }
   #profile-dropdown.open { display: block; }
   .profile-dd-item {
@@ -210,7 +210,7 @@
   .profile-dd-item:hover { background: rgba(30,136,229,0.08); }
   /* ── Profile change modal ── */
   #profile-modal {
-    position: fixed; inset: 0; z-index: 500;
+    position: fixed; inset: 0; z-index: 9500;
     background: rgba(20,35,70,0.55); backdrop-filter: blur(6px);
     display: none; align-items: center; justify-content: center;
     padding: 24px;
@@ -715,6 +715,51 @@
 <!-- ═══════════════════════════════════════════════════
      UPDATE MODAL (investor view)
 ═══════════════════════════════════════════════════ -->
+<!-- ═══════ PROFILE CHANGE MODAL (v4.0) — fuera del container para evitar z-index traps ═══════ -->
+<div id="profile-modal">
+  <div class="profile-modal-card">
+    <button class="update-modal-close" onclick="closeProfileModal()">✕</button>
+    <div class="profile-modal-title" id="profile-modal-title">Cambiar contraseña</div>
+    <div class="profile-modal-sub" id="profile-modal-sub">Introduce tu contraseña actual para confirmar el cambio</div>
+
+    <!-- Formulario cambio de contraseña -->
+    <div id="profile-form-password">
+      <div class="profile-field">
+        <label>Contraseña actual</label>
+        <input type="password" id="profile-current-pass" class="profile-input" placeholder="••••••••" autocomplete="current-password">
+      </div>
+      <div class="profile-field">
+        <label>Nueva contraseña</label>
+        <input type="password" id="profile-new-pass" class="profile-input" placeholder="Mínimo 8 caracteres" autocomplete="new-password">
+      </div>
+      <div class="profile-field">
+        <label>Confirmar nueva contraseña</label>
+        <input type="password" id="profile-confirm-pass" class="profile-input" placeholder="Repite la nueva contraseña" autocomplete="new-password">
+      </div>
+      <button class="profile-save-btn" onclick="investorChangePassword()">Guardar nueva contraseña</button>
+    </div>
+
+    <!-- Formulario cambio de email -->
+    <div id="profile-form-email" style="display:none;">
+      <div class="profile-field">
+        <label>Contraseña actual</label>
+        <input type="password" id="profile-email-pass" class="profile-input" placeholder="••••••••" autocomplete="current-password">
+      </div>
+      <div class="profile-field">
+        <label>Nuevo email de acceso</label>
+        <input type="email" id="profile-new-email" class="profile-input" placeholder="nuevo@email.com" autocomplete="email">
+      </div>
+      <div class="profile-field">
+        <label>Confirmar nuevo email</label>
+        <input type="email" id="profile-confirm-email" class="profile-input" placeholder="Repite el nuevo email" autocomplete="email">
+      </div>
+      <button class="profile-save-btn" onclick="investorChangeEmail()">Guardar nuevo email</button>
+    </div>
+
+    <div id="profile-modal-msg"></div>
+  </div>
+</div>
+
 <div id="update-modal" style="display:none;">
   <div class="update-modal-card">
     <button class="update-modal-close" onclick="closeUpdateModal()">✕</button>
@@ -1253,51 +1298,6 @@
     </div>
 
 
-  </div>
-
-  <!-- ═══════ PROFILE CHANGE MODAL (v4.0) ═══════ -->
-  <div id="profile-modal">
-    <div class="profile-modal-card">
-      <button class="update-modal-close" onclick="closeProfileModal()">✕</button>
-      <div class="profile-modal-title" id="profile-modal-title">Cambiar contraseña</div>
-      <div class="profile-modal-sub" id="profile-modal-sub">Introduce tu contraseña actual para confirmar el cambio</div>
-
-      <!-- Formulario cambio de contraseña -->
-      <div id="profile-form-password">
-        <div class="profile-field">
-          <label>Contraseña actual</label>
-          <input type="password" id="profile-current-pass" class="profile-input" placeholder="••••••••" autocomplete="current-password">
-        </div>
-        <div class="profile-field">
-          <label>Nueva contraseña</label>
-          <input type="password" id="profile-new-pass" class="profile-input" placeholder="Mínimo 8 caracteres" autocomplete="new-password">
-        </div>
-        <div class="profile-field">
-          <label>Confirmar nueva contraseña</label>
-          <input type="password" id="profile-confirm-pass" class="profile-input" placeholder="Repite la nueva contraseña" autocomplete="new-password">
-        </div>
-        <button class="profile-save-btn" onclick="investorChangePassword()">Guardar nueva contraseña</button>
-      </div>
-
-      <!-- Formulario cambio de email -->
-      <div id="profile-form-email" style="display:none;">
-        <div class="profile-field">
-          <label>Contraseña actual</label>
-          <input type="password" id="profile-email-pass" class="profile-input" placeholder="••••••••" autocomplete="current-password">
-        </div>
-        <div class="profile-field">
-          <label>Nuevo email de acceso</label>
-          <input type="email" id="profile-new-email" class="profile-input" placeholder="nuevo@email.com" autocomplete="email">
-        </div>
-        <div class="profile-field">
-          <label>Confirmar nuevo email</label>
-          <input type="email" id="profile-confirm-email" class="profile-input" placeholder="Repite el nuevo email" autocomplete="email">
-        </div>
-        <button class="profile-save-btn" onclick="investorChangeEmail()">Guardar nuevo email</button>
-      </div>
-
-      <div id="profile-modal-msg"></div>
-    </div>
   </div>
 
   <!-- ═══════ FAREWELL / RATING MODAL ═══════ -->
