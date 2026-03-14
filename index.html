@@ -19,7 +19,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AngelClub — Portal Inversor v3.9</title>
+<title>AngelClub — Portal Inversor v4.0</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -191,6 +191,69 @@
   }
   .logout-btn:hover { background: rgba(198,40,40,0.14); }
   .topbar-date { font-size: 11px; color: var(--muted); letter-spacing: 0.08em; text-align: right; }
+  /* ── Profile dropdown ── */
+  #user-badge-wrapper { position: relative; }
+  #profile-dropdown {
+    position: absolute; top: calc(100% + 8px); right: 0;
+    background: rgba(255,255,255,0.98); border: 1px solid var(--border);
+    border-radius: 14px; padding: 6px; min-width: 210px;
+    box-shadow: 0 8px 32px rgba(21,101,192,0.18);
+    z-index: 400; display: none; animation: fadeUp 0.15s ease both;
+  }
+  #profile-dropdown.open { display: block; }
+  .profile-dd-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 14px; border-radius: 10px; cursor: pointer;
+    font-family: 'DM Mono', monospace; font-size: 12px; color: var(--text);
+    transition: background 0.15s;
+  }
+  .profile-dd-item:hover { background: rgba(30,136,229,0.08); }
+  /* ── Profile change modal ── */
+  #profile-modal {
+    position: fixed; inset: 0; z-index: 500;
+    background: rgba(20,35,70,0.55); backdrop-filter: blur(6px);
+    display: none; align-items: center; justify-content: center;
+    padding: 24px;
+  }
+  #profile-modal.open { display: flex; animation: fadeIn 0.2s ease both; }
+  .profile-modal-card {
+    background: rgba(255,255,255,0.97); border-radius: 20px;
+    padding: 36px 40px; max-width: 420px; width: 100%;
+    box-shadow: 0 24px 80px rgba(21,101,192,0.22);
+    position: relative; animation: fadeUp 0.25s ease both;
+  }
+  .profile-modal-title {
+    font-family: 'Syne', sans-serif; font-weight: 800; font-size: 20px;
+    color: var(--blue); margin-bottom: 4px;
+  }
+  .profile-modal-sub {
+    font-size: 11px; color: var(--muted); margin-bottom: 22px;
+    font-family: 'DM Mono', monospace; letter-spacing: 0.03em;
+  }
+  .profile-field { margin-bottom: 14px; }
+  .profile-field label {
+    display: block; font-size: 10px; color: var(--muted); margin-bottom: 5px;
+    font-family: 'DM Mono', monospace; letter-spacing: 0.07em; text-transform: uppercase;
+  }
+  .profile-input {
+    width: 100%; padding: 10px 13px; border: 1px solid var(--border);
+    border-radius: 10px; background: var(--glass); color: var(--text);
+    font-family: 'DM Mono', monospace; font-size: 13px;
+    box-sizing: border-box; outline: none; transition: border-color 0.2s;
+  }
+  .profile-input:focus { border-color: var(--blue); }
+  .profile-save-btn {
+    width: 100%; padding: 12px; margin-top: 8px;
+    background: linear-gradient(135deg,var(--blue),var(--blue-bright));
+    border: none; border-radius: 12px; color: white;
+    font-family: 'Syne', sans-serif; font-weight: 700; font-size: 14px;
+    cursor: pointer; transition: opacity 0.2s;
+  }
+  .profile-save-btn:hover { opacity: 0.88; }
+  #profile-modal-msg {
+    font-size: 12px; margin-top: 12px; text-align: center;
+    font-family: 'DM Mono', monospace; display: none; min-height: 18px;
+  }
   .topbar-date strong { display: block; color: var(--blue-bright); font-size: 13px; margin-bottom: 2px; }
 
   /* KPI CARDS */
@@ -587,7 +650,7 @@
       <button id="tab-admin" onclick="setLoginMode('admin')" style="flex:1;padding:9px 0;border:none;border-radius:9px;font-family:'Syne',sans-serif;font-weight:700;font-size:12px;cursor:pointer;transition:all 0.2s;background:transparent;color:var(--muted);">⚙️ Administrador</button>
     </div>
 
-    <div id="login-title" class="login-title">Portal del Inversor <span style="font-size:13px;font-family:'DM Mono',monospace;font-weight:600;color:var(--gold);letter-spacing:0.10em;background:rgba(230,168,23,0.12);padding:2px 8px;border-radius:6px;border:1px solid rgba(230,168,23,0.35);">v3.9</span></div>
+    <div id="login-title" class="login-title">Portal del Inversor <span style="font-size:13px;font-family:'DM Mono',monospace;font-weight:600;color:var(--gold);letter-spacing:0.10em;background:rgba(230,168,23,0.12);padding:2px 8px;border-radius:6px;border:1px solid rgba(230,168,23,0.35);">v4.0</span></div>
     <div id="login-sub" class="login-sub">Introduce tu correo electrónico para continuar</div>
 
     <!-- INVESTOR FIELDS — STEP 1: email -->
@@ -675,15 +738,21 @@
       <div class="logo-icon">A</div>
       <div>
         <div class="logo-text">ANGEL<span>CLUB</span></div>
-        <div id="topbar-subtitle" style="font-size:10px;color:var(--muted);letter-spacing:0.15em;text-transform:uppercase;margin-top:2px;">Portal Inversor <span style="letter-spacing:0.08em;font-weight:600;color:var(--gold);background:rgba(230,168,23,0.13);padding:1px 7px;border-radius:5px;border:1px solid rgba(230,168,23,0.30);">v3.9</span></div>
+        <div id="topbar-subtitle" style="font-size:10px;color:var(--muted);letter-spacing:0.15em;text-transform:uppercase;margin-top:2px;">Portal Inversor <span style="letter-spacing:0.08em;font-weight:600;color:var(--gold);background:rgba(230,168,23,0.13);padding:1px 7px;border-radius:5px;border:1px solid rgba(230,168,23,0.30);">v4.0</span></div>
       </div>
     </div>
     <div class="topbar-right">
-      <div class="investor-badge" id="user-badge">
-        <div class="investor-avatar" id="inv-avatar">?</div>
-        <div>
-          <div class="investor-name-badge" id="inv-name-display">—</div>
-          <div class="investor-email-badge" id="inv-email-display">—</div>
+      <div id="user-badge-wrapper">
+        <div class="investor-badge" id="user-badge" onclick="toggleProfileMenu()" style="cursor:pointer;" title="Opciones de perfil">
+          <div class="investor-avatar" id="inv-avatar">?</div>
+          <div>
+            <div class="investor-name-badge" id="inv-name-display">—</div>
+            <div class="investor-email-badge" id="inv-email-display">—</div>
+          </div>
+        </div>
+        <div id="profile-dropdown">
+          <div class="profile-dd-item" onclick="openProfileModal('password')">🔒 &nbsp;Cambiar contraseña</div>
+          <div class="profile-dd-item" onclick="openProfileModal('email')">✉️ &nbsp;Cambiar email de acceso</div>
         </div>
       </div>
       <!-- ADMIN BADGE (hidden by default) -->
@@ -1186,6 +1255,51 @@
 
   </div>
 
+  <!-- ═══════ PROFILE CHANGE MODAL (v4.0) ═══════ -->
+  <div id="profile-modal">
+    <div class="profile-modal-card">
+      <button class="update-modal-close" onclick="closeProfileModal()">✕</button>
+      <div class="profile-modal-title" id="profile-modal-title">Cambiar contraseña</div>
+      <div class="profile-modal-sub" id="profile-modal-sub">Introduce tu contraseña actual para confirmar el cambio</div>
+
+      <!-- Formulario cambio de contraseña -->
+      <div id="profile-form-password">
+        <div class="profile-field">
+          <label>Contraseña actual</label>
+          <input type="password" id="profile-current-pass" class="profile-input" placeholder="••••••••" autocomplete="current-password">
+        </div>
+        <div class="profile-field">
+          <label>Nueva contraseña</label>
+          <input type="password" id="profile-new-pass" class="profile-input" placeholder="Mínimo 8 caracteres" autocomplete="new-password">
+        </div>
+        <div class="profile-field">
+          <label>Confirmar nueva contraseña</label>
+          <input type="password" id="profile-confirm-pass" class="profile-input" placeholder="Repite la nueva contraseña" autocomplete="new-password">
+        </div>
+        <button class="profile-save-btn" onclick="investorChangePassword()">Guardar nueva contraseña</button>
+      </div>
+
+      <!-- Formulario cambio de email -->
+      <div id="profile-form-email" style="display:none;">
+        <div class="profile-field">
+          <label>Contraseña actual</label>
+          <input type="password" id="profile-email-pass" class="profile-input" placeholder="••••••••" autocomplete="current-password">
+        </div>
+        <div class="profile-field">
+          <label>Nuevo email de acceso</label>
+          <input type="email" id="profile-new-email" class="profile-input" placeholder="nuevo@email.com" autocomplete="email">
+        </div>
+        <div class="profile-field">
+          <label>Confirmar nuevo email</label>
+          <input type="email" id="profile-confirm-email" class="profile-input" placeholder="Repite el nuevo email" autocomplete="email">
+        </div>
+        <button class="profile-save-btn" onclick="investorChangeEmail()">Guardar nuevo email</button>
+      </div>
+
+      <div id="profile-modal-msg"></div>
+    </div>
+  </div>
+
   <!-- ═══════ FAREWELL / RATING MODAL ═══════ -->
   <div id="farewell-overlay" style="
     display:none;position:fixed;inset:0;z-index:99990;
@@ -1275,7 +1389,7 @@ var _ORIGINAL_HTML_SRC = '<!DOCTYPE html>\n' + document.documentElement.outerHTM
 'use strict';
 
 // ═══════════════════════════════════════════════════════════════
-// SECURITY LAYER v3.9
+// SECURITY LAYER v4.0
 // ═══════════════════════════════════════════════════════════════
 
 // ── SHA-256 (pure JS, no dependencies) ─────────────────────────
@@ -1332,7 +1446,12 @@ const _SESSION_STORAGE_KEY = 'AC_SESSION_v1';
 
 function _saveSession(role, email) {
   try {
-    sessionStorage.setItem(_SESSION_STORAGE_KEY, JSON.stringify({ role, email }));
+    const payload = { role, email };
+    // v4.0: si el email de acceso difiere del email en INVESTOR_DB, guardar la referencia original
+    if (role === 'investor' && currentInvestor && currentInvestor.investorRef && currentInvestor.investorRef !== email) {
+      payload.investorRef = currentInvestor.investorRef;
+    }
+    sessionStorage.setItem(_SESSION_STORAGE_KEY, JSON.stringify(payload));
   } catch(e) {}
 }
 
@@ -1350,13 +1469,16 @@ function _tryRestoreSession() {
     const email = saved.email.toLowerCase();
 
     if (role === 'investor') {
-      const record = INVESTOR_DB[email];
+      // v4.0: si el inversor cambió su email, investorRef apunta al email original en INVESTOR_DB
+      const investorLookup = (saved.investorRef || email).toLowerCase();
+      const record = INVESTOR_DB[investorLookup];
       if (!record) return false;
       const displayName = [...record.names].sort((a,b) => b.length - a.length)[0];
       currentInvestor = {
         role:        'investor',
         name:        displayName,
         email:       email,
+        investorRef: investorLookup !== email ? investorLookup : undefined,
         investments: record.investments
       };
       _currentSessionToken = _SESSION_TOKEN + 'investor';
@@ -2876,7 +2998,7 @@ async function saveUpdate(startupKey, url) {
     delete STARTUP_UPDATES[startupKey];
   }
   try { localStorage.setItem(UPDATES_STORAGE_KEY, JSON.stringify(STARTUP_UPDATES)); } catch(e) {}
-  // v3.9 — persistir también en MongoDB
+  // v4.0 — persistir también en MongoDB
   try {
     if (!_adminApiKey) return;
     await fetch(API_BASE + '/equity', {
@@ -2963,7 +3085,7 @@ async function loadEquity() {
         if (remote.equities || remote.statuses || remote.updateLinks) {
           if (remote.equities) Object.assign(STARTUP_EQUITY, remote.equities);
           if (remote.statuses) Object.assign(STARTUP_STATUS_OVERRIDE, remote.statuses);
-          if (remote.updateLinks) Object.assign(STARTUP_UPDATES, remote.updateLinks); // v3.9
+          if (remote.updateLinks) Object.assign(STARTUP_UPDATES, remote.updateLinks); // v4.0
         } else {
           Object.assign(STARTUP_EQUITY, remote); // legacy
         }
@@ -3621,7 +3743,7 @@ async function adminSaveUpdate(startupKey, startupName) {
   const input = document.getElementById(`upd-input-${startupKey}`);
   if (!input) return;
   const url = input.value.trim();
-  // v3.9 — await para que MongoDB se actualice antes de re-render
+  // v4.0 — await para que MongoDB se actualice antes de re-render
   await saveUpdate(startupKey, url);
 
   // Re-render the card to reflect new state
@@ -3645,7 +3767,7 @@ function setLoginMode(mode) {
   document.getElementById('investor-fields').style.display = isAdmin ? 'none' : 'block';
   document.getElementById('investor-step2').style.display  = 'none';
   document.getElementById('admin-fields').style.display    = isAdmin ? 'block' : 'none';
-  document.getElementById('login-title').innerHTML = isAdmin ? 'Acceso Administrador' : 'Portal del Inversor <span style="font-size:11px;font-family:\'DM Mono\',monospace;font-weight:600;color:var(--gold);letter-spacing:0.10em;background:rgba(230,168,23,0.12);padding:2px 8px;border-radius:6px;border:1px solid rgba(230,168,23,0.35);">v3.9</span>';
+  document.getElementById('login-title').innerHTML = isAdmin ? 'Acceso Administrador' : 'Portal del Inversor <span style="font-size:11px;font-family:\'DM Mono\',monospace;font-weight:600;color:var(--gold);letter-spacing:0.10em;background:rgba(230,168,23,0.12);padding:2px 8px;border-radius:6px;border:1px solid rgba(230,168,23,0.35);">v4.0</span>';
   document.getElementById('login-sub').textContent = isAdmin
     ? 'Acceso exclusivo para el equipo de AngelClub'
     : 'Introduce tu correo electrónico para acceder';
@@ -3814,6 +3936,7 @@ function _pwKey(email) { return 'AC_INV_PW_' + email.toLowerCase(); }
 // Cache en memoria de contraseñas desde MongoDB
 let _pwCache = {};
 let _pwCacheLoaded = false;
+let _loginAliases = {}; // v4.0 — newLoginEmail → originalInvestorEmail (auto-populated on email change)
 
 async function _loadPasswordsFromMongo() {
   if (_pwCacheLoaded) return;
@@ -3823,7 +3946,17 @@ async function _loadPasswordsFromMongo() {
     const res = await fetch(API_BASE + '/investors', {
       headers: { 'x-api-key': apiKey }
     });
-    if (res.ok) { _pwCache = await res.json(); _pwCacheLoaded = true; }
+    if (res.ok) {
+      const data = await res.json();
+      // v4.0: API devuelve { passwords, aliases } — compatible con formato legacy { email: hash }
+      if (data && data.passwords) {
+        _pwCache       = data.passwords;
+        _loginAliases  = data.aliases || {};
+      } else {
+        _pwCache = data; // fallback legacy
+      }
+      _pwCacheLoaded = true;
+    }
   } catch(e) { /* fallback silencioso */ }
 }
 
@@ -3927,13 +4060,19 @@ async function doLogin() {
     errEl.style.display = 'block'; return;
   }
 
-  const record = INVESTOR_DB[emailInput];
+  await _loadPasswordsFromMongo(); // garantizar cache cargado antes de verificar
+
+  // v4.0: soportar inversores que cambiaron su email de acceso
+  let investorLookup = emailInput;
+  if (!INVESTOR_DB[emailInput] && _loginAliases[emailInput]) {
+    investorLookup = _loginAliases[emailInput]; // redirigir al email original en INVESTOR_DB
+  }
+  const record = INVESTOR_DB[investorLookup];
   if (!record) {
     errEl.textContent = '❌ Email no encontrado en la base de datos de inversores.';
     errEl.style.display = 'block'; return;
   }
 
-  await _loadPasswordsFromMongo(); // garantizar cache cargado antes de verificar
   const storedHash = _getStoredPwHash(emailInput);
   if (!storedHash) {
     errEl.textContent = '⚠️ Aún no tienes acceso activado. Contacta con el equipo para que te asignen una contraseña.';
@@ -3942,7 +4081,8 @@ async function doLogin() {
 
   // ── Email válido y contraseña asignada — ir a step 2 ─────────
   const displayName = [...record.names].sort((a,b) => b.length - a.length)[0];
-  _pendingLoginRecord = { _record: record, displayName, email: emailInput, investments: record.investments };
+  const investorRef = investorLookup !== emailInput ? investorLookup : undefined;
+  _pendingLoginRecord = { _record: record, displayName, email: emailInput, investorRef, investments: record.investments };
 
   const initials = displayName.split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase();
   document.getElementById('inv-step2-avatar').textContent = initials;
@@ -3965,6 +4105,7 @@ function _finishInvestorLogin(record) {
     role:        'investor',
     name:        record.displayName,
     email:       record.email,
+    investorRef: record.investorRef || undefined, // v4.0: referencia al email original en INVESTOR_DB
     investments: record.investments || (record._record && record._record.investments) || new Map()
   };
   _pendingLoginRecord = null;
@@ -4059,7 +4200,7 @@ function showDashboard() {
   // Topbar
   document.getElementById('user-badge').style.display = 'flex';
   document.getElementById('admin-badge').style.display = 'none';
-  document.getElementById('topbar-subtitle').innerHTML = 'Portal Inversor <span style="letter-spacing:0.08em;font-weight:600;color:var(--gold);background:rgba(230,168,23,0.13);padding:1px 7px;border-radius:5px;border:1px solid rgba(230,168,23,0.30);">v3.9</span>';
+  document.getElementById('topbar-subtitle').innerHTML = 'Portal Inversor <span style="letter-spacing:0.08em;font-weight:600;color:var(--gold);background:rgba(230,168,23,0.13);padding:1px 7px;border-radius:5px;border:1px solid rgba(230,168,23,0.30);">v4.0</span>';
   document.getElementById('topbar-view-label').textContent = 'Mi Portfolio';
 
   const inv = currentInvestor;
@@ -5013,7 +5154,7 @@ function sendContactForm() {
     feedback.className = 'cf-feedback error'; feedback.textContent = '⚠️ Por favor, completa todos los campos.'; feedback.style.display='block'; return;
   }
   const subject = encodeURIComponent(`[AngelClub] Solicitud de información — ${project}`);
-  const body = encodeURIComponent(`Nombre: ${name}\nEmail: ${email}\nProyecto: ${project}\nConsulta: ${type}\n\nMensaje:\n${message}\n\n—\nEnviado desde Portal Inversor AngelClub v3.9`);
+  const body = encodeURIComponent(`Nombre: ${name}\nEmail: ${email}\nProyecto: ${project}\nConsulta: ${type}\n\nMensaje:\n${message}\n\n—\nEnviado desde Portal Inversor AngelClub v4.0`);
   window.location.href = `mailto:equipo@angelclub.es?subject=${subject}&body=${body}`;
   btn.disabled = true;
   document.getElementById('cf-btn-text').textContent = '✓ Abriendo correo…';
@@ -5022,6 +5163,158 @@ function sendContactForm() {
   feedback.style.display = 'block';
   setTimeout(()=>{ btn.disabled=false; document.getElementById('cf-btn-text').textContent='Enviar solicitud'; document.getElementById('cf-message').value=''; feedback.style.display='none'; }, 5000);
 }
+// ═══════════════════════════════════════════════════════════════
+// PERFIL INVERSOR — Cambio de contraseña / email (v4.0)
+// ═══════════════════════════════════════════════════════════════
+
+function toggleProfileMenu() {
+  const dd = document.getElementById('profile-dropdown');
+  if (!dd) return;
+  if (dd.classList.contains('open')) {
+    dd.classList.remove('open');
+  } else {
+    dd.classList.add('open');
+    setTimeout(() => {
+      document.addEventListener('click', _closeProfileMenuOutside, { once: true });
+    }, 0);
+  }
+}
+
+function _closeProfileMenuOutside(e) {
+  const wrapper = document.getElementById('user-badge-wrapper');
+  if (wrapper && wrapper.contains(e.target)) {
+    // clic dentro del wrapper — re-registrar listener
+    document.addEventListener('click', _closeProfileMenuOutside, { once: true });
+  } else {
+    const dd = document.getElementById('profile-dropdown');
+    if (dd) dd.classList.remove('open');
+  }
+}
+
+function openProfileModal(tab) {
+  const dd = document.getElementById('profile-dropdown');
+  if (dd) dd.classList.remove('open');
+
+  const modal     = document.getElementById('profile-modal');
+  const titleEl   = document.getElementById('profile-modal-title');
+  const subEl     = document.getElementById('profile-modal-sub');
+  const formPass  = document.getElementById('profile-form-password');
+  const formEmail = document.getElementById('profile-form-email');
+  const msgEl     = document.getElementById('profile-modal-msg');
+
+  // Reset campos y mensaje
+  ['profile-current-pass','profile-new-pass','profile-confirm-pass',
+   'profile-email-pass','profile-new-email','profile-confirm-email']
+    .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+  if (msgEl) { msgEl.style.display = 'none'; msgEl.textContent = ''; }
+
+  if (tab === 'password') {
+    titleEl.textContent = 'Cambiar contraseña';
+    subEl.textContent   = 'Introduce tu contraseña actual para confirmar el cambio';
+    formPass.style.display  = 'block';
+    formEmail.style.display = 'none';
+  } else {
+    titleEl.textContent = 'Cambiar email de acceso';
+    subEl.textContent   = 'Verifica tu contraseña actual para cambiar el email con el que accedes';
+    formPass.style.display  = 'none';
+    formEmail.style.display = 'block';
+  }
+  modal.classList.add('open');
+}
+
+function closeProfileModal() {
+  const modal = document.getElementById('profile-modal');
+  if (modal) modal.classList.remove('open');
+}
+
+async function investorChangePassword() {
+  const msgEl      = document.getElementById('profile-modal-msg');
+  const currentVal = document.getElementById('profile-current-pass').value;
+  const newVal     = document.getElementById('profile-new-pass').value;
+  const confirmVal = document.getElementById('profile-confirm-pass').value;
+
+  const showMsg = (text, color) => {
+    msgEl.textContent = text; msgEl.style.color = color; msgEl.style.display = 'block';
+  };
+
+  if (!currentVal)                      return showMsg('⚠️ Introduce tu contraseña actual.', 'var(--red)');
+  if (!newVal || newVal.length < 8)     return showMsg('⚠️ La nueva contraseña debe tener al menos 8 caracteres.', 'var(--red)');
+  if (newVal !== confirmVal)            return showMsg('⚠️ Las contraseñas no coinciden.', 'var(--red)');
+  if (currentVal === newVal)            return showMsg('⚠️ La nueva contraseña debe ser diferente a la actual.', 'var(--red)');
+  if (!currentInvestor)                 return showMsg('❌ Sesión no válida. Vuelve a iniciar sesión.', 'var(--red)');
+
+  let currentHash, newHash;
+  try { currentHash = await _sha256(currentVal); newHash = await _sha256(newVal); }
+  catch(e) { return showMsg('❌ Error al procesar la contraseña.', 'var(--red)'); }
+
+  showMsg('⏳ Guardando en MongoDB…', 'var(--muted)');
+  try {
+    const res = await fetch(API_BASE + '/investors', {
+      method: 'PATCH',
+      headers: { 'x-api-key': API_KEY_RO, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: currentInvestor.email, currentPasswordHash: currentHash, newPasswordHash: newHash })
+    });
+    if (res.ok) {
+      _setStoredPwHash(currentInvestor.email, newHash);
+      _pwCacheLoaded = false; // forzar recarga en próximo login
+      showMsg('✅ Contraseña actualizada. Usa la nueva contraseña en tu próximo acceso.', '#388E3C');
+      ['profile-current-pass','profile-new-pass','profile-confirm-pass']
+        .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+    } else {
+      const data = await res.json().catch(() => ({}));
+      if (res.status === 403) showMsg('❌ La contraseña actual es incorrecta.', 'var(--red)');
+      else showMsg('❌ Error al guardar: ' + (data.error || res.status), 'var(--red)');
+    }
+  } catch(e) { showMsg('❌ Error de conexión. Comprueba tu internet e inténtalo de nuevo.', 'var(--red)'); }
+}
+
+async function investorChangeEmail() {
+  const msgEl      = document.getElementById('profile-modal-msg');
+  const currentVal = document.getElementById('profile-email-pass').value;
+  const newEmail   = document.getElementById('profile-new-email').value.trim().toLowerCase();
+  const confirmEm  = document.getElementById('profile-confirm-email').value.trim().toLowerCase();
+
+  const showMsg = (text, color) => {
+    msgEl.textContent = text; msgEl.style.color = color; msgEl.style.display = 'block';
+  };
+
+  if (!currentVal)                          return showMsg('⚠️ Introduce tu contraseña actual.', 'var(--red)');
+  if (!newEmail || !newEmail.includes('@')) return showMsg('⚠️ Introduce un email válido.', 'var(--red)');
+  if (newEmail !== confirmEm)               return showMsg('⚠️ Los emails no coinciden.', 'var(--red)');
+  if (newEmail === currentInvestor?.email)  return showMsg('⚠️ El nuevo email es igual al actual.', 'var(--red)');
+  if (!currentInvestor)                     return showMsg('❌ Sesión no válida. Vuelve a iniciar sesión.', 'var(--red)');
+
+  let currentHash;
+  try { currentHash = await _sha256(currentVal); }
+  catch(e) { return showMsg('❌ Error al procesar la contraseña.', 'var(--red)'); }
+
+  showMsg('⏳ Guardando en MongoDB…', 'var(--muted)');
+  try {
+    const res = await fetch(API_BASE + '/investors', {
+      method: 'PATCH',
+      headers: { 'x-api-key': API_KEY_RO, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: currentInvestor.email, currentPasswordHash: currentHash, newEmail })
+    });
+    if (res.ok) {
+      const oldEmail = currentInvestor.email;
+      // Actualizar sesión activa
+      currentInvestor.investorRef = currentInvestor.investorRef || oldEmail;
+      currentInvestor.email       = newEmail;
+      document.getElementById('inv-email-display').textContent = newEmail;
+      _pwCacheLoaded = false; // forzar recarga para obtener el alias actualizado
+      _saveSession('investor', newEmail);
+      showMsg('✅ Email actualizado. A partir de ahora accede con ' + newEmail + '.', '#388E3C');
+      ['profile-email-pass','profile-new-email','profile-confirm-email']
+        .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+    } else {
+      const data = await res.json().catch(() => ({}));
+      if (res.status === 403)      showMsg('❌ La contraseña actual es incorrecta.', 'var(--red)');
+      else if (res.status === 409) showMsg('❌ Ese email ya está en uso por otro inversor.', 'var(--red)');
+      else showMsg('❌ Error al guardar: ' + (data.error || res.status), 'var(--red)');
+    }
+  } catch(e) { showMsg('❌ Error de conexión. Comprueba tu internet e inténtalo de nuevo.', 'var(--red)'); }
+}
+
 // ── Expose only what inline HTML handlers need ──────────────────
 window.doLogin          = doLogin;
 window.doLogout         = doLogout;
@@ -5051,6 +5344,11 @@ window.adminSaveUpdate  = adminSaveUpdate;
 window.adminSaveEquity    = adminSaveEquity;
 window.adminToggleStatus  = adminToggleStatus;
 window.exportToExcel    = exportToExcel;
+window.toggleProfileMenu      = toggleProfileMenu;
+window.openProfileModal       = openProfileModal;
+window.closeProfileModal      = closeProfileModal;
+window.investorChangePassword = investorChangePassword;
+window.investorChangeEmail    = investorChangeEmail;
 
 // ── Auto-restore session on page load/refresh ───────────────────
 // ── Page initialisation: handles both normal load and BFCache restore ──
