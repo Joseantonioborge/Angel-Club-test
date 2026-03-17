@@ -191,6 +191,13 @@
     transition: all 0.2s; display: flex; align-items: center; gap: 6px;
   }
   .logout-btn:hover { background: rgba(198,40,40,0.14); }
+  .download-report-btn {
+    background: rgba(21,101,192,0.08); border: 1px solid rgba(21,101,192,0.22);
+    color: var(--blue-bright); border-radius: 10px; padding: 8px 16px;
+    font-family: 'DM Mono', monospace; font-size: 11px; cursor: pointer;
+    transition: all 0.2s; align-items: center; gap: 6px;
+  }
+  .download-report-btn:hover { background: rgba(21,101,192,0.15); border-color: rgba(21,101,192,0.40); }
   .topbar-date { font-size: 11px; color: var(--muted); letter-spacing: 0.08em; text-align: right; }
   /* ── Profile dropdown ── */
   #user-badge-wrapper { position: relative; z-index: 9000; }
@@ -813,6 +820,7 @@
         <strong id="today-date"></strong>
         <span id="topbar-view-label">Mi Portfolio</span>
       </div>
+      <button class="download-report-btn" id="btn-download-report" onclick="downloadInvestorReport()" style="display:none;">📥 Informe PDF</button>
       <button class="logout-btn" onclick="doLogout()">⎋ Cerrar sesión</button>
     </div>
   </div>
@@ -4131,6 +4139,8 @@ function _doLogoutFinal() {
   document.getElementById('investor-fields').style.display = 'block';
   document.getElementById('investor-step2').style.display = 'none';
   document.getElementById('login-error').style.display = 'none';
+  const _btnReport = document.getElementById('btn-download-report');
+  if (_btnReport) _btnReport.style.display = 'none';
   setLoginMode('investor');
 }
 
@@ -4201,6 +4211,7 @@ function showDashboard() {
   // Topbar
   document.getElementById('user-badge').style.display = 'flex';
   document.getElementById('admin-badge').style.display = 'none';
+  document.getElementById('btn-download-report').style.display = 'flex';
   document.getElementById('topbar-subtitle').innerHTML = 'Portal Inversor <span style="letter-spacing:0.08em;font-weight:600;color:var(--gold);background:rgba(230,168,23,0.13);padding:1px 7px;border-radius:5px;border:1px solid rgba(230,168,23,0.30);">v4.0</span>';
   document.getElementById('topbar-view-label').textContent = 'Mi Portfolio';
 
@@ -4319,6 +4330,142 @@ function showDashboard() {
   const cfSelect = document.getElementById('cf-project');
   cfSelect.innerHTML = '<option value="">— Selecciona un proyecto —</option>';
   portfolio.forEach(p => { const opt=document.createElement('option'); opt.value=p.name; opt.textContent=p.name; cfSelect.appendChild(opt); });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// INVESTOR REPORT PDF
+// ═══════════════════════════════════════════════════════════════
+function downloadInvestorReport() {
+  if (!currentInvestor) return;
+  const inv = currentInvestor;
+  const reportDate = new Date().toLocaleDateString('es-ES', {day:'numeric', month:'long', year:'numeric'});
+
+  // Rebuild portfolio (same logic as showDashboard)
+  const portfolio = [];
+  inv.investments.forEach((investorAmount, key) => {
+    const s = STARTUPS[key];
+    if (s) portfolio.push({ ...s, key, investorAmount, status: getEffectiveStatus(key) });
+  });
+  portfolio.sort((a,b) => (b.investorAmount||0) - (a.investorAmount||0));
+
+  const totalInvestorCapital = portfolio.reduce((s,p) => s+(p.investorAmount||0), 0);
+  const activeCount = portfolio.filter(p=>p.status==='active').length;
+  const exitCount   = portfolio.filter(p=>p.status==='exit').length;
+  const failCount   = portfolio.filter(p=>p.status==='fail').length;
+  const bestTir     = portfolio.filter(p=>p.tir).sort((a,b)=>b.tir-a.tir)[0];
+
+  const rows = portfolio.map(p => {
+    const statusLabel = p.status==='exit' ? 'EXIT' : p.status==='fail' ? 'FAIL' : 'ACTIVA';
+    const statusColor = p.status==='exit' ? '#2E7D32' : p.status==='fail' ? '#C62828' : '#1565C0';
+    const eq = getEffectiveEquity(p.key);
+    const invEq = getInvestorEquity(p.key, p.investorAmount, p.capital);
+    const myAmount = p.investorAmount > 0 ? `€${p.investorAmount.toLocaleString('es-ES')}` : '—';
+    const tirStr = p.tir ? `+${p.tir}%` : '—';
+    return `<tr>
+      <td>${p.name}</td>
+      <td>€${p.capital.toLocaleString('es-ES')}</td>
+      <td><strong>${myAmount}</strong></td>
+      <td>${invEq ? invEq.str : '—'} <span style="font-size:10px;color:#888;">(club: ${eq})</span></td>
+      <td style="color:${statusColor};font-weight:700;letter-spacing:0.04em;">${statusLabel}</td>
+      <td>${tirStr}</td>
+    </tr>`;
+  }).join('');
+
+  const bestTirBlock = bestTir
+    ? `<div style="background:#EEF3FB;border:1px solid #D0DFF5;border-radius:10px;padding:10px 16px;margin-bottom:22px;font-size:11px;color:#5A7A9F;">
+        <strong style="color:#1565C0;">Mejor TIR del portfolio:</strong> +${bestTir.tir}% — <strong>${bestTir.name}</strong>
+       </div>` : '';
+
+  const html = `<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Informe Portfolio — ${inv.name}</title>
+<style>
+  @page { margin: 18mm 16mm; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; color: #1A2B4A; background: #fff; font-size: 12px; }
+  .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 26px; padding-bottom: 14px; border-bottom: 2.5px solid #1565C0; }
+  .header-left h1 { font-size: 21px; font-weight: 800; color: #1565C0; letter-spacing: -0.3px; margin-bottom: 3px; }
+  .header-left p { font-size: 10px; color: #5A7A9F; text-transform: uppercase; letter-spacing: 0.08em; }
+  .header-right { text-align: right; font-size: 11px; color: #5A7A9F; line-height: 1.6; }
+  .header-right strong { display: block; font-size: 14px; color: #1A2B4A; font-weight: 700; margin-bottom: 1px; }
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px; }
+  .kpi-card { background: #EEF3FB; border: 1px solid #D0DFF5; border-radius: 10px; padding: 14px 12px; text-align: center; }
+  .kpi-label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.12em; color: #5A7A9F; margin-bottom: 5px; }
+  .kpi-value { font-size: 22px; font-weight: 800; color: #1565C0; line-height: 1; }
+  .kpi-value.red { color: #C62828; }
+  .section-title { font-size: 11px; font-weight: 700; color: #1565C0; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.10em; border-bottom: 1px solid #D0DFF5; padding-bottom: 5px; }
+  table { width: 100%; border-collapse: collapse; font-size: 11px; }
+  thead th { background: #1565C0; color: white; padding: 7px 9px; text-align: left; font-weight: 700; font-size: 9px; text-transform: uppercase; letter-spacing: 0.07em; }
+  tbody tr { border-bottom: 1px solid #E8EFF8; }
+  tbody tr:nth-child(even) { background: #F4F8FD; }
+  tbody td { padding: 7px 9px; vertical-align: middle; }
+  .footer { margin-top: 22px; padding-top: 10px; border-top: 1px solid #D0DFF5; display: flex; justify-content: space-between; font-size: 9px; color: #8A9AB5; }
+  @media print { body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
+</style>
+</head>
+<body>
+  <div class="header">
+    <div class="header-left">
+      <h1>ANGELCLUB — Informe de Portfolio</h1>
+      <p>Resumen de posición inversora · Confidencial</p>
+    </div>
+    <div class="header-right">
+      <strong>${inv.name}</strong>
+      ${inv.email}<br>${reportDate}
+    </div>
+  </div>
+
+  <div class="kpi-grid">
+    <div class="kpi-card">
+      <div class="kpi-label">Capital Invertido</div>
+      <div class="kpi-value">€${totalInvestorCapital.toLocaleString('es-ES')}</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Startups en Cartera</div>
+      <div class="kpi-value">${portfolio.length}</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Activas</div>
+      <div class="kpi-value">${activeCount}</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Exits / Fails</div>
+      <div class="kpi-value">${exitCount} / <span class="red">${failCount}</span></div>
+    </div>
+  </div>
+
+  ${bestTirBlock}
+
+  <div class="section-title">Detalle de Inversiones</div>
+  <table>
+    <thead>
+      <tr>
+        <th>Startup</th>
+        <th>Capital Club</th>
+        <th>Mi Aportación</th>
+        <th>Mi Equity</th>
+        <th>Estado</th>
+        <th>TIR</th>
+      </tr>
+    </thead>
+    <tbody>${rows}</tbody>
+  </table>
+
+  <div class="footer">
+    <span>AngelClub · Portal de Inversores · Documento confidencial</span>
+    <span>Generado el ${reportDate}</span>
+  </div>
+</body>
+</html>`;
+
+  const w = window.open('', '_blank', 'width=920,height=720');
+  if (!w) { alert('Activa las ventanas emergentes en tu navegador para descargar el informe.'); return; }
+  w.document.write(html);
+  w.document.close();
+  w.focus();
+  setTimeout(() => { w.print(); }, 700);
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -4658,6 +4805,7 @@ function showAdminDashboard() {
 
   // Topbar — admin mode
   document.getElementById('user-badge').style.display = 'none';
+  document.getElementById('btn-download-report').style.display = 'none';
   const adminBadge = document.getElementById('admin-badge');
   adminBadge.style.display = 'flex';
   document.getElementById('topbar-subtitle').textContent = 'Panel Administrador';
@@ -5362,6 +5510,7 @@ window.openProfileModal       = openProfileModal;
 window.closeProfileModal      = closeProfileModal;
 window.investorChangePassword = investorChangePassword;
 window.investorChangeEmail    = investorChangeEmail;
+window.downloadInvestorReport = downloadInvestorReport;
 
 // ── Auto-restore session on page load/refresh ───────────────────
 // ── Page initialisation: handles both normal load and BFCache restore ──
