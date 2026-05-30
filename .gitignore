@@ -1,0 +1,9 @@
+# ── Repo PÚBLICO: no subir documentación interna ni código de la API ──
+# (contienen referencias a API keys de administrador / detalles internos)
+SKILL.md
+angelclub-api/
+
+# Artefactos locales
+.DS_Store
+.claude/
+_backups/
