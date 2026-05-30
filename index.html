@@ -6,7 +6,7 @@
 // Fuerza URL con ?v= para bypassar caché del CDN sin acceso a Cloudflare.
 // IMPORTANTE: cambia _DEPLOY_VERSION cada vez que subas un nuevo index.html
 (function(){
-  var _DEPLOY_VERSION = '4.3';
+  var _DEPLOY_VERSION = '4.4';
   var params = new URLSearchParams(window.location.search);
   if (params.get('v') !== _DEPLOY_VERSION) {
     params.set('v', _DEPLOY_VERSION);
@@ -19,7 +19,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AngelClub — Portal Inversor v4.3</title>
+<title>AngelClub — Portal Inversor v4.4</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -690,6 +690,56 @@
   .inv-save-btn:active { transform: translateY(1px); }
   .startup-detail-msg { margin-top: 10px; font-size: 12px; font-weight: 600; min-height: 16px; }
   .startup-detail-empty { padding: 8px; color: var(--muted); font-size: 13px; }
+
+  /* ── Añadir inversor a startup (admin) v4.4 ── */
+  .add-inv-bar { margin-top: 12px; }
+  .add-inv-btn {
+    background: rgba(43,168,74,0.10); color: #2BA84A; border: 1px dashed rgba(43,168,74,0.45);
+    border-radius: 10px; padding: 9px 16px; font-size: 13px; font-weight: 700; cursor: pointer;
+    font-family: 'Syne', sans-serif; transition: background 0.15s ease;
+  }
+  .add-inv-btn:hover { background: rgba(43,168,74,0.18); }
+  .add-inv-form {
+    margin-top: 12px; padding: 14px 16px; background: #fff;
+    border: 1px solid rgba(43,168,74,0.30); border-radius: 12px;
+  }
+  .add-inv-form-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 13px; color: var(--ink, #0F2038); margin-bottom: 10px; }
+  .add-inv-search-wrap { position: relative; margin-bottom: 10px; }
+  .add-inv-search {
+    width: 100%; padding: 9px 12px; border: 1px solid rgba(30,136,229,0.30);
+    border-radius: 8px; font-size: 13px; box-sizing: border-box; background: #fff; color: var(--ink, #0F2038);
+  }
+  .add-inv-search:focus { outline: none; border-color: var(--blue-bright); box-shadow: 0 0 0 3px rgba(30,136,229,0.15); }
+  .add-inv-suggestions {
+    position: absolute; left: 0; right: 0; top: calc(100% + 4px); z-index: 30;
+    background: #fff; border: 1px solid rgba(15,32,56,0.12); border-radius: 10px;
+    box-shadow: 0 12px 28px rgba(15,32,56,0.16); max-height: 240px; overflow-y: auto;
+  }
+  .add-inv-suggestions:empty { display: none; }
+  .add-inv-sugg-item {
+    display: flex; justify-content: space-between; align-items: center; gap: 10px;
+    padding: 9px 12px; cursor: pointer; border-bottom: 1px solid rgba(15,32,56,0.05);
+  }
+  .add-inv-sugg-item:last-child { border-bottom: none; }
+  .add-inv-sugg-item:hover { background: rgba(30,136,229,0.07); }
+  .add-inv-sugg-name { font-weight: 700; font-size: 13px; color: var(--ink, #0F2038); }
+  .add-inv-sugg-email { font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; }
+  .add-inv-sugg-empty { padding: 9px 12px; font-size: 12px; color: var(--muted); }
+  .add-inv-fields { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .add-inv-input {
+    flex: 1; min-width: 150px; padding: 8px 11px; border: 1px solid rgba(15,32,56,0.18);
+    border-radius: 8px; font-size: 13px; background: #fff; color: var(--ink, #0F2038);
+  }
+  .add-inv-input:focus { outline: none; border-color: var(--blue-bright); box-shadow: 0 0 0 3px rgba(30,136,229,0.12); }
+  .add-inv-amount { display: flex; align-items: center; gap: 6px; }
+  .add-inv-actions { display: flex; gap: 8px; margin-top: 12px; }
+  .add-inv-cancel {
+    background: transparent; color: var(--muted); border: 1px solid rgba(15,32,56,0.18);
+    border-radius: 8px; padding: 7px 14px; font-size: 12px; font-weight: 700; cursor: pointer;
+    font-family: 'Syne', sans-serif;
+  }
+  .add-inv-cancel:hover { background: rgba(15,32,56,0.05); }
+  .add-inv-hint { margin-top: 10px; font-size: 11px; color: var(--muted); line-height: 1.4; }
 </style>
 </head>
 <body>
@@ -709,7 +759,7 @@
       <button id="tab-admin" onclick="setLoginMode('admin')" style="flex:1;padding:9px 0;border:none;border-radius:9px;font-family:'Syne',sans-serif;font-weight:700;font-size:12px;cursor:pointer;transition:all 0.2s;background:transparent;color:var(--muted);">⚙️ Administrador</button>
     </div>
 
-    <div id="login-title" class="login-title">Portal del Inversor <span style="font-size:13px;font-family:'DM Mono',monospace;font-weight:600;color:var(--gold);letter-spacing:0.10em;background:rgba(230,168,23,0.12);padding:2px 8px;border-radius:6px;border:1px solid rgba(230,168,23,0.35);">v4.3</span></div>
+    <div id="login-title" class="login-title">Portal del Inversor <span style="font-size:13px;font-family:'DM Mono',monospace;font-weight:600;color:var(--gold);letter-spacing:0.10em;background:rgba(230,168,23,0.12);padding:2px 8px;border-radius:6px;border:1px solid rgba(230,168,23,0.35);">v4.4</span></div>
     <div id="login-sub" class="login-sub">Introduce tu correo electrónico para continuar</div>
 
     <!-- INVESTOR FIELDS — STEP 1: email -->
@@ -842,7 +892,7 @@
       <div class="logo-icon">A</div>
       <div>
         <div class="logo-text">ANGEL<span>CLUB</span></div>
-        <div id="topbar-subtitle" style="font-size:10px;color:var(--muted);letter-spacing:0.15em;text-transform:uppercase;margin-top:2px;">Portal Inversor <span style="letter-spacing:0.08em;font-weight:600;color:var(--gold);background:rgba(230,168,23,0.13);padding:1px 7px;border-radius:5px;border:1px solid rgba(230,168,23,0.30);">v4.3</span></div>
+        <div id="topbar-subtitle" style="font-size:10px;color:var(--muted);letter-spacing:0.15em;text-transform:uppercase;margin-top:2px;">Portal Inversor <span style="letter-spacing:0.08em;font-weight:600;color:var(--gold);background:rgba(230,168,23,0.13);padding:1px 7px;border-radius:5px;border:1px solid rgba(230,168,23,0.30);">v4.4</span></div>
       </div>
     </div>
     <div class="topbar-right">
@@ -3236,10 +3286,24 @@ function getInvestorEquity(startupKey, investorAmount, clubCapital) {
 // Clave: "email_lower|startupKey" => importe (número, €)
 // ═══════════════════════════════════════════════════════════════
 let INVESTMENT_OVERRIDES = {};
+let INVESTOR_NAME_REGISTRY = {}; // email_lower => name (inversores añadidos vía admin, v4.4)
 const INVESTMENT_STORAGE_KEY = 'angelclub_investment_overrides_v1';
+const INVESTOR_NAMES_STORAGE_KEY = 'angelclub_investor_names_v1';
 
 function _invKey(email, startupKey) {
   return (email || '').trim().toLowerCase() + '|' + startupKey;
+}
+
+// Crea/asegura una entrada en INVESTOR_DB para un email dado (inversores nuevos, v4.4)
+function _ensureInvestorRecord(email, name) {
+  const emailKey = (email || '').trim().toLowerCase();
+  if (!emailKey) return null;
+  if (!INVESTOR_DB[emailKey]) {
+    INVESTOR_DB[emailKey] = { names: new Set(), investments: new Map() };
+  }
+  const finalName = (name && name.trim()) || INVESTOR_NAME_REGISTRY[emailKey];
+  if (finalName) INVESTOR_DB[emailKey].names.add(finalName.trim());
+  return INVESTOR_DB[emailKey];
 }
 
 // Aplica los overrides cargados sobre INVESTOR_DB (fuente de verdad de los dashboards)
@@ -3250,9 +3314,9 @@ function applyInvestmentOverrides() {
     const email = k.slice(0, sep);
     const startupKey = k.slice(sep + 1);
     const amount = INVESTMENT_OVERRIDES[k];
-    if (INVESTOR_DB[email]) {
-      INVESTOR_DB[email].investments.set(startupKey, amount);
-    }
+    // v4.4: crear la ficha si el inversor no existía (inversor nuevo añadido por admin)
+    const rec = INVESTOR_DB[email] || _ensureInvestorRecord(email, INVESTOR_NAME_REGISTRY[email]);
+    if (rec) rec.investments.set(startupKey, amount);
   });
 }
 
@@ -3265,6 +3329,7 @@ async function loadInvestmentOverrides() {
         const remote = await res.json();
         if (remote && remote.amounts) {
           INVESTMENT_OVERRIDES = remote.amounts;
+          if (remote.names) INVESTOR_NAME_REGISTRY = remote.names; // v4.4
           applyInvestmentOverrides();
           return;
         }
@@ -3275,8 +3340,10 @@ async function loadInvestmentOverrides() {
   try {
     const raw = localStorage.getItem(INVESTMENT_STORAGE_KEY);
     INVESTMENT_OVERRIDES = raw ? JSON.parse(raw) : {};
+    const rawNames = localStorage.getItem(INVESTOR_NAMES_STORAGE_KEY);
+    INVESTOR_NAME_REGISTRY = rawNames ? JSON.parse(rawNames) : {};
     applyInvestmentOverrides();
-  } catch(e) { INVESTMENT_OVERRIDES = {}; }
+  } catch(e) { INVESTMENT_OVERRIDES = {}; INVESTOR_NAME_REGISTRY = {}; }
 }
 
 // Importe efectivo (override > valor base del CSV)
@@ -3285,23 +3352,30 @@ function getEffectiveInvestmentAmount(email, startupKey, fallback) {
   return INVESTMENT_OVERRIDES[k] !== undefined ? INVESTMENT_OVERRIDES[k] : (fallback || 0);
 }
 
-// Guarda el nuevo importe en MongoDB (solo admin)
-async function saveInvestmentAmount(email, startupKey, amount) {
+// Guarda el nuevo importe en MongoDB (solo admin). name opcional (inversor nuevo, v4.4)
+async function saveInvestmentAmount(email, startupKey, amount, name) {
   const emailKey = (email || '').trim().toLowerCase();
   const k = _invKey(emailKey, startupKey);
   INVESTMENT_OVERRIDES[k] = amount;                 // UX optimista
-  if (INVESTOR_DB[emailKey]) INVESTOR_DB[emailKey].investments.set(startupKey, amount);
+  if (name && name.trim()) INVESTOR_NAME_REGISTRY[emailKey] = name.trim();
+  _ensureInvestorRecord(emailKey, name);            // crea ficha si no existe + añade importe abajo
+  INVESTOR_DB[emailKey].investments.set(startupKey, amount);
   try {
     if (!_adminApiKey) throw new Error('_adminApiKey no disponible');
+    const body = { email: emailKey, startupKey, amount };
+    if (name && name.trim()) body.name = name.trim();
     const res = await fetch(API_BASE + '/investments', {
       method: 'PUT',
       headers: { 'x-api-key': _adminApiKey, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: emailKey, startupKey, amount })
+      body: JSON.stringify(body)
     });
     if (!res.ok) throw new Error('API ' + res.status);
     return true;
   } catch(e) {
-    try { localStorage.setItem(INVESTMENT_STORAGE_KEY, JSON.stringify(INVESTMENT_OVERRIDES)); } catch(e2) {}
+    try {
+      localStorage.setItem(INVESTMENT_STORAGE_KEY, JSON.stringify(INVESTMENT_OVERRIDES));
+      localStorage.setItem(INVESTOR_NAMES_STORAGE_KEY, JSON.stringify(INVESTOR_NAME_REGISTRY));
+    } catch(e2) {}
     console.warn('saveInvestmentAmount fallback localStorage:', e);
     return false;
   }
@@ -3319,6 +3393,23 @@ function getInvestorsForStartup(startupKey) {
   });
   list.sort((a,b) => b.amount - a.amount);
   return list;
+}
+
+// Búsqueda de inversores existentes en el portal (para añadirlos a una startup, v4.4)
+// Devuelve los que NO están ya en la startup indicada, filtrados por nombre/email.
+function searchExistingInvestors(query, excludeStartupKey) {
+  const q = (query || '').trim().toLowerCase();
+  const results = [];
+  Object.keys(INVESTOR_DB).forEach(email => {
+    const rec = INVESTOR_DB[email];
+    if (excludeStartupKey && rec.investments.has(excludeStartupKey)) return; // ya está
+    const name = [...rec.names].sort((a,b)=>b.length-a.length)[0] || email;
+    if (!q || name.toLowerCase().includes(q) || email.toLowerCase().includes(q)) {
+      results.push({ name, email });
+    }
+  });
+  results.sort((a,b) => a.name.localeCompare(b.name));
+  return results.slice(0, 30);
 }
 
 loadEquity(); // async — carga desde MongoDB con fallback a preset/localStorage
@@ -3920,7 +4011,7 @@ function setLoginMode(mode) {
   document.getElementById('investor-fields').style.display = isAdmin ? 'none' : 'block';
   document.getElementById('investor-step2').style.display  = 'none';
   document.getElementById('admin-fields').style.display    = isAdmin ? 'block' : 'none';
-  document.getElementById('login-title').innerHTML = isAdmin ? 'Acceso Administrador' : 'Portal del Inversor <span style="font-size:11px;font-family:\'DM Mono\',monospace;font-weight:600;color:var(--gold);letter-spacing:0.10em;background:rgba(230,168,23,0.12);padding:2px 8px;border-radius:6px;border:1px solid rgba(230,168,23,0.35);">v4.3</span>';
+  document.getElementById('login-title').innerHTML = isAdmin ? 'Acceso Administrador' : 'Portal del Inversor <span style="font-size:11px;font-family:\'DM Mono\',monospace;font-weight:600;color:var(--gold);letter-spacing:0.10em;background:rgba(230,168,23,0.12);padding:2px 8px;border-radius:6px;border:1px solid rgba(230,168,23,0.35);">v4.4</span>';
   document.getElementById('login-sub').textContent = isAdmin
     ? 'Acceso exclusivo para el equipo de AngelClub'
     : 'Introduce tu correo electrónico para acceder';
@@ -4356,7 +4447,7 @@ function showDashboard() {
   document.getElementById('user-badge').style.display = 'flex';
   document.getElementById('admin-badge').style.display = 'none';
   document.getElementById('btn-download-report').style.display = 'flex';
-  document.getElementById('topbar-subtitle').innerHTML = 'Portal Inversor <span style="letter-spacing:0.08em;font-weight:600;color:var(--gold);background:rgba(230,168,23,0.13);padding:1px 7px;border-radius:5px;border:1px solid rgba(230,168,23,0.30);">v4.3</span>';
+  document.getElementById('topbar-subtitle').innerHTML = 'Portal Inversor <span style="letter-spacing:0.08em;font-weight:600;color:var(--gold);background:rgba(230,168,23,0.13);padding:1px 7px;border-radius:5px;border:1px solid rgba(230,168,23,0.30);">v4.4</span>';
   document.getElementById('topbar-view-label').textContent = 'Mi Portfolio';
 
   const inv = currentInvestor;
@@ -5367,12 +5458,10 @@ function toggleStartupInvestors(startupKey, rowEl) {
 
 function renderStartupInvestorsHtml(startupKey) {
   const sName = STARTUPS[startupKey]?.name || startupKey;
+  const safeStartupName = (sName || '').replace(/</g,'&lt;');
   const investors = getInvestorsForStartup(startupKey);
   const sum = investors.reduce((s,i)=>s+(i.amount||0),0);
-  if (!investors.length) {
-    return `<div class="startup-detail-box"><div class="startup-detail-empty">No hay inversores registrados para ${sName}.</div></div>`;
-  }
-  const rows = investors.map(inv => {
+  const rowsHtml = investors.length ? investors.map(inv => {
     const safeEmail = inv.email.replace(/\\/g,'\\\\').replace(/'/g, "\\'");
     let suffix; try { suffix = btoa(unescape(encodeURIComponent(inv.email))).replace(/[^a-zA-Z0-9]/g,''); }
     catch(e) { suffix = inv.email.replace(/[^a-zA-Z0-9]/g,''); }
@@ -5389,14 +5478,37 @@ function renderStartupInvestorsHtml(startupKey) {
           <button class="inv-save-btn" onclick="adminSaveInvestmentAmount('${safeEmail}','${startupKey}','${inputId}')">💾 Guardar</button>
         </div>
       </div>`;
-  }).join('');
+  }).join('') : `<div class="startup-detail-empty">Aún no hay inversores en ${safeStartupName}. Añade el primero con el botón de abajo ↓</div>`;
   return `
-    <div class="startup-detail-box">
+    <div class="startup-detail-box" id="sdbox_${startupKey}">
       <div class="startup-detail-head">
-        <span class="startup-detail-title">👥 Inversores en ${sName}</span>
+        <span class="startup-detail-title">👥 Inversores en ${safeStartupName}</span>
         <span class="startup-detail-sum" id="sdsum_${startupKey}">${investors.length} inversor${investors.length!==1?'es':''} · €${sum.toLocaleString('es-ES')} aportados</span>
       </div>
-      <div class="inv-edit-list">${rows}</div>
+      <div class="inv-edit-list">${rowsHtml}</div>
+      <div class="add-inv-bar">
+        <button class="add-inv-btn" onclick="toggleAddInvestorForm('${startupKey}')">➕ Añadir inversor</button>
+      </div>
+      <div class="add-inv-form" id="addform_${startupKey}" style="display:none;">
+        <div class="add-inv-form-title">Añadir inversor a ${safeStartupName}</div>
+        <div class="add-inv-search-wrap">
+          <input id="addsearch_${startupKey}" class="add-inv-search" type="text" autocomplete="off"
+                 placeholder="🔍 Buscar inversor existente por nombre o email…"
+                 oninput="searchInvestorsForAddUI('${startupKey}', this.value)">
+          <div class="add-inv-suggestions" id="addsugg_${startupKey}"></div>
+        </div>
+        <div class="add-inv-fields">
+          <input id="addname_${startupKey}"  class="add-inv-input" type="text"  placeholder="Nombre del inversor">
+          <input id="addemail_${startupKey}" class="add-inv-input" type="email" placeholder="email@ejemplo.com">
+          <div class="add-inv-amount"><span class="inv-edit-eur">€</span>
+            <input id="addamt_${startupKey}" class="inv-amount-input" type="number" min="0" step="100" placeholder="Importe aportado"></div>
+        </div>
+        <div class="add-inv-actions">
+          <button class="inv-save-btn" onclick="adminAddInvestorToStartup('${startupKey}')">✅ Añadir al proyecto</button>
+          <button class="add-inv-cancel" onclick="toggleAddInvestorForm('${startupKey}')">Cancelar</button>
+        </div>
+        <div class="add-inv-hint">Selecciona un inversor de la búsqueda (ya en el portal con otras inversiones) o escribe nombre + email para uno nuevo.</div>
+      </div>
       <div class="startup-detail-msg" id="sdmsg_${startupKey}"></div>
     </div>`;
 }
@@ -5422,6 +5534,70 @@ async function adminSaveInvestmentAmount(email, startupKey, inputId) {
     msg.textContent = ok ? '✅ Importe actualizado y guardado en MongoDB' : '⚠️ Guardado localmente (sin conexión a MongoDB)';
     msg.style.color = ok ? '#2BA84A' : '#E6A817';
   }
+}
+
+// ── Añadir inversor a una startup (admin) v4.4 ─────────────────────
+function toggleAddInvestorForm(startupKey) {
+  const form = document.getElementById('addform_' + startupKey);
+  if (!form) return;
+  const showing = form.style.display !== 'none';
+  form.style.display = showing ? 'none' : 'block';
+  if (!showing) {
+    const s = document.getElementById('addsearch_' + startupKey); if (s) { s.value = ''; s.focus(); }
+    const sug = document.getElementById('addsugg_' + startupKey); if (sug) sug.innerHTML = '';
+    ['addname_','addemail_','addamt_'].forEach(p => { const el = document.getElementById(p+startupKey); if (el) el.value=''; });
+  }
+}
+
+function searchInvestorsForAddUI(startupKey, query) {
+  const box = document.getElementById('addsugg_' + startupKey);
+  if (!box) return;
+  const q = (query || '').trim();
+  if (q.length < 2) { box.innerHTML = ''; return; }
+  const results = searchExistingInvestors(q, startupKey);
+  if (!results.length) {
+    box.innerHTML = '<div class="add-inv-sugg-empty">Sin coincidencias — se añadirá como inversor nuevo (rellena nombre + email).</div>';
+    return;
+  }
+  box.innerHTML = results.map(r => {
+    const se = r.email.replace(/\\/g,'\\\\').replace(/'/g, "\\'");
+    const sn = r.name.replace(/\\/g,'\\\\').replace(/'/g, "\\'");
+    return `<div class="add-inv-sugg-item" onclick="selectInvestorForAdd('${startupKey}','${se}','${sn}')">
+      <span class="add-inv-sugg-name">${r.name}</span><span class="add-inv-sugg-email">${r.email}</span></div>`;
+  }).join('');
+}
+
+function selectInvestorForAdd(startupKey, email, name) {
+  const ne = document.getElementById('addname_'  + startupKey);
+  const ee = document.getElementById('addemail_' + startupKey);
+  const se = document.getElementById('addsearch_'+ startupKey);
+  const box = document.getElementById('addsugg_' + startupKey);
+  if (ne) ne.value = name;
+  if (ee) ee.value = email;
+  if (se) se.value = name + ' · ' + email;
+  if (box) box.innerHTML = '';
+  const amt = document.getElementById('addamt_' + startupKey); if (amt) amt.focus();
+}
+
+async function adminAddInvestorToStartup(startupKey) {
+  const name   = (document.getElementById('addname_'  + startupKey)?.value || '').trim();
+  const email  = (document.getElementById('addemail_' + startupKey)?.value || '').trim().toLowerCase();
+  const amount = Math.round(parseFloat(document.getElementById('addamt_' + startupKey)?.value));
+  const msg = document.getElementById('sdmsg_' + startupKey);
+  const setMsg = (t,c) => { const m = document.getElementById('sdmsg_' + startupKey); if (m){ m.textContent=t; m.style.color=c; } };
+  // Validaciones
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setMsg('⚠️ Email no válido', '#E5484D'); return; }
+  if (!name) { setMsg('⚠️ Falta el nombre del inversor', '#E5484D'); return; }
+  if (isNaN(amount) || amount < 0) { setMsg('⚠️ Importe no válido', '#E5484D'); return; }
+  if (INVESTOR_DB[email] && INVESTOR_DB[email].investments.has(startupKey)) {
+    setMsg('⚠️ Ese inversor ya está en esta startup. Edita su importe en la lista de arriba.', '#E6A817'); return;
+  }
+  if (msg) { msg.textContent = '⏳ Añadiendo…'; msg.style.color = 'var(--muted)'; }
+  const ok = await saveInvestmentAmount(email, startupKey, amount, name);
+  // Re-render del bloque de detalle (refleja el inversor recién añadido)
+  const box = document.getElementById('sdbox_' + startupKey);
+  if (box) box.outerHTML = renderStartupInvestorsHtml(startupKey);
+  setMsg(ok ? '✅ Inversor añadido y guardado en MongoDB' : '⚠️ Añadido localmente (sin conexión a MongoDB)', ok ? '#2BA84A' : '#E6A817');
 }
 
 function filterAdminTable() {
@@ -5856,6 +6032,10 @@ window.investorChangeEmail    = investorChangeEmail;
 window.downloadInvestorReport = downloadInvestorReport;
 window.toggleStartupInvestors   = toggleStartupInvestors;
 window.adminSaveInvestmentAmount = adminSaveInvestmentAmount;
+window.toggleAddInvestorForm     = toggleAddInvestorForm;
+window.searchInvestorsForAddUI   = searchInvestorsForAddUI;
+window.selectInvestorForAdd      = selectInvestorForAdd;
+window.adminAddInvestorToStartup = adminAddInvestorToStartup;
 
 // ── Auto-restore session on page load/refresh ───────────────────
 // ── Page initialisation: handles both normal load and BFCache restore ──
