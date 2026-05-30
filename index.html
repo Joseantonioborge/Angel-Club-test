@@ -6,7 +6,7 @@
 // Fuerza URL con ?v= para bypassar caché del CDN sin acceso a Cloudflare.
 // IMPORTANTE: cambia _DEPLOY_VERSION cada vez que subas un nuevo index.html
 (function(){
-  var _DEPLOY_VERSION = '4.2';
+  var _DEPLOY_VERSION = '4.3';
   var params = new URLSearchParams(window.location.search);
   if (params.get('v') !== _DEPLOY_VERSION) {
     params.set('v', _DEPLOY_VERSION);
@@ -19,7 +19,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AngelClub — Portal Inversor v4.2</title>
+<title>AngelClub — Portal Inversor v4.3</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -639,6 +639,57 @@
     .kpi-value { font-size: 20px; }
     .login-card { padding: 32px 24px; margin: 16px; }
   }
+
+  /* ── Expansión de inversores por startup (Portfolio Completo admin) v4.3 ── */
+  .startup-clickable-row:hover { background: rgba(30,136,229,0.06); }
+  .startup-clickable-row .inv-caret {
+    display: inline-block; font-size: 10px; color: var(--blue-bright);
+    transition: transform 0.2s ease; opacity: 0.7;
+  }
+  .startup-row-expanded { background: rgba(30,136,229,0.08); }
+  .startup-row-expanded .inv-caret { transform: rotate(180deg); opacity: 1; }
+  .startup-detail-row > td { padding: 0 !important; background: rgba(15,32,56,0.04); }
+  .startup-detail-box {
+    padding: 16px 18px; border-left: 3px solid var(--blue-bright);
+    background: rgba(30,136,229,0.045);
+  }
+  .startup-detail-head {
+    display: flex; justify-content: space-between; align-items: center;
+    flex-wrap: wrap; gap: 8px; margin-bottom: 12px;
+  }
+  .startup-detail-title {
+    font-family: 'Syne', sans-serif; font-weight: 700; font-size: 14px; color: var(--ink, #0F2038);
+  }
+  .startup-detail-sum {
+    font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted);
+    background: rgba(30,136,229,0.10); padding: 3px 10px; border-radius: 20px;
+  }
+  .inv-edit-list { display: flex; flex-direction: column; gap: 8px; }
+  .inv-edit-row {
+    display: flex; justify-content: space-between; align-items: center;
+    flex-wrap: wrap; gap: 10px; background: #fff;
+    border: 1px solid rgba(15,32,56,0.08); border-radius: 10px; padding: 10px 14px;
+  }
+  .inv-edit-info { min-width: 0; flex: 1; }
+  .inv-edit-name { font-weight: 700; font-size: 13px; color: var(--ink, #0F2038); }
+  .inv-edit-email { font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; }
+  .inv-edit-controls { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+  .inv-edit-eur { font-weight: 700; color: var(--muted); font-size: 13px; }
+  .inv-amount-input {
+    width: 120px; padding: 7px 10px; border: 1px solid rgba(30,136,229,0.30);
+    border-radius: 8px; font-family: 'DM Mono', monospace; font-size: 13px;
+    font-weight: 700; color: var(--ink, #0F2038); text-align: right; background: #fff;
+  }
+  .inv-amount-input:focus { outline: none; border-color: var(--blue-bright); box-shadow: 0 0 0 3px rgba(30,136,229,0.15); }
+  .inv-save-btn {
+    background: var(--blue-bright); color: #fff; border: none; border-radius: 8px;
+    padding: 7px 12px; font-size: 12px; font-weight: 700; cursor: pointer;
+    font-family: 'Syne', sans-serif; transition: filter 0.15s ease; white-space: nowrap;
+  }
+  .inv-save-btn:hover { filter: brightness(1.08); }
+  .inv-save-btn:active { transform: translateY(1px); }
+  .startup-detail-msg { margin-top: 10px; font-size: 12px; font-weight: 600; min-height: 16px; }
+  .startup-detail-empty { padding: 8px; color: var(--muted); font-size: 13px; }
 </style>
 </head>
 <body>
@@ -658,7 +709,7 @@
       <button id="tab-admin" onclick="setLoginMode('admin')" style="flex:1;padding:9px 0;border:none;border-radius:9px;font-family:'Syne',sans-serif;font-weight:700;font-size:12px;cursor:pointer;transition:all 0.2s;background:transparent;color:var(--muted);">⚙️ Administrador</button>
     </div>
 
-    <div id="login-title" class="login-title">Portal del Inversor <span style="font-size:13px;font-family:'DM Mono',monospace;font-weight:600;color:var(--gold);letter-spacing:0.10em;background:rgba(230,168,23,0.12);padding:2px 8px;border-radius:6px;border:1px solid rgba(230,168,23,0.35);">v4.2</span></div>
+    <div id="login-title" class="login-title">Portal del Inversor <span style="font-size:13px;font-family:'DM Mono',monospace;font-weight:600;color:var(--gold);letter-spacing:0.10em;background:rgba(230,168,23,0.12);padding:2px 8px;border-radius:6px;border:1px solid rgba(230,168,23,0.35);">v4.3</span></div>
     <div id="login-sub" class="login-sub">Introduce tu correo electrónico para continuar</div>
 
     <!-- INVESTOR FIELDS — STEP 1: email -->
@@ -791,7 +842,7 @@
       <div class="logo-icon">A</div>
       <div>
         <div class="logo-text">ANGEL<span>CLUB</span></div>
-        <div id="topbar-subtitle" style="font-size:10px;color:var(--muted);letter-spacing:0.15em;text-transform:uppercase;margin-top:2px;">Portal Inversor <span style="letter-spacing:0.08em;font-weight:600;color:var(--gold);background:rgba(230,168,23,0.13);padding:1px 7px;border-radius:5px;border:1px solid rgba(230,168,23,0.30);">v4.2</span></div>
+        <div id="topbar-subtitle" style="font-size:10px;color:var(--muted);letter-spacing:0.15em;text-transform:uppercase;margin-top:2px;">Portal Inversor <span style="letter-spacing:0.08em;font-weight:600;color:var(--gold);background:rgba(230,168,23,0.13);padding:1px 7px;border-radius:5px;border:1px solid rgba(230,168,23,0.30);">v4.3</span></div>
       </div>
     </div>
     <div class="topbar-right">
@@ -3178,7 +3229,100 @@ function getInvestorEquity(startupKey, investorAmount, clubCapital) {
   return { pct: investorEq, str: formatted + '%', clubEq: eq };
 }
 
+// ═══════════════════════════════════════════════════════════════
+// IMPORTES DE INVERSIÓN POR INVERSOR — overrides admin (MongoDB) v4.3
+// Permite actualizar la cantidad aportada por cada inversor en cada
+// startup (p.ej. cuando se aporta más capital en una ronda posterior).
+// Clave: "email_lower|startupKey" => importe (número, €)
+// ═══════════════════════════════════════════════════════════════
+let INVESTMENT_OVERRIDES = {};
+const INVESTMENT_STORAGE_KEY = 'angelclub_investment_overrides_v1';
+
+function _invKey(email, startupKey) {
+  return (email || '').trim().toLowerCase() + '|' + startupKey;
+}
+
+// Aplica los overrides cargados sobre INVESTOR_DB (fuente de verdad de los dashboards)
+function applyInvestmentOverrides() {
+  Object.keys(INVESTMENT_OVERRIDES).forEach(k => {
+    const sep = k.indexOf('|');
+    if (sep < 0) return;
+    const email = k.slice(0, sep);
+    const startupKey = k.slice(sep + 1);
+    const amount = INVESTMENT_OVERRIDES[k];
+    if (INVESTOR_DB[email]) {
+      INVESTOR_DB[email].investments.set(startupKey, amount);
+    }
+  });
+}
+
+async function loadInvestmentOverrides() {
+  try {
+    const apiKey = API_KEY_RO || _adminApiKey;
+    if (apiKey) {
+      const res = await fetch(API_BASE + '/investments', { headers: { 'x-api-key': apiKey } });
+      if (res.ok) {
+        const remote = await res.json();
+        if (remote && remote.amounts) {
+          INVESTMENT_OVERRIDES = remote.amounts;
+          applyInvestmentOverrides();
+          return;
+        }
+      }
+    }
+  } catch(e) { /* fallback silencioso */ }
+  // Fallback: localStorage (ediciones locales pendientes)
+  try {
+    const raw = localStorage.getItem(INVESTMENT_STORAGE_KEY);
+    INVESTMENT_OVERRIDES = raw ? JSON.parse(raw) : {};
+    applyInvestmentOverrides();
+  } catch(e) { INVESTMENT_OVERRIDES = {}; }
+}
+
+// Importe efectivo (override > valor base del CSV)
+function getEffectiveInvestmentAmount(email, startupKey, fallback) {
+  const k = _invKey(email, startupKey);
+  return INVESTMENT_OVERRIDES[k] !== undefined ? INVESTMENT_OVERRIDES[k] : (fallback || 0);
+}
+
+// Guarda el nuevo importe en MongoDB (solo admin)
+async function saveInvestmentAmount(email, startupKey, amount) {
+  const emailKey = (email || '').trim().toLowerCase();
+  const k = _invKey(emailKey, startupKey);
+  INVESTMENT_OVERRIDES[k] = amount;                 // UX optimista
+  if (INVESTOR_DB[emailKey]) INVESTOR_DB[emailKey].investments.set(startupKey, amount);
+  try {
+    if (!_adminApiKey) throw new Error('_adminApiKey no disponible');
+    const res = await fetch(API_BASE + '/investments', {
+      method: 'PUT',
+      headers: { 'x-api-key': _adminApiKey, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: emailKey, startupKey, amount })
+    });
+    if (!res.ok) throw new Error('API ' + res.status);
+    return true;
+  } catch(e) {
+    try { localStorage.setItem(INVESTMENT_STORAGE_KEY, JSON.stringify(INVESTMENT_OVERRIDES)); } catch(e2) {}
+    console.warn('saveInvestmentAmount fallback localStorage:', e);
+    return false;
+  }
+}
+
+// Inversores de una startup (desde INVESTOR_DB, ya refleja overrides)
+function getInvestorsForStartup(startupKey) {
+  const list = [];
+  Object.keys(INVESTOR_DB).forEach(email => {
+    const rec = INVESTOR_DB[email];
+    if (rec.investments.has(startupKey)) {
+      const name = [...rec.names].sort((a,b)=>b.length-a.length)[0] || email;
+      list.push({ name, email, amount: rec.investments.get(startupKey) || 0 });
+    }
+  });
+  list.sort((a,b) => b.amount - a.amount);
+  return list;
+}
+
 loadEquity(); // async — carga desde MongoDB con fallback a preset/localStorage
+loadInvestmentOverrides(); // async — carga overrides de importes por inversor (v4.3)
 _loadPasswordsFromMongo(); // async — carga contraseñas cross-device desde MongoDB
 
 // ═══════════════════════════════════════════════════════════════
@@ -3776,7 +3920,7 @@ function setLoginMode(mode) {
   document.getElementById('investor-fields').style.display = isAdmin ? 'none' : 'block';
   document.getElementById('investor-step2').style.display  = 'none';
   document.getElementById('admin-fields').style.display    = isAdmin ? 'block' : 'none';
-  document.getElementById('login-title').innerHTML = isAdmin ? 'Acceso Administrador' : 'Portal del Inversor <span style="font-size:11px;font-family:\'DM Mono\',monospace;font-weight:600;color:var(--gold);letter-spacing:0.10em;background:rgba(230,168,23,0.12);padding:2px 8px;border-radius:6px;border:1px solid rgba(230,168,23,0.35);">v4.2</span>';
+  document.getElementById('login-title').innerHTML = isAdmin ? 'Acceso Administrador' : 'Portal del Inversor <span style="font-size:11px;font-family:\'DM Mono\',monospace;font-weight:600;color:var(--gold);letter-spacing:0.10em;background:rgba(230,168,23,0.12);padding:2px 8px;border-radius:6px;border:1px solid rgba(230,168,23,0.35);">v4.3</span>';
   document.getElementById('login-sub').textContent = isAdmin
     ? 'Acceso exclusivo para el equipo de AngelClub'
     : 'Introduce tu correo electrónico para acceder';
@@ -4212,7 +4356,7 @@ function showDashboard() {
   document.getElementById('user-badge').style.display = 'flex';
   document.getElementById('admin-badge').style.display = 'none';
   document.getElementById('btn-download-report').style.display = 'flex';
-  document.getElementById('topbar-subtitle').innerHTML = 'Portal Inversor <span style="letter-spacing:0.08em;font-weight:600;color:var(--gold);background:rgba(230,168,23,0.13);padding:1px 7px;border-radius:5px;border:1px solid rgba(230,168,23,0.30);">v4.2</span>';
+  document.getElementById('topbar-subtitle').innerHTML = 'Portal Inversor <span style="letter-spacing:0.08em;font-weight:600;color:var(--gold);background:rgba(230,168,23,0.13);padding:1px 7px;border-radius:5px;border:1px solid rgba(230,168,23,0.30);">v4.3</span>';
   document.getElementById('topbar-view-label').textContent = 'Mi Portfolio';
 
   const inv = currentInvestor;
@@ -5100,8 +5244,15 @@ function renderAdminExtras(allStartups, totalCapital) {
       <td>${admSEqDisplay}</td>
       <td><span class="status-badge ${statusClass}">${statusLabel}</span></td>
       <td>${tirEl}</td>
-      <td><span style="font-family:'Syne',sans-serif;font-weight:700;color:var(--blue-bright);">${investorCount}</span></td>
+      <td><span style="font-family:'Syne',sans-serif;font-weight:700;color:var(--blue-bright);">${investorCount}</span> <span class="inv-caret">▾</span></td>
       <td>${webEl}</td>`;
+    tr.classList.add('startup-clickable-row');
+    tr.style.cursor = 'pointer';
+    tr.title = 'Ver inversores y editar importes aportados';
+    tr.addEventListener('click', (e) => {
+      if (e.target.closest('a')) return; // no expandir si se hace click en un enlace
+      toggleStartupInvestors(p.key, tr);
+    });
     admStartupTbody.appendChild(tr);
   });
 
@@ -5166,7 +5317,8 @@ function renderAdminExtras(allStartups, totalCapital) {
     const s = STARTUPS[key];
     const statusLabel = s ? (s.status==='exit'?'✅ EXIT':s.status==='fail'?'❌ FAIL':'● ACTIVA') : '—';
     const statusClass = s ? (s.status==='exit'?'status-exit':s.status==='fail'?'status-fail':'status-active') : '';
-    _admInvestorRows.push({ name, email, startup: s?.name||startup, amount: amount||0, statusLabel, statusClass });
+    const effAmount = getEffectiveInvestmentAmount(email, key, amount||0); // override admin (v4.3)
+    _admInvestorRows.push({ name, email, startup: s?.name||startup, amount: effAmount, statusLabel, statusClass });
   });
   _admInvestorRows.sort((a,b) => b.amount - a.amount);
 
@@ -5185,6 +5337,91 @@ function renderAdminExtras(allStartups, totalCapital) {
   adminRenderPasswordsTable();
   refreshAccessLogPanel();
   adminRenderRatings();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Expansión de inversores por startup en el Portfolio Completo (admin) v4.3
+// Click en una fila → despliega el listado de inversores con sus importes
+// aportados, editables y persistidos en MongoDB.
+// ═══════════════════════════════════════════════════════════════
+function toggleStartupInvestors(startupKey, rowEl) {
+  const next = rowEl.nextElementSibling;
+  if (next && next.classList.contains('startup-detail-row')) {
+    next.remove();
+    rowEl.classList.remove('startup-row-expanded');
+    return;
+  }
+  // Cerrar cualquier otra fila expandida (acordeón)
+  document.querySelectorAll('#admin-startup-tbody .startup-detail-row').forEach(r => r.remove());
+  document.querySelectorAll('#admin-startup-tbody .startup-row-expanded').forEach(r => r.classList.remove('startup-row-expanded'));
+
+  rowEl.classList.add('startup-row-expanded');
+  const detailTr = document.createElement('tr');
+  detailTr.className = 'startup-detail-row';
+  const td = document.createElement('td');
+  td.colSpan = 9;
+  td.innerHTML = renderStartupInvestorsHtml(startupKey);
+  detailTr.appendChild(td);
+  rowEl.parentNode.insertBefore(detailTr, rowEl.nextSibling);
+}
+
+function renderStartupInvestorsHtml(startupKey) {
+  const sName = STARTUPS[startupKey]?.name || startupKey;
+  const investors = getInvestorsForStartup(startupKey);
+  const sum = investors.reduce((s,i)=>s+(i.amount||0),0);
+  if (!investors.length) {
+    return `<div class="startup-detail-box"><div class="startup-detail-empty">No hay inversores registrados para ${sName}.</div></div>`;
+  }
+  const rows = investors.map(inv => {
+    const safeEmail = inv.email.replace(/\\/g,'\\\\').replace(/'/g, "\\'");
+    let suffix; try { suffix = btoa(unescape(encodeURIComponent(inv.email))).replace(/[^a-zA-Z0-9]/g,''); }
+    catch(e) { suffix = inv.email.replace(/[^a-zA-Z0-9]/g,''); }
+    const inputId = 'invamt_' + startupKey + '_' + suffix;
+    return `
+      <div class="inv-edit-row">
+        <div class="inv-edit-info">
+          <div class="inv-edit-name">${inv.name}</div>
+          <div class="inv-edit-email">${inv.email}</div>
+        </div>
+        <div class="inv-edit-controls">
+          <span class="inv-edit-eur">€</span>
+          <input id="${inputId}" class="inv-amount-input" type="number" min="0" step="100" value="${inv.amount||0}">
+          <button class="inv-save-btn" onclick="adminSaveInvestmentAmount('${safeEmail}','${startupKey}','${inputId}')">💾 Guardar</button>
+        </div>
+      </div>`;
+  }).join('');
+  return `
+    <div class="startup-detail-box">
+      <div class="startup-detail-head">
+        <span class="startup-detail-title">👥 Inversores en ${sName}</span>
+        <span class="startup-detail-sum" id="sdsum_${startupKey}">${investors.length} inversor${investors.length!==1?'es':''} · €${sum.toLocaleString('es-ES')} aportados</span>
+      </div>
+      <div class="inv-edit-list">${rows}</div>
+      <div class="startup-detail-msg" id="sdmsg_${startupKey}"></div>
+    </div>`;
+}
+
+async function adminSaveInvestmentAmount(email, startupKey, inputId) {
+  const input = document.getElementById(inputId);
+  const msg = document.getElementById('sdmsg_' + startupKey);
+  if (!input) return;
+  const raw = parseFloat(input.value);
+  if (isNaN(raw) || raw < 0) {
+    if (msg) { msg.textContent = '⚠️ Importe no válido'; msg.style.color = '#E5484D'; }
+    return;
+  }
+  const amount = Math.round(raw);
+  if (msg) { msg.textContent = '⏳ Guardando…'; msg.style.color = 'var(--muted)'; }
+  const ok = await saveInvestmentAmount(email, startupKey, amount);
+  // Recalcular suma del grupo
+  const investors = getInvestorsForStartup(startupKey);
+  const sum = investors.reduce((s,i)=>s+(i.amount||0),0);
+  const sumEl = document.getElementById('sdsum_' + startupKey);
+  if (sumEl) sumEl.textContent = `${investors.length} inversor${investors.length!==1?'es':''} · €${sum.toLocaleString('es-ES')} aportados`;
+  if (msg) {
+    msg.textContent = ok ? '✅ Importe actualizado y guardado en MongoDB' : '⚠️ Guardado localmente (sin conexión a MongoDB)';
+    msg.style.color = ok ? '#2BA84A' : '#E6A817';
+  }
 }
 
 function filterAdminTable() {
@@ -5617,6 +5854,8 @@ window.closeProfileModal      = closeProfileModal;
 window.investorChangePassword = investorChangePassword;
 window.investorChangeEmail    = investorChangeEmail;
 window.downloadInvestorReport = downloadInvestorReport;
+window.toggleStartupInvestors   = toggleStartupInvestors;
+window.adminSaveInvestmentAmount = adminSaveInvestmentAmount;
 
 // ── Auto-restore session on page load/refresh ───────────────────
 // ── Page initialisation: handles both normal load and BFCache restore ──
