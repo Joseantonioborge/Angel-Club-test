@@ -3,6 +3,9 @@
 SKILL.md
 angelclub-api/
 
+# Plantillas / assets de origen (no necesarios en el portal público)
+*.docx
+
 # Artefactos locales
 .DS_Store
 .claude/

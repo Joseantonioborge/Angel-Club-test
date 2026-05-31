@@ -6,7 +6,7 @@
 // Fuerza URL con ?v= para bypassar caché del CDN sin acceso a Cloudflare.
 // IMPORTANTE: cambia _DEPLOY_VERSION cada vez que subas un nuevo index.html
 (function(){
-  var _DEPLOY_VERSION = '4.5';
+  var _DEPLOY_VERSION = '4.6';
   var params = new URLSearchParams(window.location.search);
   if (params.get('v') !== _DEPLOY_VERSION) {
     params.set('v', _DEPLOY_VERSION);
@@ -19,7 +19,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AngelClub — Portal Inversor v4.5</title>
+<title>AngelClub — Portal Inversor v4.6</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -263,6 +263,49 @@
     font-family: 'DM Mono', monospace; display: none; min-height: 18px;
   }
   .topbar-date strong { display: block; color: var(--blue-bright); font-size: 13px; margin-bottom: 2px; }
+
+  /* ── Reports dropdown (v4.6) ── */
+  #reports-dropdown {
+    position: absolute; top: calc(100% + 8px); right: 0;
+    background: rgba(255,255,255,0.98); border: 1px solid var(--border);
+    border-radius: 14px; padding: 6px; min-width: 230px;
+    box-shadow: 0 8px 32px rgba(21,101,192,0.18);
+    z-index: 9000; display: none; animation: fadeUp 0.15s ease both;
+  }
+  #reports-dropdown.open { display: block; }
+
+  /* ── Loss certificate modal (v4.6) ── */
+  #losscert-modal {
+    position: fixed; inset: 0; z-index: 9500;
+    background: rgba(20,35,70,0.55); backdrop-filter: blur(6px);
+    display: none; align-items: center; justify-content: center; padding: 24px;
+  }
+  #losscert-modal.open { display: flex; animation: fadeIn 0.2s ease both; }
+  .losscert-step { display: flex; gap: 12px; margin-bottom: 18px; }
+  .losscert-step-num {
+    flex-shrink: 0; width: 26px; height: 26px; border-radius: 50%;
+    background: linear-gradient(135deg,var(--blue),var(--blue-bright)); color: #fff;
+    font-family: 'Syne', sans-serif; font-weight: 800; font-size: 13px;
+    display: flex; align-items: center; justify-content: center; margin-top: 2px;
+  }
+  .losscert-step-body { flex: 1; min-width: 0; }
+  .losscert-step-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 14px; color: var(--text); margin-bottom: 8px; }
+  .losscert-hint { font-size: 11px; color: var(--muted); margin-bottom: 8px; font-family: 'DM Mono', monospace; }
+  .losscert-proj {
+    display: flex; align-items: center; gap: 10px; cursor: pointer;
+    background: var(--glass); border: 1px solid var(--border); border-radius: 10px;
+    padding: 9px 12px; margin-bottom: 7px;
+  }
+  .losscert-proj:hover { border-color: var(--blue); }
+  .losscert-proj-cb { width: 16px; height: 16px; accent-color: var(--blue-bright); cursor: pointer; }
+  .losscert-proj-name { flex: 1; font-weight: 700; font-size: 13px; color: var(--text); }
+  .losscert-proj-amt { font-family: 'DM Mono', monospace; font-size: 12px; font-weight: 700; color: #C62828; }
+  .losscert-auto {
+    background: rgba(30,136,229,0.07); border: 1px solid rgba(30,136,229,0.18);
+    border-radius: 10px; padding: 10px 13px; font-size: 11px; line-height: 1.5;
+    color: var(--muted); margin: 4px 0 16px;
+  }
+  #losscert-msg { font-size: 12px; margin-top: 12px; text-align: center; font-family: 'DM Mono', monospace; display: none; min-height: 18px; font-weight: 600; }
 
   /* KPI CARDS */
   .kpi-grid {
@@ -759,7 +802,7 @@
       <button id="tab-admin" onclick="setLoginMode('admin')" style="flex:1;padding:9px 0;border:none;border-radius:9px;font-family:'Syne',sans-serif;font-weight:700;font-size:12px;cursor:pointer;transition:all 0.2s;background:transparent;color:var(--muted);">⚙️ Administrador</button>
     </div>
 
-    <div id="login-title" class="login-title">Portal del Inversor <span style="font-size:13px;font-family:'DM Mono',monospace;font-weight:600;color:var(--gold);letter-spacing:0.10em;background:rgba(230,168,23,0.12);padding:2px 8px;border-radius:6px;border:1px solid rgba(230,168,23,0.35);">v4.5</span></div>
+    <div id="login-title" class="login-title">Portal del Inversor <span style="font-size:13px;font-family:'DM Mono',monospace;font-weight:600;color:var(--gold);letter-spacing:0.10em;background:rgba(230,168,23,0.12);padding:2px 8px;border-radius:6px;border:1px solid rgba(230,168,23,0.35);">v4.6</span></div>
     <div id="login-sub" class="login-sub">Introduce tu correo electrónico para continuar</div>
 
     <!-- INVESTOR FIELDS — STEP 1: email -->
@@ -880,6 +923,40 @@
   </div>
 </div>
 
+<!-- ═══════ CERTIFICADO DE PÉRDIDAS (v4.6) — fuera del container ═══════ -->
+<div id="losscert-modal">
+  <div class="profile-modal-card" style="max-width:560px;">
+    <button class="update-modal-close" onclick="closeLossCertModal()">✕</button>
+    <div class="profile-modal-title">📉 Certificado de pérdidas</div>
+    <div class="profile-modal-sub">Justificante de pérdida patrimonial para tu IRPF · Se autocompleta con tus datos del portal</div>
+
+    <div class="losscert-step">
+      <div class="losscert-step-num">1</div>
+      <div class="losscert-step-body">
+        <div class="losscert-step-title">Tu identificación fiscal</div>
+        <div class="profile-field" style="margin-bottom:0;">
+          <label>DNI / NIF <span style="color:#C62828;">*</span></label>
+          <input type="text" id="losscert-dni" class="profile-input" placeholder="Ej. 12345678A" maxlength="15" autocomplete="off" oninput="this.value=this.value.toUpperCase()">
+        </div>
+      </div>
+    </div>
+
+    <div class="losscert-step">
+      <div class="losscert-step-num">2</div>
+      <div class="losscert-step-body">
+        <div class="losscert-step-title">Proyectos fallidos a incluir</div>
+        <div class="losscert-hint" id="losscert-multi-hint" style="display:none;">Marca los proyectos que quieres incluir en el certificado.</div>
+        <div id="losscert-projects"></div>
+      </div>
+    </div>
+
+    <div class="losscert-auto">🔒 Tu nombre, los importes, las fechas y la firma digital verificada de D. Eneko Knörr de Santiago se completan automáticamente. Solo necesitas tu DNI/NIF.</div>
+
+    <button class="profile-save-btn" onclick="generateLossCertificate()">📄 Generar certificado (PDF)</button>
+    <div id="losscert-msg"></div>
+  </div>
+</div>
+
 <!-- ═══════════════════════════════════════════════════
      DASHBOARD
 ═══════════════════════════════════════════════════ -->
@@ -892,7 +969,7 @@
       <div class="logo-icon">A</div>
       <div>
         <div class="logo-text">ANGEL<span>CLUB</span></div>
-        <div id="topbar-subtitle" style="font-size:10px;color:var(--muted);letter-spacing:0.15em;text-transform:uppercase;margin-top:2px;">Portal Inversor <span style="letter-spacing:0.08em;font-weight:600;color:var(--gold);background:rgba(230,168,23,0.13);padding:1px 7px;border-radius:5px;border:1px solid rgba(230,168,23,0.30);">v4.5</span></div>
+        <div id="topbar-subtitle" style="font-size:10px;color:var(--muted);letter-spacing:0.15em;text-transform:uppercase;margin-top:2px;">Portal Inversor <span style="letter-spacing:0.08em;font-weight:600;color:var(--gold);background:rgba(230,168,23,0.13);padding:1px 7px;border-radius:5px;border:1px solid rgba(230,168,23,0.30);">v4.6</span></div>
       </div>
     </div>
     <div class="topbar-right">
@@ -921,7 +998,13 @@
         <strong id="today-date"></strong>
         <span id="topbar-view-label">Mi Portfolio</span>
       </div>
-      <button class="download-report-btn" id="btn-download-report" onclick="downloadInvestorReport()" style="display:none;">📥 Informe PDF</button>
+      <span id="reports-menu-wrapper" style="position:relative;display:inline-flex;">
+        <button class="download-report-btn" id="btn-download-report" onclick="toggleReportsMenu(event)" style="display:none;">📥 Descargar informes ▾</button>
+        <div id="reports-dropdown">
+          <div class="profile-dd-item" onclick="downloadInvestorReport()">📊 &nbsp;Informe Portfolio</div>
+          <div class="profile-dd-item" id="reports-dd-cert" onclick="openLossCertModal()" style="display:none;">📉 &nbsp;Certificado de pérdidas</div>
+        </div>
+      </span>
       <button class="logout-btn" onclick="doLogout()">⎋ Cerrar sesión</button>
     </div>
   </div>
@@ -3953,6 +4036,12 @@ document.getElementById('update-modal').addEventListener('click', function(e) {
   if (e.target === this) closeUpdateModal();
 });
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeUpdateModal(); });
+// Cierre del modal de certificado de pérdidas (v4.6)
+(function(){
+  const lc = document.getElementById('losscert-modal');
+  if (lc) lc.addEventListener('click', function(e){ if (e.target === this) closeLossCertModal(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLossCertModal(); });
+})();
 
 // ═══════════════════════════════════════════════════════════════
 // ADMIN UPDATE PANEL renderer
@@ -4011,7 +4100,7 @@ function setLoginMode(mode) {
   document.getElementById('investor-fields').style.display = isAdmin ? 'none' : 'block';
   document.getElementById('investor-step2').style.display  = 'none';
   document.getElementById('admin-fields').style.display    = isAdmin ? 'block' : 'none';
-  document.getElementById('login-title').innerHTML = isAdmin ? 'Acceso Administrador' : 'Portal del Inversor <span style="font-size:11px;font-family:\'DM Mono\',monospace;font-weight:600;color:var(--gold);letter-spacing:0.10em;background:rgba(230,168,23,0.12);padding:2px 8px;border-radius:6px;border:1px solid rgba(230,168,23,0.35);">v4.5</span>';
+  document.getElementById('login-title').innerHTML = isAdmin ? 'Acceso Administrador' : 'Portal del Inversor <span style="font-size:11px;font-family:\'DM Mono\',monospace;font-weight:600;color:var(--gold);letter-spacing:0.10em;background:rgba(230,168,23,0.12);padding:2px 8px;border-radius:6px;border:1px solid rgba(230,168,23,0.35);">v4.6</span>';
   document.getElementById('login-sub').textContent = isAdmin
     ? 'Acceso exclusivo para el equipo de AngelClub'
     : 'Introduce tu correo electrónico para acceder';
@@ -4447,7 +4536,7 @@ function showDashboard() {
   document.getElementById('user-badge').style.display = 'flex';
   document.getElementById('admin-badge').style.display = 'none';
   document.getElementById('btn-download-report').style.display = 'flex';
-  document.getElementById('topbar-subtitle').innerHTML = 'Portal Inversor <span style="letter-spacing:0.08em;font-weight:600;color:var(--gold);background:rgba(230,168,23,0.13);padding:1px 7px;border-radius:5px;border:1px solid rgba(230,168,23,0.30);">v4.5</span>';
+  document.getElementById('topbar-subtitle').innerHTML = 'Portal Inversor <span style="letter-spacing:0.08em;font-weight:600;color:var(--gold);background:rgba(230,168,23,0.13);padding:1px 7px;border-radius:5px;border:1px solid rgba(230,168,23,0.30);">v4.6</span>';
   document.getElementById('topbar-view-label').textContent = 'Mi Portfolio';
 
   const inv = currentInvestor;
@@ -4571,6 +4660,7 @@ function showDashboard() {
 // INVESTOR REPORT PDF
 // ═══════════════════════════════════════════════════════════════
 function downloadInvestorReport() {
+  const _dd = document.getElementById('reports-dropdown'); if (_dd) _dd.classList.remove('open');
   if (!currentInvestor) return;
   const inv = currentInvestor;
   const reportDate = new Date().toLocaleDateString('es-ES', {day:'numeric', month:'long', year:'numeric'});
@@ -4878,6 +4968,211 @@ function downloadInvestorReport() {
   w.document.close();
   w.focus();
   setTimeout(() => { w.print(); }, 700);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// DESCARGAR INFORMES — menú + Certificado de pérdidas (v4.6)
+// ═══════════════════════════════════════════════════════════════
+// Proyectos del inversor cuyo estado efectivo es 'fail' (activado por admin)
+function getInvestorFailProjects() {
+  if (!currentInvestor) return [];
+  const list = [];
+  currentInvestor.investments.forEach((amount, key) => {
+    const s = STARTUPS[key];
+    if (s && getEffectiveStatus(key) === 'fail') {
+      list.push({ key, name: s.name, amount: amount || 0 });
+    }
+  });
+  list.sort((a,b) => (b.amount||0) - (a.amount||0));
+  return list;
+}
+
+function toggleReportsMenu(e) {
+  if (e) e.stopPropagation();
+  const dd = document.getElementById('reports-dropdown');
+  if (!dd) return;
+  // La opción de certificado solo aparece si hay ≥1 proyecto en estado fail
+  const certItem = document.getElementById('reports-dd-cert');
+  if (certItem) certItem.style.display = getInvestorFailProjects().length > 0 ? 'flex' : 'none';
+  if (dd.classList.contains('open')) {
+    dd.classList.remove('open');
+  } else {
+    dd.classList.add('open');
+    setTimeout(() => document.addEventListener('click', _closeReportsMenuOutside, { once: true }), 0);
+  }
+}
+
+function _closeReportsMenuOutside(e) {
+  const wrapper = document.getElementById('reports-menu-wrapper');
+  if (wrapper && wrapper.contains(e.target)) {
+    document.addEventListener('click', _closeReportsMenuOutside, { once: true });
+  } else {
+    const dd = document.getElementById('reports-dropdown'); if (dd) dd.classList.remove('open');
+  }
+}
+
+function openLossCertModal() {
+  const dd = document.getElementById('reports-dropdown'); if (dd) dd.classList.remove('open');
+  const fails = getInvestorFailProjects();
+  if (!fails.length) return; // seguridad: sin proyectos fail no se abre
+  const modal = document.getElementById('losscert-modal');
+  const dni = document.getElementById('losscert-dni'); if (dni) dni.value = '';
+  const msg = document.getElementById('losscert-msg'); if (msg) { msg.style.display = 'none'; msg.textContent = ''; }
+  const multiHint = document.getElementById('losscert-multi-hint');
+  if (multiHint) multiHint.style.display = fails.length > 1 ? 'block' : 'none';
+  const box = document.getElementById('losscert-projects');
+  box.innerHTML = fails.map(p => `
+    <label class="losscert-proj">
+      <input type="checkbox" class="losscert-proj-cb" value="${(p.key||'').replace(/"/g,'&quot;')}" checked>
+      <span class="losscert-proj-name">${p.name}</span>
+      <span class="losscert-proj-amt">€${p.amount.toLocaleString('es-ES')}</span>
+    </label>`).join('');
+  modal.classList.add('open');
+  setTimeout(() => { if (dni) dni.focus(); }, 60);
+}
+
+function closeLossCertModal() {
+  const modal = document.getElementById('losscert-modal'); if (modal) modal.classList.remove('open');
+}
+
+function generateLossCertificate() {
+  const inv = currentInvestor;
+  if (!inv) return;
+  const msg = document.getElementById('losscert-msg');
+  const setMsg = (t,c) => { if (msg) { msg.style.display='block'; msg.textContent=t; msg.style.color=c; } };
+  const dniRaw = (document.getElementById('losscert-dni')?.value || '').trim().toUpperCase();
+  const dni = dniRaw.replace(/[\s.-]/g, '');
+  // Validación DNI/NIF/NIE permisiva pero con sentido
+  if (!/^[A-Z0-9]{8,10}$/.test(dni) || !/[0-9]{6,}/.test(dni)) {
+    setMsg('⚠️ Introduce un DNI/NIF válido (p. ej. 12345678A)', '#C62828'); return;
+  }
+  const selected = [...document.querySelectorAll('.losscert-proj-cb:checked')].map(cb => cb.value);
+  if (!selected.length) { setMsg('⚠️ Selecciona al menos un proyecto fallido', '#C62828'); return; }
+  const fails = getInvestorFailProjects().filter(p => selected.includes(p.key));
+  if (!fails.length) { setMsg('⚠️ No hay proyectos válidos seleccionados', '#C62828'); return; }
+  const ok = _renderLossCertificatePDF(inv, dniRaw, fails);
+  if (ok) closeLossCertModal();
+}
+
+function _renderLossCertificatePDF(inv, dni, fails) {
+  const now = new Date();
+  const MESES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  const dia = now.getDate();
+  const mes = MESES[now.getMonth()];
+  const anio = now.getFullYear();
+  const dateLong = `${dia} de ${mes} de ${anio}`;
+  const timeStr = now.toLocaleTimeString('es-ES');
+  const esc = s => String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const fmt = n => '€' + Number(n||0).toLocaleString('es-ES');
+
+  const totalInvert = fails.reduce((s,p) => s + (p.amount||0), 0);
+  const totalLoss   = totalInvert; // pérdida total = capital aportado (sin recuperación)
+
+  const tableRows = fails.map(p => `
+    <tr>
+      <td>${esc(p.name)}</td>
+      <td style="text-align:center;color:#5A7A9F;">—</td>
+      <td style="text-align:right;">${fmt(p.amount)}</td>
+      <td style="text-align:right;color:#C62828;font-weight:700;">${fmt(p.amount)}</td>
+    </tr>`).join('');
+
+  // Referencia única del documento
+  const ref = 'AC-CERT-' + anio + String(now.getMonth()+1).padStart(2,'0') + String(dia).padStart(2,'0')
+            + '-' + Math.random().toString(36).slice(2,8).toUpperCase();
+
+  const html = `<!DOCTYPE html>
+<html lang="es"><head><meta charset="UTF-8">
+<title>Certificado de Pérdidas — ${esc(inv.name)}</title>
+<style>
+  @page { margin: 18mm 18mm; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family: 'Times New Roman', Georgia, serif; color:#1A2B4A; font-size:12.5px; line-height:1.6; }
+  .doc-head { text-align:center; border-bottom:2.5px solid #1565C0; padding-bottom:14px; margin-bottom:20px; }
+  .doc-title { font-size:18px; font-weight:800; letter-spacing:0.5px; color:#10243f; margin-bottom:10px; text-transform:uppercase; font-family:'Times New Roman',serif; }
+  .doc-entity { font-size:13px; font-weight:700; color:#1565C0; }
+  .doc-meta { font-size:11px; color:#5A7A9F; margin-top:2px; }
+  .place-date { margin:18px 0 14px; font-size:12.5px; }
+  .certifica { text-align:center; font-weight:800; letter-spacing:3px; font-size:14px; margin:14px 0; color:#10243f; }
+  p.body-p { text-align:justify; margin-bottom:12px; }
+  table.inv { width:100%; border-collapse:collapse; margin:14px 0; font-size:11.5px; font-family:Arial,sans-serif; }
+  table.inv th { background:#f4f4f4; border:1px solid #999; padding:7px 9px; text-align:left; font-weight:700; }
+  table.inv th.r { text-align:right; } table.inv th.c { text-align:center; }
+  table.inv td { border:1px solid #999; padding:7px 9px; }
+  table.inv tr.total td { font-weight:800; background:#fbfbfb; }
+  .note { background:#FBF8EC; border:1px solid #E7D9A8; border-radius:7px; padding:10px 13px; font-size:10.5px; color:#6B5E36; margin:14px 0; font-family:Arial,sans-serif; }
+  /* Firma digital verificada */
+  .sig-wrap { margin-top:34px; display:flex; justify-content:flex-end; }
+  .sig-card { width:340px; border:1.5px solid #1a4fba; border-radius:10px; padding:14px 16px; background:linear-gradient(180deg,#f7faff,#eef3fb); position:relative; }
+  .sig-mono { font-family:'Segoe Script','Brush Script MT','Apple Chancery',cursive; font-size:30px; color:#10243f; line-height:1; margin-bottom:4px; transform:rotate(-3deg); }
+  .sig-line { border-top:1px solid #1A2B4A; margin:6px 0 6px; }
+  .sig-name { font-family:Arial,sans-serif; font-weight:800; font-size:12px; color:#10243f; }
+  .sig-role { font-family:Arial,sans-serif; font-size:10px; color:#5A7A9F; margin-bottom:9px; }
+  .sig-verified { display:flex; gap:9px; align-items:flex-start; border-top:1px dashed #b9cbe8; padding-top:9px; }
+  .sig-check { flex-shrink:0; width:22px; height:22px; border-radius:50%; background:#1f9d55; color:#fff; font-size:13px; font-weight:800; display:flex; align-items:center; justify-content:center; }
+  .sig-vtitle { font-family:Arial,sans-serif; font-weight:800; font-size:10.5px; color:#1a4fba; }
+  .sig-vmeta { font-family:Arial,sans-serif; font-size:8.3px; color:#5A7A9F; line-height:1.45; margin-top:2px; }
+  .doc-footer { margin-top:26px; border-top:1px solid #D0DFF5; padding-top:8px; font-size:8.5px; color:#8A9AB5; font-family:Arial,sans-serif; }
+  .disclaimer { background:#FBF8EC; border:1px solid #E7D9A8; border-radius:7px; padding:9px 13px; font-size:8.4px; line-height:1.5; color:#6B5E36; margin-top:14px; font-family:Arial,sans-serif; }
+  @media print { body { -webkit-print-color-adjust:exact; print-color-adjust:exact; } }
+</style></head>
+<body>
+  <div class="doc-head">
+    <div class="doc-title">Certificado de Pérdida por Inversión</div>
+    <div class="doc-entity">CLUB DE ANGEL FUNDING SL</div>
+    <div class="doc-meta">CIF: B87848321 · Domicilio social: Calle Núñez de Balboa, núm. 120, 28006 Madrid (Madrid)</div>
+  </div>
+
+  <div class="place-date">En Madrid, a ${dateLong}.</div>
+  <div class="certifica">CERTIFICA</div>
+
+  <p class="body-p">Que D./Dña. <strong>${esc(inv.name)}</strong>, con DNI/NIF <strong>${esc(dni)}</strong>, realizó las siguientes inversiones a través de CLUB DE ANGEL FUNDING SL, mediante contratos de cuenta en participación, conforme a lo dispuesto en el Código de Comercio:</p>
+
+  <table class="inv">
+    <thead>
+      <tr><th>Proyecto / Startup</th><th class="c">Fecha de inversión</th><th class="r">Importe invertido</th><th class="r">Importe pérdida</th></tr>
+    </thead>
+    <tbody>
+      ${tableRows}
+      <tr class="total"><td>TOTAL</td><td class="c" style="text-align:center;">—</td><td style="text-align:right;">${fmt(totalInvert)}</td><td style="text-align:right;color:#C62828;">${fmt(totalLoss)}</td></tr>
+    </tbody>
+  </table>
+
+  <p class="body-p">Que, como consecuencia de la situación económica y financiera de las citadas sociedades, las inversiones han resultado totalmente fallidas a fecha ${dateLong}, debido a la situación de insolvencia / concurso de acreedores de las mismas.</p>
+
+  <p class="body-p">Que el importe total de la pérdida económica imputable al inversor asciende a <strong>${fmt(totalLoss)}</strong>, no existiendo expectativa razonable de recuperación, ni total ni parcial, de las inversiones realizadas a través de las cuentas en participación.</p>
+
+  <p class="body-p">Y para que así conste a los efectos oportunos, especialmente para su justificación en la declaración del Impuesto sobre la Renta de las Personas Físicas (IRPF) / Declaración patrimonial, se expide el presente certificado.</p>
+
+  <div class="note">📎 <strong>Nota:</strong> Se adjunta al presente certificado el documento acreditativo de la causa señalada (concurso de acreedores), de conformidad con la normativa del IRPF aplicable a la justificación de pérdidas patrimoniales.</div>
+
+  <div class="sig-wrap">
+    <div class="sig-card">
+      <div class="sig-mono">Eneko Knörr</div>
+      <div class="sig-line"></div>
+      <div class="sig-name">D. Eneko Knörr de Santiago</div>
+      <div class="sig-role">En representación de CLUB DE ANGEL FUNDING SL</div>
+      <div class="sig-verified">
+        <div class="sig-check">✓</div>
+        <div>
+          <div class="sig-vtitle">Firma electrónica avanzada verificada</div>
+          <div class="sig-vmeta">Firmado digitalmente por ENEKO KNÖRR DE SANTIAGO<br>Fecha: ${dateLong}, ${timeStr} (CET)<br>Certificado digital válido · CLUB DE ANGEL FUNDING SL — CIF B87848321<br>Ref. documento: ${ref}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="disclaimer"><strong>Aviso:</strong> Documento generado automáticamente por el Portal de Inversores de AngelClub a partir de los datos registrados. Tiene carácter justificativo de la pérdida patrimonial a efectos fiscales. Para su validez fiscal, consérvelo junto con la documentación acreditativa de la insolvencia/concurso. No constituye asesoramiento fiscal; consulte con su asesor.</div>
+
+  <div class="doc-footer">AngelClub · CLUB DE ANGEL FUNDING SL · Certificado de pérdidas · Ref. ${ref} · Generado el ${dateLong} ${timeStr}</div>
+</body></html>`;
+
+  const w = window.open('', '_blank', 'width=960,height=820');
+  if (!w) { const m = document.getElementById('losscert-msg'); if (m) { m.style.display='block'; m.textContent='⚠️ Activa las ventanas emergentes para descargar el certificado.'; m.style.color='#C62828'; } return false; }
+  w.document.write(html);
+  w.document.close();
+  w.focus();
+  setTimeout(() => { w.print(); }, 700);
+  return true;
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -6107,6 +6402,10 @@ window.toggleAddInvestorForm     = toggleAddInvestorForm;
 window.searchInvestorsForAddUI   = searchInvestorsForAddUI;
 window.selectInvestorForAdd      = selectInvestorForAdd;
 window.adminAddInvestorToStartup = adminAddInvestorToStartup;
+window.toggleReportsMenu         = toggleReportsMenu;
+window.openLossCertModal         = openLossCertModal;
+window.closeLossCertModal        = closeLossCertModal;
+window.generateLossCertificate   = generateLossCertificate;
 
 // ── Auto-restore session on page load/refresh ───────────────────
 // ── Page initialisation: handles both normal load and BFCache restore ──
