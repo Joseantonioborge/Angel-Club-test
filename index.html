@@ -6,7 +6,7 @@
 // Fuerza URL con ?v= para bypassar caché del CDN sin acceso a Cloudflare.
 // IMPORTANTE: cambia _DEPLOY_VERSION cada vez que subas un nuevo index.html
 (function(){
-  var _DEPLOY_VERSION = '4.7';
+  var _DEPLOY_VERSION = '4.8';
   var params = new URLSearchParams(window.location.search);
   if (params.get('v') !== _DEPLOY_VERSION) {
     params.set('v', _DEPLOY_VERSION);
@@ -19,7 +19,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AngelClub — Portal Inversor v4.7</title>
+<title>AngelClub — Portal Inversor v4.8</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -348,6 +348,19 @@
     display: flex; align-items: center; gap: 10px;
   }
   .panel-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  /* ── Paneles colapsables del panel admin (v4.8) ── */
+  .panel-title.panel-toggle { cursor: pointer; user-select: none; transition: color .15s; border-radius: 10px; flex-wrap: wrap; }
+  .panel-title.panel-toggle::after { display: none; } /* sin línea divisoria en la cabecera-botón */
+  .panel-title.panel-toggle:hover { color: var(--blue-bright); }
+  .collapse-caret {
+    margin-left: auto; flex-shrink: 0; font-size: 12px; color: var(--blue-bright);
+    transition: transform .25s ease; padding-left: 12px;
+  }
+  .panel.collapsed .panel-title.panel-toggle .collapse-caret { transform: rotate(-90deg); }
+  .panel.collapsed .panel-title { margin-bottom: 0; }
+  .panel.collapsed > *:not(.panel-title) { display: none !important; }
+  .panel.collapsed .collapsible-controls { display: none !important; }
 
   /* INVESTMENTS TABLE */
   .investments-table { width: 100%; border-collapse: collapse; }
@@ -802,7 +815,7 @@
       <button id="tab-admin" onclick="setLoginMode('admin')" style="flex:1;padding:9px 0;border:none;border-radius:9px;font-family:'Syne',sans-serif;font-weight:700;font-size:12px;cursor:pointer;transition:all 0.2s;background:transparent;color:var(--muted);">⚙️ Administrador</button>
     </div>
 
-    <div id="login-title" class="login-title">Portal del Inversor <span style="font-size:13px;font-family:'DM Mono',monospace;font-weight:600;color:var(--gold);letter-spacing:0.10em;background:rgba(230,168,23,0.12);padding:2px 8px;border-radius:6px;border:1px solid rgba(230,168,23,0.35);">v4.7</span></div>
+    <div id="login-title" class="login-title">Portal del Inversor <span style="font-size:13px;font-family:'DM Mono',monospace;font-weight:600;color:var(--gold);letter-spacing:0.10em;background:rgba(230,168,23,0.12);padding:2px 8px;border-radius:6px;border:1px solid rgba(230,168,23,0.35);">v4.8</span></div>
     <div id="login-sub" class="login-sub">Introduce tu correo electrónico para continuar</div>
 
     <!-- INVESTOR FIELDS — STEP 1: email -->
@@ -969,7 +982,7 @@
       <div class="logo-icon">A</div>
       <div>
         <div class="logo-text">ANGEL<span>CLUB</span></div>
-        <div id="topbar-subtitle" style="font-size:10px;color:var(--muted);letter-spacing:0.15em;text-transform:uppercase;margin-top:2px;">Portal Inversor <span style="letter-spacing:0.08em;font-weight:600;color:var(--gold);background:rgba(230,168,23,0.13);padding:1px 7px;border-radius:5px;border:1px solid rgba(230,168,23,0.30);">v4.7</span></div>
+        <div id="topbar-subtitle" style="font-size:10px;color:var(--muted);letter-spacing:0.15em;text-transform:uppercase;margin-top:2px;">Portal Inversor <span style="letter-spacing:0.08em;font-weight:600;color:var(--gold);background:rgba(230,168,23,0.13);padding:1px 7px;border-radius:5px;border:1px solid rgba(230,168,23,0.30);">v4.8</span></div>
       </div>
     </div>
     <div class="topbar-right">
@@ -1234,9 +1247,10 @@
     </div>
 
     <!-- TABLA INVERSORES DETALLE -->
-    <div class="panel" style="margin-top:24px;animation-delay:0.3s;">
-      <div class="panel-title">👥 Directorio de Inversores
+    <div class="panel collapsible collapsed" style="margin-top:24px;animation-delay:0.3s;">
+      <div class="panel-title panel-toggle" onclick="togglePanel(this)">👥 Directorio de Inversores
         <span style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;margin-left:8px;" id="adm-investor-count-label"></span>
+        <span class="collapse-caret">▾</span>
       </div>
       <div style="margin-bottom:16px;display:flex;gap:12px;flex-wrap:wrap;align-items:center;">
         <input id="adm-search" class="field-input" type="text" placeholder="🔍 Buscar inversor o startup…" oninput="filterAdminTable()" style="max-width:320px;margin:0;">
@@ -1262,12 +1276,13 @@
     </div>
 
     <!-- ACTUALIZACIONES POR STARTUP -->
-    <div class="panel" id="admin-updates-panel" style="margin-top:24px;animation-delay:0.35s;">
-      <div class="panel-title">
+    <div class="panel collapsible collapsed" id="admin-updates-panel" style="margin-top:24px;animation-delay:0.35s;">
+      <div class="panel-title panel-toggle" onclick="togglePanel(this)">
         📡 Actualizaciones por Startup
         <span style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;margin-left:8px;">
           Añade un enlace (URL de documento, vídeo o web) por startup. Será visible para los inversores de esa compañía.
         </span>
+        <span class="collapse-caret">▾</span>
       </div>
       <div class="upd-grid" id="upd-cards-grid">
         <!-- Populated by JS -->
@@ -1275,12 +1290,13 @@
     </div>
 
     <!-- EQUITY POR STARTUP -->
-    <div class="panel" id="admin-equity-panel" style="margin-top:24px;animation-delay:0.40s;">
-      <div class="panel-title">
+    <div class="panel collapsible collapsed" id="admin-equity-panel" style="margin-top:24px;animation-delay:0.40s;">
+      <div class="panel-title panel-toggle" onclick="togglePanel(this)">
         📊 Equity por Startup
         <span style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;margin-left:8px;">
           Define el porcentaje de participación total del club en cada startup. El inversor verá su % individual calculado proporcionalmente a su aportación.
         </span>
+        <span class="collapse-caret">▾</span>
       </div>
       <div class="upd-grid" id="eq-cards-grid">
         <!-- Populated by JS -->
@@ -1288,10 +1304,10 @@
     </div>
 
     <!-- REGISTRO DE ACCESOS -->
-    <div class="panel" id="admin-access-log-panel" style="margin-top:24px;animation-delay:0.45s;">
-      <div class="panel-title" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+    <div class="panel collapsible collapsed" id="admin-access-log-panel" style="margin-top:24px;animation-delay:0.45s;">
+      <div class="panel-title panel-toggle" onclick="togglePanel(this)" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
         <span>🔐 Registro de Accesos al Portal</span>
-        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+        <div class="collapsible-controls" onclick="event.stopPropagation()" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
           <input id="log-search" class="field-input" type="text" placeholder="🔍 Buscar inversor…"
             oninput="filterAccessLog()" style="max-width:240px;margin:0;font-size:11px;padding:8px 14px;">
           <span id="log-count-label" style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;white-space:nowrap;"></span>
@@ -1305,6 +1321,7 @@
             🗑 Limpiar registro
           </button>
         </div>
+        <span class="collapse-caret">▾</span>
       </div>
       <div id="access-log-empty" style="display:none;padding:40px;text-align:center;color:var(--muted);font-size:12px;">
         Aún no hay accesos registrados. Aparecerán aquí cuando los inversores inicien sesión.
@@ -1328,10 +1345,11 @@
     </div>
 
     <!-- PANEL: Registro de certificados de pérdidas descargados (v4.7) -->
-    <div class="panel" id="admin-cert-log-panel" style="margin-top:24px;animation-delay:0.47s;">
-      <div class="panel-title" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+    <div class="panel collapsible collapsed" id="admin-cert-log-panel" style="margin-top:24px;animation-delay:0.47s;">
+      <div class="panel-title panel-toggle" onclick="togglePanel(this)" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
         <span>📉 Certificados de Pérdidas Descargados</span>
         <span id="cert-log-count-label" style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;white-space:nowrap;"></span>
+        <span class="collapse-caret">▾</span>
       </div>
       <div id="cert-log-empty" style="display:none;padding:40px;text-align:center;color:var(--muted);font-size:12px;">
         Aún no se ha descargado ningún certificado de pérdidas. Aparecerán aquí cuando un inversor descargue uno.
@@ -1356,10 +1374,10 @@
     </div>
 
     <!-- PANEL: Gestión de contraseñas cross-device -->
-    <div class="panel" id="admin-passwords-panel" style="margin-top:24px;animation-delay:0.50s;">
-      <div class="panel-title" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+    <div class="panel collapsible collapsed" id="admin-passwords-panel" style="margin-top:24px;animation-delay:0.50s;">
+      <div class="panel-title panel-toggle" onclick="togglePanel(this)" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
         <span>🔑 Contraseñas de Inversores</span>
-        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+        <div class="collapsible-controls" onclick="event.stopPropagation()" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
           <button onclick="adminExportPasswords()" style="
             background:rgba(30,136,229,0.10);border:1px solid rgba(30,136,229,0.25);
             color:var(--blue-bright);border-radius:10px;padding:7px 16px;
@@ -1402,6 +1420,7 @@
             ⬇ Descargar HTML
           </button>
         </div>
+        <span class="collapse-caret">▾</span>
       </div>
       <div id="admin-download-msg" style="display:none;margin:8px 0 0 0;padding:8px 14px;border-radius:8px;font-size:11px;font-family:'DM Mono',monospace;"></div>
       <div id="admin-passwords-info" style="
@@ -4172,7 +4191,7 @@ function setLoginMode(mode) {
   document.getElementById('investor-fields').style.display = isAdmin ? 'none' : 'block';
   document.getElementById('investor-step2').style.display  = 'none';
   document.getElementById('admin-fields').style.display    = isAdmin ? 'block' : 'none';
-  document.getElementById('login-title').innerHTML = isAdmin ? 'Acceso Administrador' : 'Portal del Inversor <span style="font-size:11px;font-family:\'DM Mono\',monospace;font-weight:600;color:var(--gold);letter-spacing:0.10em;background:rgba(230,168,23,0.12);padding:2px 8px;border-radius:6px;border:1px solid rgba(230,168,23,0.35);">v4.7</span>';
+  document.getElementById('login-title').innerHTML = isAdmin ? 'Acceso Administrador' : 'Portal del Inversor <span style="font-size:11px;font-family:\'DM Mono\',monospace;font-weight:600;color:var(--gold);letter-spacing:0.10em;background:rgba(230,168,23,0.12);padding:2px 8px;border-radius:6px;border:1px solid rgba(230,168,23,0.35);">v4.8</span>';
   document.getElementById('login-sub').textContent = isAdmin
     ? 'Acceso exclusivo para el equipo de AngelClub'
     : 'Introduce tu correo electrónico para acceder';
@@ -4608,7 +4627,7 @@ function showDashboard() {
   document.getElementById('user-badge').style.display = 'flex';
   document.getElementById('admin-badge').style.display = 'none';
   document.getElementById('btn-download-report').style.display = 'flex';
-  document.getElementById('topbar-subtitle').innerHTML = 'Portal Inversor <span style="letter-spacing:0.08em;font-weight:600;color:var(--gold);background:rgba(230,168,23,0.13);padding:1px 7px;border-radius:5px;border:1px solid rgba(230,168,23,0.30);">v4.7</span>';
+  document.getElementById('topbar-subtitle').innerHTML = 'Portal Inversor <span style="letter-spacing:0.08em;font-weight:600;color:var(--gold);background:rgba(230,168,23,0.13);padding:1px 7px;border-radius:5px;border:1px solid rgba(230,168,23,0.30);">v4.8</span>';
   document.getElementById('topbar-view-label').textContent = 'Mi Portfolio';
 
   const inv = currentInvestor;
@@ -6502,6 +6521,12 @@ window.toggleReportsMenu         = toggleReportsMenu;
 window.openLossCertModal         = openLossCertModal;
 window.closeLossCertModal        = closeLossCertModal;
 window.generateLossCertificate   = generateLossCertificate;
+// Acordeón de paneles admin (v4.8): recoge/despliega un panel
+function togglePanel(headerEl) {
+  const panel = headerEl && headerEl.closest('.panel');
+  if (panel) panel.classList.toggle('collapsed');
+}
+window.togglePanel = togglePanel;
 
 // ── Auto-restore session on page load/refresh ───────────────────
 // ── Page initialisation: handles both normal load and BFCache restore ──
