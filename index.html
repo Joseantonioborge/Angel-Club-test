@@ -6,7 +6,7 @@
 // Fuerza URL con ?v= para bypassar caché del CDN sin acceso a Cloudflare.
 // IMPORTANTE: cambia _DEPLOY_VERSION cada vez que subas un nuevo index.html
 (function(){
-  var _DEPLOY_VERSION = '4.6';
+  var _DEPLOY_VERSION = '4.7';
   var params = new URLSearchParams(window.location.search);
   if (params.get('v') !== _DEPLOY_VERSION) {
     params.set('v', _DEPLOY_VERSION);
@@ -19,7 +19,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AngelClub — Portal Inversor v4.6</title>
+<title>AngelClub — Portal Inversor v4.7</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -802,7 +802,7 @@
       <button id="tab-admin" onclick="setLoginMode('admin')" style="flex:1;padding:9px 0;border:none;border-radius:9px;font-family:'Syne',sans-serif;font-weight:700;font-size:12px;cursor:pointer;transition:all 0.2s;background:transparent;color:var(--muted);">⚙️ Administrador</button>
     </div>
 
-    <div id="login-title" class="login-title">Portal del Inversor <span style="font-size:13px;font-family:'DM Mono',monospace;font-weight:600;color:var(--gold);letter-spacing:0.10em;background:rgba(230,168,23,0.12);padding:2px 8px;border-radius:6px;border:1px solid rgba(230,168,23,0.35);">v4.6</span></div>
+    <div id="login-title" class="login-title">Portal del Inversor <span style="font-size:13px;font-family:'DM Mono',monospace;font-weight:600;color:var(--gold);letter-spacing:0.10em;background:rgba(230,168,23,0.12);padding:2px 8px;border-radius:6px;border:1px solid rgba(230,168,23,0.35);">v4.7</span></div>
     <div id="login-sub" class="login-sub">Introduce tu correo electrónico para continuar</div>
 
     <!-- INVESTOR FIELDS — STEP 1: email -->
@@ -969,7 +969,7 @@
       <div class="logo-icon">A</div>
       <div>
         <div class="logo-text">ANGEL<span>CLUB</span></div>
-        <div id="topbar-subtitle" style="font-size:10px;color:var(--muted);letter-spacing:0.15em;text-transform:uppercase;margin-top:2px;">Portal Inversor <span style="letter-spacing:0.08em;font-weight:600;color:var(--gold);background:rgba(230,168,23,0.13);padding:1px 7px;border-radius:5px;border:1px solid rgba(230,168,23,0.30);">v4.6</span></div>
+        <div id="topbar-subtitle" style="font-size:10px;color:var(--muted);letter-spacing:0.15em;text-transform:uppercase;margin-top:2px;">Portal Inversor <span style="letter-spacing:0.08em;font-weight:600;color:var(--gold);background:rgba(230,168,23,0.13);padding:1px 7px;border-radius:5px;border:1px solid rgba(230,168,23,0.30);">v4.7</span></div>
       </div>
     </div>
     <div class="topbar-right">
@@ -1323,6 +1323,34 @@
             </tr>
           </thead>
           <tbody id="access-log-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- PANEL: Registro de certificados de pérdidas descargados (v4.7) -->
+    <div class="panel" id="admin-cert-log-panel" style="margin-top:24px;animation-delay:0.47s;">
+      <div class="panel-title" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+        <span>📉 Certificados de Pérdidas Descargados</span>
+        <span id="cert-log-count-label" style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;white-space:nowrap;"></span>
+      </div>
+      <div id="cert-log-empty" style="display:none;padding:40px;text-align:center;color:var(--muted);font-size:12px;">
+        Aún no se ha descargado ningún certificado de pérdidas. Aparecerán aquí cuando un inversor descargue uno.
+      </div>
+      <div class="table-scroll" id="cert-log-table-wrap" style="max-height:480px;">
+        <table class="investments-table" id="cert-log-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Fecha y Hora</th>
+              <th>Inversor</th>
+              <th>Email</th>
+              <th>DNI/NIF</th>
+              <th>Startups (fail)</th>
+              <th>Pérdida (€)</th>
+              <th>Ref.</th>
+            </tr>
+          </thead>
+          <tbody id="cert-log-tbody"></tbody>
         </table>
       </div>
     </div>
@@ -3660,6 +3688,50 @@ function refreshAccessLogPanel() {
   renderAccessLog(filtered);
 }
 
+// Panel de seguimiento de certificados de pérdidas descargados (MongoDB) v4.7
+async function refreshCertLogPanel() {
+  const tbody = document.getElementById('cert-log-tbody');
+  const empty = document.getElementById('cert-log-empty');
+  const wrap  = document.getElementById('cert-log-table-wrap');
+  const label = document.getElementById('cert-log-count-label');
+  if (!tbody) return;
+  let docs = [];
+  try {
+    if (_adminApiKey) {
+      const res = await fetch(API_BASE + '/cert_logs', { headers: { 'x-api-key': _adminApiKey } });
+      if (res.ok) docs = await res.json();
+    }
+  } catch(e) { /* silencioso */ }
+  const esc = s => String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  tbody.innerHTML = '';
+  if (!Array.isArray(docs) || !docs.length) {
+    if (empty) empty.style.display = 'block';
+    if (wrap)  wrap.style.display  = 'none';
+    if (label) label.textContent   = '0 certificados';
+    return;
+  }
+  if (empty) empty.style.display = 'none';
+  if (wrap)  wrap.style.display  = 'block';
+  if (label) label.textContent   = `${docs.length} certificado${docs.length!==1?'s':''}`;
+  docs.forEach((d, i) => {
+    const dt = d.timestamp ? new Date(d.timestamp) : null;
+    const dtStr = dt ? dt.toLocaleDateString('es-ES') + ' ' + dt.toLocaleTimeString('es-ES', {hour:'2-digit',minute:'2-digit'}) : '—';
+    const names = (d.startupNames && d.startupNames.length) ? d.startupNames.join(', ')
+                 : ((d.startups||[]).map(s=>s.name).filter(Boolean).join(', ') || '—');
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td style="color:var(--muted);font-size:11px;">${i+1}</td>
+      <td style="font-family:'DM Mono',monospace;font-size:11px;white-space:nowrap;">${dtStr}</td>
+      <td style="font-weight:700;">${esc(d.name||'—')}</td>
+      <td style="font-size:11px;color:var(--muted);">${esc(d.email||'—')}</td>
+      <td style="font-family:'DM Mono',monospace;font-size:11px;">${esc(d.dni||'—')}</td>
+      <td style="font-size:11px;">${esc(names)}</td>
+      <td style="text-align:right;font-weight:700;color:#C62828;">€${Number(d.totalLoss||0).toLocaleString('es-ES')}</td>
+      <td style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);">${esc(d.ref||'—')}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+
 // ═══════════════════════════════════════════════════════════════
 // ADMIN EQUITY PANEL renderer
 // ═══════════════════════════════════════════════════════════════
@@ -4100,7 +4172,7 @@ function setLoginMode(mode) {
   document.getElementById('investor-fields').style.display = isAdmin ? 'none' : 'block';
   document.getElementById('investor-step2').style.display  = 'none';
   document.getElementById('admin-fields').style.display    = isAdmin ? 'block' : 'none';
-  document.getElementById('login-title').innerHTML = isAdmin ? 'Acceso Administrador' : 'Portal del Inversor <span style="font-size:11px;font-family:\'DM Mono\',monospace;font-weight:600;color:var(--gold);letter-spacing:0.10em;background:rgba(230,168,23,0.12);padding:2px 8px;border-radius:6px;border:1px solid rgba(230,168,23,0.35);">v4.6</span>';
+  document.getElementById('login-title').innerHTML = isAdmin ? 'Acceso Administrador' : 'Portal del Inversor <span style="font-size:11px;font-family:\'DM Mono\',monospace;font-weight:600;color:var(--gold);letter-spacing:0.10em;background:rgba(230,168,23,0.12);padding:2px 8px;border-radius:6px;border:1px solid rgba(230,168,23,0.35);">v4.7</span>';
   document.getElementById('login-sub').textContent = isAdmin
     ? 'Acceso exclusivo para el equipo de AngelClub'
     : 'Introduce tu correo electrónico para acceder';
@@ -4536,7 +4608,7 @@ function showDashboard() {
   document.getElementById('user-badge').style.display = 'flex';
   document.getElementById('admin-badge').style.display = 'none';
   document.getElementById('btn-download-report').style.display = 'flex';
-  document.getElementById('topbar-subtitle').innerHTML = 'Portal Inversor <span style="letter-spacing:0.08em;font-weight:600;color:var(--gold);background:rgba(230,168,23,0.13);padding:1px 7px;border-radius:5px;border:1px solid rgba(230,168,23,0.30);">v4.6</span>';
+  document.getElementById('topbar-subtitle').innerHTML = 'Portal Inversor <span style="letter-spacing:0.08em;font-weight:600;color:var(--gold);background:rgba(230,168,23,0.13);padding:1px 7px;border-radius:5px;border:1px solid rgba(230,168,23,0.30);">v4.7</span>';
   document.getElementById('topbar-view-label').textContent = 'Mi Portfolio';
 
   const inv = currentInvestor;
@@ -5054,6 +5126,26 @@ function generateLossCertificate() {
   if (ok) closeLossCertModal();
 }
 
+// Registra en MongoDB la descarga de un certificado de pérdidas (seguimiento admin) v4.7
+function _logCertificateDownload(inv, dni, fails, ref, totalLoss) {
+  try {
+    const apiKey = API_KEY_RO || _adminApiKey;
+    if (!apiKey) return;
+    fetch(API_BASE + '/cert_logs', {
+      method: 'POST',
+      headers: { 'x-api-key': apiKey, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: inv.email,
+        name:  inv.name,
+        dni:   dni,
+        ref:   ref,
+        totalLoss: totalLoss,
+        startups: (fails || []).map(p => ({ key: p.key, name: p.name, amount: p.amount }))
+      })
+    }).catch(() => {});
+  } catch (e) { /* fire-and-forget */ }
+}
+
 function _renderLossCertificatePDF(inv, dni, fails) {
   const now = new Date();
   const MESES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
@@ -5079,6 +5171,9 @@ function _renderLossCertificatePDF(inv, dni, fails) {
   // Referencia única del documento
   const ref = 'AC-CERT-' + anio + String(now.getMonth()+1).padStart(2,'0') + String(dia).padStart(2,'0')
             + '-' + Math.random().toString(36).slice(2,8).toUpperCase();
+
+  // Registro de seguimiento en MongoDB (quién descarga y de qué startups) — fire-and-forget (v4.7)
+  _logCertificateDownload(inv, dni, fails, ref, totalLoss);
 
   const html = `<!DOCTYPE html>
 <html lang="es"><head><meta charset="UTF-8">
@@ -5793,6 +5888,7 @@ function renderAdminExtras(allStartups, totalCapital) {
   renderAdminEquityPanel(allSorted);
   adminRenderPasswordsTable();
   refreshAccessLogPanel();
+  refreshCertLogPanel();
   adminRenderRatings();
 }
 
