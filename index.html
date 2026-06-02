@@ -6,7 +6,7 @@
 // Fuerza URL con ?v= para bypassar caché del CDN sin acceso a Cloudflare.
 // IMPORTANTE: cambia _DEPLOY_VERSION cada vez que subas un nuevo index.html
 (function(){
-  var _DEPLOY_VERSION = '4.9';
+  var _DEPLOY_VERSION = '5.0';
   var params = new URLSearchParams(window.location.search);
   if (params.get('v') !== _DEPLOY_VERSION) {
     params.set('v', _DEPLOY_VERSION);
@@ -19,7 +19,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AngelClub — Portal Inversor v4.9</title>
+<title>AngelClub — Portal Inversor v5.0</title>
 <!-- Favicon e iconos PWA / acceso a pantalla de inicio en móvil (v4.9) -->
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <link rel="icon" type="image/png" href="favicon.png">
@@ -690,22 +690,99 @@
     .two-col { grid-template-columns: 1fr; }
     .bottom-grid { grid-template-columns: 1fr; }
   }
+  /* ═══════════ EXPERIENCIA MÓVIL TIPO APP (v5.0) ═══════════ */
   @media (max-width: 768px) {
-    .container { padding: 24px 16px; }
-    .topbar { flex-direction: column; align-items: flex-start; }
-    .topbar-right { width: 100%; justify-content: space-between; }
-    .kpi-grid { grid-template-columns: repeat(2, 1fr); gap: 14px; }
-    .kpi-value { font-size: 24px; }
+    html { -webkit-text-size-adjust: 100%; }
+    body { -webkit-tap-highlight-color: transparent; overscroll-behavior-y: none; }
+
+    .container {
+      padding: 14px 14px calc(26px + env(safe-area-inset-bottom));
+    }
+
+    /* Cabecera tipo barra de navegación de app: compacta, fija y con blur */
+    .topbar {
+      position: sticky; top: 0; z-index: 50;
+      flex-direction: row; align-items: center; flex-wrap: wrap;
+      gap: 10px; margin: -14px -14px 18px; padding: 11px 14px;
+      padding-top: calc(11px + env(safe-area-inset-top));
+      background: rgba(238,243,251,0.88);
+      backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+      box-shadow: 0 2px 14px rgba(21,101,192,0.08);
+    }
+    .logo-area { gap: 10px; flex: 1 1 auto; min-width: 0; }
+    .logo-icon { width: 38px; height: 38px; font-size: 18px; border-radius: 11px; }
+    .logo-text { font-size: 19px; }
+    #topbar-subtitle { font-size: 9px !important; }
+    .topbar-right { width: auto; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+    .topbar-date { display: none; }                 /* la fecha ocupa demasiado en móvil */
+    .investor-badge { padding: 6px 12px; border-radius: 22px; }
+    .investor-avatar { width: 28px; height: 28px; font-size: 12px; }
+    .investor-name-badge { font-size: 12px; max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .investor-email-badge { font-size: 9px; max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    /* Botones de acción: tap-targets cómodos */
+    .download-report-btn, .logout-btn { padding: 9px 14px; font-size: 11px; border-radius: 12px; }
+
+    /* KPIs: 2 columnas, tarjetas compactas, sin hover-lift táctil */
+    .kpi-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 22px; }
+    .kpi-card { padding: 16px; border-radius: 18px; }
+    .kpi-card:hover { transform: none; box-shadow: 0 2px 16px var(--shadow); }
+    .kpi-icon { font-size: 22px; margin-bottom: 8px; }
+    .kpi-value { font-size: 23px; }
+    .kpi-label { font-size: 9px; }
+    .kpi-sub { font-size: 10px; }
+
+    /* Paneles a ancho completo, compactos */
+    .panel { padding: 18px 15px; border-radius: 18px; }
+    .panel-title { font-size: 15px; margin-bottom: 16px; }
+
+    /* Una sola columna */
+    .two-col, .bottom-grid { grid-template-columns: 1fr; gap: 16px; }
     .field-row { grid-template-columns: 1fr; }
-    .contact-actions { flex-direction: column; align-items: flex-start; }
-    .send-btn { width: 100%; justify-content: center; }
-    .investments-table th:nth-child(3), .investments-table td:nth-child(3) { display: none; }
+    .upd-grid { grid-template-columns: 1fr; }
+
+    /* Tablas: scroll horizontal con inercia (estilo app), sin perder columnas */
+    .table-scroll { -webkit-overflow-scrolling: touch; overflow-x: auto; }
+    .investments-table { min-width: 540px; }
+    .investments-table th, .investments-table td { font-size: 11px; padding: 8px 10px; white-space: nowrap; }
+    .investments-table th:nth-child(3), .investments-table td:nth-child(3) { display: table-cell; }
+
+    /* Gráficas adaptables al ancho del móvil */
+    .chart-wrap { gap: 14px; }
+    svg.donut { width: 168px !important; height: 168px !important; max-width: 74vw; }
+
+    /* Inputs a 16px para evitar el zoom automático de iOS al enfocar */
+    .field-input, .profile-input, .add-inv-input, .add-inv-search,
+    input[type="text"], input[type="email"], input[type="password"], input[type="number"], select, textarea { font-size: 16px; }
+    .send-btn, .profile-save-btn { width: 100%; justify-content: center; }
+    .contact-actions { flex-direction: column; align-items: stretch; }
+
+    /* Modales a casi pantalla completa */
+    #profile-modal, #losscert-modal { padding: 14px; }
+    .profile-modal-card { padding: 26px 20px; border-radius: 20px; }
+
+    /* Login a pantalla casi completa */
+    .login-card { padding: 28px 22px; margin: 14px; border-radius: 22px; width: 100%; }
   }
+
   @media (max-width: 480px) {
-    .kpi-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
-    .kpi-card { padding: 16px; }
-    .kpi-value { font-size: 20px; }
-    .login-card { padding: 32px 24px; margin: 16px; }
+    .kpi-grid { gap: 10px; }
+    .kpi-value { font-size: 21px; }
+    .kpi-icon { font-size: 20px; }
+    .logo-text { font-size: 17px; }
+    .logo-icon { width: 34px; height: 34px; font-size: 16px; }
+    .topbar-right { gap: 6px; }
+    .download-report-btn, .logout-btn { padding: 8px 12px; font-size: 10px; }
+    .investor-name-badge, .investor-email-badge { max-width: 88px; }
+    .panel { padding: 15px 13px; }
+    .panel-title { font-size: 14px; }
+    .login-card { padding: 24px 18px; }
+  }
+
+  /* En táctil: sin animaciones de hover-lift que despistan */
+  @media (hover: none) {
+    .kpi-card:hover, .panel:hover { transform: none; }
   }
 
   /* ── Expansión de inversores por startup (Portfolio Completo admin) v4.3 ── */
@@ -827,7 +904,7 @@
       <button id="tab-admin" onclick="setLoginMode('admin')" style="flex:1;padding:9px 0;border:none;border-radius:9px;font-family:'Syne',sans-serif;font-weight:700;font-size:12px;cursor:pointer;transition:all 0.2s;background:transparent;color:var(--muted);">⚙️ Administrador</button>
     </div>
 
-    <div id="login-title" class="login-title">Portal del Inversor <span style="font-size:13px;font-family:'DM Mono',monospace;font-weight:600;color:var(--gold);letter-spacing:0.10em;background:rgba(230,168,23,0.12);padding:2px 8px;border-radius:6px;border:1px solid rgba(230,168,23,0.35);">v4.9</span></div>
+    <div id="login-title" class="login-title">Portal del Inversor <span style="font-size:13px;font-family:'DM Mono',monospace;font-weight:600;color:var(--gold);letter-spacing:0.10em;background:rgba(230,168,23,0.12);padding:2px 8px;border-radius:6px;border:1px solid rgba(230,168,23,0.35);">v5.0</span></div>
     <div id="login-sub" class="login-sub">Introduce tu correo electrónico para continuar</div>
 
     <!-- INVESTOR FIELDS — STEP 1: email -->
@@ -994,7 +1071,7 @@
       <div class="logo-icon">A</div>
       <div>
         <div class="logo-text">ANGEL<span>CLUB</span></div>
-        <div id="topbar-subtitle" style="font-size:10px;color:var(--muted);letter-spacing:0.15em;text-transform:uppercase;margin-top:2px;">Portal Inversor <span style="letter-spacing:0.08em;font-weight:600;color:var(--gold);background:rgba(230,168,23,0.13);padding:1px 7px;border-radius:5px;border:1px solid rgba(230,168,23,0.30);">v4.9</span></div>
+        <div id="topbar-subtitle" style="font-size:10px;color:var(--muted);letter-spacing:0.15em;text-transform:uppercase;margin-top:2px;">Portal Inversor <span style="letter-spacing:0.08em;font-weight:600;color:var(--gold);background:rgba(230,168,23,0.13);padding:1px 7px;border-radius:5px;border:1px solid rgba(230,168,23,0.30);">v5.0</span></div>
       </div>
     </div>
     <div class="topbar-right">
@@ -4203,7 +4280,7 @@ function setLoginMode(mode) {
   document.getElementById('investor-fields').style.display = isAdmin ? 'none' : 'block';
   document.getElementById('investor-step2').style.display  = 'none';
   document.getElementById('admin-fields').style.display    = isAdmin ? 'block' : 'none';
-  document.getElementById('login-title').innerHTML = isAdmin ? 'Acceso Administrador' : 'Portal del Inversor <span style="font-size:11px;font-family:\'DM Mono\',monospace;font-weight:600;color:var(--gold);letter-spacing:0.10em;background:rgba(230,168,23,0.12);padding:2px 8px;border-radius:6px;border:1px solid rgba(230,168,23,0.35);">v4.9</span>';
+  document.getElementById('login-title').innerHTML = isAdmin ? 'Acceso Administrador' : 'Portal del Inversor <span style="font-size:11px;font-family:\'DM Mono\',monospace;font-weight:600;color:var(--gold);letter-spacing:0.10em;background:rgba(230,168,23,0.12);padding:2px 8px;border-radius:6px;border:1px solid rgba(230,168,23,0.35);">v5.0</span>';
   document.getElementById('login-sub').textContent = isAdmin
     ? 'Acceso exclusivo para el equipo de AngelClub'
     : 'Introduce tu correo electrónico para acceder';
@@ -4639,7 +4716,7 @@ function showDashboard() {
   document.getElementById('user-badge').style.display = 'flex';
   document.getElementById('admin-badge').style.display = 'none';
   document.getElementById('btn-download-report').style.display = 'flex';
-  document.getElementById('topbar-subtitle').innerHTML = 'Portal Inversor <span style="letter-spacing:0.08em;font-weight:600;color:var(--gold);background:rgba(230,168,23,0.13);padding:1px 7px;border-radius:5px;border:1px solid rgba(230,168,23,0.30);">v4.9</span>';
+  document.getElementById('topbar-subtitle').innerHTML = 'Portal Inversor <span style="letter-spacing:0.08em;font-weight:600;color:var(--gold);background:rgba(230,168,23,0.13);padding:1px 7px;border-radius:5px;border:1px solid rgba(230,168,23,0.30);">v5.0</span>';
   document.getElementById('topbar-view-label').textContent = 'Mi Portfolio';
 
   const inv = currentInvestor;
