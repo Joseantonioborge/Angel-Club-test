@@ -10,3 +10,6 @@ angelclub-api/
 .DS_Store
 .claude/
 _backups/
+
+# Imagen fuente del favicon (se usan las versiones generadas)
+FABICON.png
