@@ -6,7 +6,7 @@
 // Fuerza URL con ?v= para bypassar caché del CDN sin acceso a Cloudflare.
 // IMPORTANTE: cambia _DEPLOY_VERSION cada vez que subas un nuevo index.html
 (function(){
-  var _DEPLOY_VERSION = '5.1';
+  var _DEPLOY_VERSION = '5.2';
   var params = new URLSearchParams(window.location.search);
   if (params.get('v') !== _DEPLOY_VERSION) {
     params.set('v', _DEPLOY_VERSION);
@@ -19,7 +19,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AngelClub — Portal Inversor v5.1</title>
+<title>AngelClub — Portal Inversor v5.2</title>
 <!-- Favicon e iconos PWA / acceso a pantalla de inicio en móvil (v4.9) -->
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <link rel="icon" type="image/png" href="favicon.png">
@@ -936,7 +936,7 @@
       <button id="tab-admin" onclick="setLoginMode('admin')" style="flex:1;padding:9px 0;border:none;border-radius:9px;font-family:'Syne',sans-serif;font-weight:700;font-size:12px;cursor:pointer;transition:all 0.2s;background:transparent;color:var(--muted);">⚙️ Administrador</button>
     </div>
 
-    <div id="login-title" class="login-title">Portal del Inversor <span style="font-size:13px;font-family:'DM Mono',monospace;font-weight:600;color:var(--gold);letter-spacing:0.10em;background:rgba(230,168,23,0.12);padding:2px 8px;border-radius:6px;border:1px solid rgba(230,168,23,0.35);">v5.1</span></div>
+    <div id="login-title" class="login-title">Portal del Inversor <span style="font-size:13px;font-family:'DM Mono',monospace;font-weight:600;color:var(--gold);letter-spacing:0.10em;background:rgba(230,168,23,0.12);padding:2px 8px;border-radius:6px;border:1px solid rgba(230,168,23,0.35);">v5.2</span></div>
     <div id="login-sub" class="login-sub">Introduce tu correo electrónico para continuar</div>
 
     <!-- INVESTOR FIELDS — STEP 1: email -->
@@ -1135,6 +1135,24 @@
         <label>Registro Mercantil</label>
         <input type="text" id="sd-mercantileRegistry" class="profile-input" placeholder="Ej. Tomo 1234, Folio 56, Hoja M-789012">
       </div>
+      <div class="sd-field-row">
+        <div class="profile-field">
+          <label>Causa de cierre <span style="color:var(--muted);font-weight:400;">(si procede)</span></label>
+          <input type="text" id="sd-closureCause" class="profile-input" list="sd-closure-causes" placeholder="Ej. Concurso de acreedores">
+          <datalist id="sd-closure-causes">
+            <option value="Concurso de acreedores"></option>
+            <option value="Liquidación"></option>
+            <option value="Disolución"></option>
+            <option value="Quiebra"></option>
+            <option value="Cese de actividad"></option>
+            <option value="Insolvencia"></option>
+          </datalist>
+        </div>
+        <div class="profile-field">
+          <label>Fecha de la causa de cierre</label>
+          <input type="date" id="sd-closureDate" class="profile-input">
+        </div>
+      </div>
       <div class="profile-field">
         <label>Notas / observaciones</label>
         <textarea id="sd-notes" class="profile-input" rows="2" placeholder="Información adicional (opcional)"></textarea>
@@ -1158,7 +1176,7 @@
       <div class="logo-icon">A</div>
       <div>
         <div class="logo-text">ANGEL<span>CLUB</span></div>
-        <div id="topbar-subtitle" style="font-size:10px;color:var(--muted);letter-spacing:0.15em;text-transform:uppercase;margin-top:2px;">Portal Inversor <span style="letter-spacing:0.08em;font-weight:600;color:var(--gold);background:rgba(230,168,23,0.13);padding:1px 7px;border-radius:5px;border:1px solid rgba(230,168,23,0.30);">v5.1</span></div>
+        <div id="topbar-subtitle" style="font-size:10px;color:var(--muted);letter-spacing:0.15em;text-transform:uppercase;margin-top:2px;">Portal Inversor <span style="letter-spacing:0.08em;font-weight:600;color:var(--gold);background:rgba(230,168,23,0.13);padding:1px 7px;border-radius:5px;border:1px solid rgba(230,168,23,0.30);">v5.2</span></div>
       </div>
     </div>
     <div class="topbar-right">
@@ -4418,13 +4436,14 @@ function renderStartupDataPanel(allStartups) {
   grid.innerHTML = '';
   allStartups.forEach(p => {
     const d = getStartupDetails(p.key);
-    const filled = !!(d.companyName || d.cif || d.investmentDate || d.participationAccount || d.registeredOffice);
+    const filled = !!(d.companyName || d.cif || d.investmentDate || d.participationAccount || d.registeredOffice || d.closureCause);
     const meta = filled ? `
         <div class="sd-card-meta">
           ${d.companyName ? `<div><b>Sociedad:</b> ${esc(d.companyName)}</div>` : ''}
           ${d.cif ? `<div><b>CIF:</b> ${esc(d.cif)}</div>` : ''}
           ${d.investmentDate ? `<div><b>Fecha inversión:</b> ${esc(_sdFmtDate(d.investmentDate))}</div>` : ''}
           ${d.participationAccount ? `<div><b>Nº cuenta particip.:</b> ${esc(d.participationAccount)}</div>` : ''}
+          ${d.closureCause ? `<div style="color:#C62828;"><b style="color:#C62828;">Causa de cierre:</b> ${esc(d.closureCause)}${d.closureDate ? ` (${esc(_sdFmtDate(d.closureDate))})` : ''}</div>` : ''}
         </div>` : `<div class="sd-card-meta" style="font-style:italic;">Sin datos societarios registrados.</div>`;
     const card = document.createElement('div');
     card.className = 'sd-card';
@@ -4455,6 +4474,8 @@ function openStartupDataModal(startupKey) {
   setV('sd-constitutionDate', d.constitutionDate);
   setV('sd-investmentAmount', d.investmentAmount);
   setV('sd-mercantileRegistry', d.mercantileRegistry);
+  setV('sd-closureCause', d.closureCause);
+  setV('sd-closureDate', d.closureDate);
   setV('sd-notes', d.notes);
   const msg = document.getElementById('startup-data-msg'); if (msg) { msg.style.display='none'; msg.textContent=''; }
   document.getElementById('startup-data-modal').classList.add('open');
@@ -4477,6 +4498,8 @@ async function saveStartupDataModal() {
     constitutionDate:     getV('sd-constitutionDate'),
     investmentAmount:     getV('sd-investmentAmount'),
     mercantileRegistry:   getV('sd-mercantileRegistry'),
+    closureCause:         getV('sd-closureCause'),
+    closureDate:          getV('sd-closureDate'),
     notes:                getV('sd-notes'),
   };
   const msg = document.getElementById('startup-data-msg');
@@ -4499,7 +4522,7 @@ function setLoginMode(mode) {
   document.getElementById('investor-fields').style.display = isAdmin ? 'none' : 'block';
   document.getElementById('investor-step2').style.display  = 'none';
   document.getElementById('admin-fields').style.display    = isAdmin ? 'block' : 'none';
-  document.getElementById('login-title').innerHTML = isAdmin ? 'Acceso Administrador' : 'Portal del Inversor <span style="font-size:11px;font-family:\'DM Mono\',monospace;font-weight:600;color:var(--gold);letter-spacing:0.10em;background:rgba(230,168,23,0.12);padding:2px 8px;border-radius:6px;border:1px solid rgba(230,168,23,0.35);">v5.1</span>';
+  document.getElementById('login-title').innerHTML = isAdmin ? 'Acceso Administrador' : 'Portal del Inversor <span style="font-size:11px;font-family:\'DM Mono\',monospace;font-weight:600;color:var(--gold);letter-spacing:0.10em;background:rgba(230,168,23,0.12);padding:2px 8px;border-radius:6px;border:1px solid rgba(230,168,23,0.35);">v5.2</span>';
   document.getElementById('login-sub').textContent = isAdmin
     ? 'Acceso exclusivo para el equipo de AngelClub'
     : 'Introduce tu correo electrónico para acceder';
@@ -4935,7 +4958,7 @@ function showDashboard() {
   document.getElementById('user-badge').style.display = 'flex';
   document.getElementById('admin-badge').style.display = 'none';
   document.getElementById('btn-download-report').style.display = 'flex';
-  document.getElementById('topbar-subtitle').innerHTML = 'Portal Inversor <span style="letter-spacing:0.08em;font-weight:600;color:var(--gold);background:rgba(230,168,23,0.13);padding:1px 7px;border-radius:5px;border:1px solid rgba(230,168,23,0.30);">v5.1</span>';
+  document.getElementById('topbar-subtitle').innerHTML = 'Portal Inversor <span style="letter-spacing:0.08em;font-weight:600;color:var(--gold);background:rgba(230,168,23,0.13);padding:1px 7px;border-radius:5px;border:1px solid rgba(230,168,23,0.30);">v5.2</span>';
   document.getElementById('topbar-view-label').textContent = 'Mi Portfolio';
 
   const inv = currentInvestor;
@@ -5487,6 +5510,13 @@ function _renderLossCertificatePDF(inv, dni, fails) {
   const totalInvert = fails.reduce((s,p) => s + (p.amount||0), 0);
   const totalLoss   = totalInvert; // pérdida total = capital aportado (sin recuperación)
 
+  // Causa y fecha de cierre desde los datos societarios (v5.2)
+  const _det = k => (typeof getStartupDetails === 'function') ? getStartupDetails(k) : {};
+  const closureCauses = [...new Set(fails.map(p => (_det(p.key).closureCause||'').trim()).filter(Boolean))];
+  const closureDates  = [...new Set(fails.map(p => (_det(p.key).closureDate ||'').trim()).filter(Boolean))];
+  const causeText   = closureCauses.length ? closureCauses.join(' / ') : 'la situación de insolvencia / concurso de acreedores';
+  const failDateTxt = (closureDates.length === 1) ? _sdFmtDate(closureDates[0]) : dateLong;
+
   const tableRows = fails.map(p => {
     const det = (typeof getStartupDetails === 'function') ? getStartupDetails(p.key) : {};
     // Nombre legal de la sociedad + CIF si están registrados; si no, el nombre de la startup
@@ -5567,7 +5597,7 @@ function _renderLossCertificatePDF(inv, dni, fails) {
     </tbody>
   </table>
 
-  <p class="body-p">Que, como consecuencia de la situación económica y financiera de las citadas sociedades, las inversiones han resultado totalmente fallidas a fecha ${dateLong}, debido a la situación de insolvencia / concurso de acreedores de las mismas.</p>
+  <p class="body-p">Que, como consecuencia de la situación económica y financiera de las citadas sociedades, las inversiones han resultado totalmente fallidas a fecha ${failDateTxt}, debido a ${esc(causeText)}${closureCauses.length ? ' de las citadas sociedades' : ' de las mismas'}.</p>
 
   <p class="body-p">Que el importe total de la pérdida económica imputable al inversor asciende a <strong>${fmt(totalLoss)}</strong>, no existiendo expectativa razonable de recuperación, ni total ni parcial, de las inversiones realizadas a través de las cuentas en participación.</p>
 
