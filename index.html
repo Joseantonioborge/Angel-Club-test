@@ -6,7 +6,7 @@
 // Fuerza URL con ?v= para bypassar caché del CDN sin acceso a Cloudflare.
 // IMPORTANTE: cambia _DEPLOY_VERSION cada vez que subas un nuevo index.html
 (function(){
-  var _DEPLOY_VERSION = '5.2';
+  var _DEPLOY_VERSION = '5.3';
   var params = new URLSearchParams(window.location.search);
   if (params.get('v') !== _DEPLOY_VERSION) {
     params.set('v', _DEPLOY_VERSION);
@@ -19,7 +19,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AngelClub — Portal Inversor v5.2</title>
+<title>AngelClub — Portal Inversor v5.3</title>
 <!-- Favicon e iconos PWA / acceso a pantalla de inicio en móvil (v4.9) -->
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <link rel="icon" type="image/png" href="favicon.png">
@@ -936,7 +936,7 @@
       <button id="tab-admin" onclick="setLoginMode('admin')" style="flex:1;padding:9px 0;border:none;border-radius:9px;font-family:'Syne',sans-serif;font-weight:700;font-size:12px;cursor:pointer;transition:all 0.2s;background:transparent;color:var(--muted);">⚙️ Administrador</button>
     </div>
 
-    <div id="login-title" class="login-title">Portal del Inversor <span style="font-size:13px;font-family:'DM Mono',monospace;font-weight:600;color:var(--gold);letter-spacing:0.10em;background:rgba(230,168,23,0.12);padding:2px 8px;border-radius:6px;border:1px solid rgba(230,168,23,0.35);">v5.2</span></div>
+    <div id="login-title" class="login-title">Portal del Inversor <span style="font-size:13px;font-family:'DM Mono',monospace;font-weight:600;color:var(--gold);letter-spacing:0.10em;background:rgba(230,168,23,0.12);padding:2px 8px;border-radius:6px;border:1px solid rgba(230,168,23,0.35);">v5.3</span></div>
     <div id="login-sub" class="login-sub">Introduce tu correo electrónico para continuar</div>
 
     <!-- INVESTOR FIELDS — STEP 1: email -->
@@ -1154,6 +1154,10 @@
         </div>
       </div>
       <div class="profile-field">
+        <label>Referencia del auto / resolución judicial</label>
+        <input type="text" id="sd-autoReference" class="profile-input" placeholder="Ej. Auto 123/2024, Juzgado de lo Mercantil nº 5 de Madrid">
+      </div>
+      <div class="profile-field">
         <label>Notas / observaciones</label>
         <textarea id="sd-notes" class="profile-input" rows="2" placeholder="Información adicional (opcional)"></textarea>
       </div>
@@ -1176,7 +1180,7 @@
       <div class="logo-icon">A</div>
       <div>
         <div class="logo-text">ANGEL<span>CLUB</span></div>
-        <div id="topbar-subtitle" style="font-size:10px;color:var(--muted);letter-spacing:0.15em;text-transform:uppercase;margin-top:2px;">Portal Inversor <span style="letter-spacing:0.08em;font-weight:600;color:var(--gold);background:rgba(230,168,23,0.13);padding:1px 7px;border-radius:5px;border:1px solid rgba(230,168,23,0.30);">v5.2</span></div>
+        <div id="topbar-subtitle" style="font-size:10px;color:var(--muted);letter-spacing:0.15em;text-transform:uppercase;margin-top:2px;">Portal Inversor <span style="letter-spacing:0.08em;font-weight:600;color:var(--gold);background:rgba(230,168,23,0.13);padding:1px 7px;border-radius:5px;border:1px solid rgba(230,168,23,0.30);">v5.3</span></div>
       </div>
     </div>
     <div class="topbar-right">
@@ -4476,6 +4480,7 @@ function openStartupDataModal(startupKey) {
   setV('sd-mercantileRegistry', d.mercantileRegistry);
   setV('sd-closureCause', d.closureCause);
   setV('sd-closureDate', d.closureDate);
+  setV('sd-autoReference', d.autoReference);
   setV('sd-notes', d.notes);
   const msg = document.getElementById('startup-data-msg'); if (msg) { msg.style.display='none'; msg.textContent=''; }
   document.getElementById('startup-data-modal').classList.add('open');
@@ -4500,6 +4505,7 @@ async function saveStartupDataModal() {
     mercantileRegistry:   getV('sd-mercantileRegistry'),
     closureCause:         getV('sd-closureCause'),
     closureDate:          getV('sd-closureDate'),
+    autoReference:        getV('sd-autoReference'),
     notes:                getV('sd-notes'),
   };
   const msg = document.getElementById('startup-data-msg');
@@ -4522,7 +4528,7 @@ function setLoginMode(mode) {
   document.getElementById('investor-fields').style.display = isAdmin ? 'none' : 'block';
   document.getElementById('investor-step2').style.display  = 'none';
   document.getElementById('admin-fields').style.display    = isAdmin ? 'block' : 'none';
-  document.getElementById('login-title').innerHTML = isAdmin ? 'Acceso Administrador' : 'Portal del Inversor <span style="font-size:11px;font-family:\'DM Mono\',monospace;font-weight:600;color:var(--gold);letter-spacing:0.10em;background:rgba(230,168,23,0.12);padding:2px 8px;border-radius:6px;border:1px solid rgba(230,168,23,0.35);">v5.2</span>';
+  document.getElementById('login-title').innerHTML = isAdmin ? 'Acceso Administrador' : 'Portal del Inversor <span style="font-size:11px;font-family:\'DM Mono\',monospace;font-weight:600;color:var(--gold);letter-spacing:0.10em;background:rgba(230,168,23,0.12);padding:2px 8px;border-radius:6px;border:1px solid rgba(230,168,23,0.35);">v5.3</span>';
   document.getElementById('login-sub').textContent = isAdmin
     ? 'Acceso exclusivo para el equipo de AngelClub'
     : 'Introduce tu correo electrónico para acceder';
@@ -4958,7 +4964,7 @@ function showDashboard() {
   document.getElementById('user-badge').style.display = 'flex';
   document.getElementById('admin-badge').style.display = 'none';
   document.getElementById('btn-download-report').style.display = 'flex';
-  document.getElementById('topbar-subtitle').innerHTML = 'Portal Inversor <span style="letter-spacing:0.08em;font-weight:600;color:var(--gold);background:rgba(230,168,23,0.13);padding:1px 7px;border-radius:5px;border:1px solid rgba(230,168,23,0.30);">v5.2</span>';
+  document.getElementById('topbar-subtitle').innerHTML = 'Portal Inversor <span style="letter-spacing:0.08em;font-weight:600;color:var(--gold);background:rgba(230,168,23,0.13);padding:1px 7px;border-radius:5px;border:1px solid rgba(230,168,23,0.30);">v5.3</span>';
   document.getElementById('topbar-view-label').textContent = 'Mi Portfolio';
 
   const inv = currentInvestor;
@@ -5517,6 +5523,29 @@ function _renderLossCertificatePDF(inv, dni, fails) {
   const causeText   = closureCauses.length ? closureCauses.join(' / ') : 'la situación de insolvencia / concurso de acreedores';
   const failDateTxt = (closureDates.length === 1) ? _sdFmtDate(closureDates[0]) : dateLong;
 
+  // Detalle societario por proyecto desde la ficha de la startup (v5.3)
+  const socBlocksArr = fails.map(p => {
+    const det = _det(p.key);
+    const pairs = [
+      ['CIF', det.cif],
+      ['Domicilio social', det.registeredOffice],
+      ['Ref. cuenta en participación', det.participationAccount],
+      ['Fecha de la inversión', det.investmentDate ? _sdFmtDate(det.investmentDate) : ''],
+      ['Causa de la pérdida', det.closureCause],
+      ['Fecha de la causa', det.closureDate ? _sdFmtDate(det.closureDate) : ''],
+      ['Referencia del auto', det.autoReference],
+    ].filter(r => r[1]);
+    if (!pairs.length) return '';
+    const items = pairs.map(([l,v]) => `<div class="soc-item"><span class="soc-label">${esc(l)}</span><span class="soc-val">${esc(v)}</span></div>`).join('');
+    return `<div class="soc-detail">
+      <div class="soc-detail-title">${esc(det.companyName || p.name)}${(det.companyName && det.companyName !== p.name) ? ` <span style="font-weight:400;color:#5A7A9F;">— ${esc(p.name)}</span>` : ''}</div>
+      <div class="soc-grid">${items}</div>
+    </div>`;
+  }).filter(Boolean);
+  const socSection = socBlocksArr.length
+    ? `<div class="section-h">Detalle societario de las inversiones</div>${socBlocksArr.join('')}`
+    : '';
+
   const tableRows = fails.map(p => {
     const det = (typeof getStartupDetails === 'function') ? getStartupDetails(p.key) : {};
     // Nombre legal de la sociedad + CIF si están registrados; si no, el nombre de la startup
@@ -5559,6 +5588,13 @@ function _renderLossCertificatePDF(inv, dni, fails) {
   table.inv th.r { text-align:right; } table.inv th.c { text-align:center; }
   table.inv td { border:1px solid #999; padding:7px 9px; }
   table.inv tr.total td { font-weight:800; background:#fbfbfb; }
+  .section-h { font-family:Arial,sans-serif; font-weight:800; font-size:11px; color:#10243f; margin:16px 0 8px; text-transform:uppercase; letter-spacing:0.6px; border-bottom:1px solid #D0DFF5; padding-bottom:4px; }
+  .soc-detail { border:1px solid #D0DFF5; border-radius:8px; padding:10px 12px; margin-bottom:9px; background:#f8fbff; page-break-inside:avoid; }
+  .soc-detail-title { font-family:Arial,sans-serif; font-weight:800; font-size:11.5px; color:#1565C0; margin-bottom:7px; }
+  .soc-grid { display:grid; grid-template-columns:1fr 1fr; gap:5px 18px; font-family:Arial,sans-serif; }
+  .soc-item { display:flex; flex-direction:column; padding:1px 0; }
+  .soc-label { color:#5A7A9F; font-size:8px; text-transform:uppercase; letter-spacing:0.4px; }
+  .soc-val { color:#1A2B4A; font-weight:600; font-size:10px; }
   .note { background:#FBF8EC; border:1px solid #E7D9A8; border-radius:7px; padding:10px 13px; font-size:10.5px; color:#6B5E36; margin:14px 0; font-family:Arial,sans-serif; }
   /* Firma digital verificada */
   .sig-wrap { margin-top:34px; display:flex; justify-content:flex-end; }
@@ -5596,6 +5632,8 @@ function _renderLossCertificatePDF(inv, dni, fails) {
       <tr class="total"><td>TOTAL</td><td class="c" style="text-align:center;">—</td><td style="text-align:right;">${fmt(totalInvert)}</td><td style="text-align:right;color:#C62828;">${fmt(totalLoss)}</td></tr>
     </tbody>
   </table>
+
+  ${socSection}
 
   <p class="body-p">Que, como consecuencia de la situación económica y financiera de las citadas sociedades, las inversiones han resultado totalmente fallidas a fecha ${failDateTxt}, debido a ${esc(causeText)}${closureCauses.length ? ' de las citadas sociedades' : ' de las mismas'}.</p>
 
