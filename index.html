@@ -6,7 +6,7 @@
 // Fuerza URL con ?v= para bypassar caché del CDN sin acceso a Cloudflare.
 // IMPORTANTE: cambia _DEPLOY_VERSION cada vez que subas un nuevo index.html
 (function(){
-  var _DEPLOY_VERSION = '5.0';
+  var _DEPLOY_VERSION = '5.1';
   var params = new URLSearchParams(window.location.search);
   if (params.get('v') !== _DEPLOY_VERSION) {
     params.set('v', _DEPLOY_VERSION);
@@ -19,7 +19,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AngelClub — Portal Inversor v5.0</title>
+<title>AngelClub — Portal Inversor v5.1</title>
 <!-- Favicon e iconos PWA / acceso a pantalla de inicio en móvil (v4.9) -->
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <link rel="icon" type="image/png" href="favicon.png">
@@ -318,6 +318,38 @@
     color: var(--muted); margin: 4px 0 16px;
   }
   #losscert-msg { font-size: 12px; margin-top: 12px; text-align: center; font-family: 'DM Mono', monospace; display: none; min-height: 18px; font-weight: 600; }
+
+  /* ── Modal datos societarios de startup (v5.1) ── */
+  #startup-data-modal {
+    position: fixed; inset: 0; z-index: 9500;
+    background: rgba(20,35,70,0.55); backdrop-filter: blur(6px);
+    display: none; align-items: center; justify-content: center; padding: 24px;
+  }
+  #startup-data-modal.open { display: flex; animation: fadeIn 0.2s ease both; }
+  #startup-data-modal .profile-modal-card { max-height: 90vh; overflow-y: auto; }
+  .sd-field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  #startup-data-msg { font-size: 12px; margin-top: 12px; text-align: center; font-family: 'DM Mono', monospace; display: none; min-height: 18px; font-weight: 600; }
+  textarea.profile-input { resize: vertical; min-height: 44px; font-family: 'DM Mono', monospace; }
+  /* Tarjeta de datos societarios en el grid */
+  .sd-card {
+    background: var(--glass); border: 1px solid var(--border); border-radius: 14px;
+    padding: 14px 16px; display: flex; flex-direction: column; gap: 8px;
+  }
+  .sd-card-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .sd-card-name { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 14px; color: var(--text); }
+  .sd-card-badge { font-size: 9px; font-family: 'DM Mono', monospace; padding: 3px 8px; border-radius: 20px; white-space: nowrap; }
+  .sd-badge-ok { background: rgba(56,142,60,0.12); color: #2E7D32; border: 1px solid rgba(56,142,60,0.25); }
+  .sd-badge-empty { background: rgba(230,168,23,0.12); color: #B8860B; border: 1px solid rgba(230,168,23,0.30); }
+  .sd-card-meta { font-size: 11px; color: var(--muted); line-height: 1.6; font-family: 'DM Mono', monospace; }
+  .sd-card-meta b { color: var(--text); font-weight: 600; }
+  .sd-edit-btn {
+    margin-top: 4px; align-self: flex-start;
+    background: rgba(30,136,229,0.10); border: 1px solid rgba(30,136,229,0.25);
+    color: var(--blue-bright); border-radius: 9px; padding: 7px 14px;
+    font-family: 'Syne', sans-serif; font-weight: 700; font-size: 11px; cursor: pointer;
+    transition: background 0.15s;
+  }
+  .sd-edit-btn:hover { background: rgba(30,136,229,0.18); }
 
   /* KPI CARDS */
   .kpi-grid {
@@ -904,7 +936,7 @@
       <button id="tab-admin" onclick="setLoginMode('admin')" style="flex:1;padding:9px 0;border:none;border-radius:9px;font-family:'Syne',sans-serif;font-weight:700;font-size:12px;cursor:pointer;transition:all 0.2s;background:transparent;color:var(--muted);">⚙️ Administrador</button>
     </div>
 
-    <div id="login-title" class="login-title">Portal del Inversor <span style="font-size:13px;font-family:'DM Mono',monospace;font-weight:600;color:var(--gold);letter-spacing:0.10em;background:rgba(230,168,23,0.12);padding:2px 8px;border-radius:6px;border:1px solid rgba(230,168,23,0.35);">v5.0</span></div>
+    <div id="login-title" class="login-title">Portal del Inversor <span style="font-size:13px;font-family:'DM Mono',monospace;font-weight:600;color:var(--gold);letter-spacing:0.10em;background:rgba(230,168,23,0.12);padding:2px 8px;border-radius:6px;border:1px solid rgba(230,168,23,0.35);">v5.1</span></div>
     <div id="login-sub" class="login-sub">Introduce tu correo electrónico para continuar</div>
 
     <!-- INVESTOR FIELDS — STEP 1: email -->
@@ -1059,6 +1091,61 @@
   </div>
 </div>
 
+<!-- ═══════ DATOS SOCIETARIOS DE STARTUP (admin, v5.1) — fuera del container ═══════ -->
+<div id="startup-data-modal">
+  <div class="profile-modal-card" style="max-width:580px;">
+    <button class="update-modal-close" onclick="closeStartupDataModal()">✕</button>
+    <div class="profile-modal-title">🏛️ Datos societarios</div>
+    <div class="profile-modal-sub" id="startup-data-modal-sub">—</div>
+
+    <div class="sd-fields">
+      <div class="profile-field">
+        <label>Nombre de la sociedad</label>
+        <input type="text" id="sd-companyName" class="profile-input" placeholder="Ej. EJEMPLO STARTUP SL">
+      </div>
+      <div class="sd-field-row">
+        <div class="profile-field">
+          <label>CIF</label>
+          <input type="text" id="sd-cif" class="profile-input" placeholder="Ej. B12345678" oninput="this.value=this.value.toUpperCase()">
+        </div>
+        <div class="profile-field">
+          <label>Fecha de la inversión</label>
+          <input type="date" id="sd-investmentDate" class="profile-input">
+        </div>
+      </div>
+      <div class="profile-field">
+        <label>Nº de cuenta en participación</label>
+        <input type="text" id="sd-participationAccount" class="profile-input" placeholder="Ej. CP-2023-001">
+      </div>
+      <div class="profile-field">
+        <label>Domicilio social</label>
+        <input type="text" id="sd-registeredOffice" class="profile-input" placeholder="Ej. Calle Ejemplo 1, 28001 Madrid">
+      </div>
+      <div class="sd-field-row">
+        <div class="profile-field">
+          <label>Fecha de constitución</label>
+          <input type="date" id="sd-constitutionDate" class="profile-input">
+        </div>
+        <div class="profile-field">
+          <label>Importe invertido (club)</label>
+          <input type="text" id="sd-investmentAmount" class="profile-input" placeholder="Ej. 50.000 €">
+        </div>
+      </div>
+      <div class="profile-field">
+        <label>Registro Mercantil</label>
+        <input type="text" id="sd-mercantileRegistry" class="profile-input" placeholder="Ej. Tomo 1234, Folio 56, Hoja M-789012">
+      </div>
+      <div class="profile-field">
+        <label>Notas / observaciones</label>
+        <textarea id="sd-notes" class="profile-input" rows="2" placeholder="Información adicional (opcional)"></textarea>
+      </div>
+    </div>
+
+    <button class="profile-save-btn" onclick="saveStartupDataModal()">💾 Guardar datos societarios</button>
+    <div id="startup-data-msg"></div>
+  </div>
+</div>
+
 <!-- ═══════════════════════════════════════════════════
      DASHBOARD
 ═══════════════════════════════════════════════════ -->
@@ -1071,7 +1158,7 @@
       <div class="logo-icon">A</div>
       <div>
         <div class="logo-text">ANGEL<span>CLUB</span></div>
-        <div id="topbar-subtitle" style="font-size:10px;color:var(--muted);letter-spacing:0.15em;text-transform:uppercase;margin-top:2px;">Portal Inversor <span style="letter-spacing:0.08em;font-weight:600;color:var(--gold);background:rgba(230,168,23,0.13);padding:1px 7px;border-radius:5px;border:1px solid rgba(230,168,23,0.30);">v5.0</span></div>
+        <div id="topbar-subtitle" style="font-size:10px;color:var(--muted);letter-spacing:0.15em;text-transform:uppercase;margin-top:2px;">Portal Inversor <span style="letter-spacing:0.08em;font-weight:600;color:var(--gold);background:rgba(230,168,23,0.13);padding:1px 7px;border-radius:5px;border:1px solid rgba(230,168,23,0.30);">v5.1</span></div>
       </div>
     </div>
     <div class="topbar-right">
@@ -1388,6 +1475,20 @@
         <span class="collapse-caret">▾</span>
       </div>
       <div class="upd-grid" id="eq-cards-grid">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+
+    <!-- DATOS SOCIETARIOS POR STARTUP (v5.1) -->
+    <div class="panel collapsible collapsed" id="admin-startup-data-panel" style="margin-top:24px;animation-delay:0.42s;">
+      <div class="panel-title panel-toggle" onclick="togglePanel(this)">
+        🏛️ Datos Societarios de Startups
+        <span style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;margin-left:8px;">
+          Datos legales/fiscales de cada sociedad (nombre, CIF, fecha de inversión, nº de cuenta en participación, domicilio social…). Se usan para autocompletar el certificado de pérdidas.
+        </span>
+        <span class="collapse-caret">▾</span>
+      </div>
+      <div class="upd-grid" id="startup-data-grid">
         <!-- Populated by JS -->
       </div>
     </div>
@@ -3359,6 +3460,7 @@ let _adminApiKey = null;
 const EQUITY_STORAGE_KEY = 'angelclub_startup_equity_v1';
 let STARTUP_EQUITY = {}; // startupKey -> equity string e.g. "3.5%"
 let STARTUP_STATUS_OVERRIDE = {}; // startupKey -> 'active'|'fail' (override de MongoDB)
+let STARTUP_DETAILS = {}; // startupKey -> { companyName, cif, investmentDate, participationAccount, registeredOffice, ... } (v5.1)
 
 // STARTUP_EQUITY_PRESET: admin-managed equity % embedded in HTML.
 // Edited by adminDownloadHtml() — do NOT modify manually.
@@ -3411,10 +3513,11 @@ async function loadEquity() {
       if (res.ok) {
         const remote = await res.json();
         // Soporte formato nuevo { equities, statuses } y legacy { key: "X%" }
-        if (remote.equities || remote.statuses || remote.updateLinks) {
+        if (remote.equities || remote.statuses || remote.updateLinks || remote.details) {
           if (remote.equities) Object.assign(STARTUP_EQUITY, remote.equities);
           if (remote.statuses) Object.assign(STARTUP_STATUS_OVERRIDE, remote.statuses);
           if (remote.updateLinks) Object.assign(STARTUP_UPDATES, remote.updateLinks); // v4.0
+          if (remote.details) Object.assign(STARTUP_DETAILS, remote.details); // v5.1
         } else {
           Object.assign(STARTUP_EQUITY, remote); // legacy
         }
@@ -3456,6 +3559,28 @@ async function saveEquity(startupKey, value) {
 // Returns effective equity for a startup key (override > hardcoded)
 function getEffectiveEquity(startupKey) {
   return STARTUP_EQUITY[startupKey] || STARTUPS[startupKey]?.equity || '—';
+}
+
+// ── Datos societarios / fiscales por startup (v5.1) ──────────────
+function getStartupDetails(startupKey) {
+  return STARTUP_DETAILS[startupKey] || {};
+}
+
+async function saveStartupDetails(startupKey, details) {
+  STARTUP_DETAILS[startupKey] = details; // UX optimista
+  try {
+    if (!_adminApiKey) throw new Error('_adminApiKey no disponible');
+    const res = await fetch(API_BASE + '/equity', {
+      method: 'PUT',
+      headers: { 'x-api-key': _adminApiKey, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ key: startupKey, details })
+    });
+    if (!res.ok) throw new Error('API ' + res.status);
+    return true;
+  } catch(e) {
+    console.warn('saveStartupDetails error:', e);
+    return false;
+  }
 }
 
 // Returns effective status for a startup key (MongoDB override > hardcoded)
@@ -4222,6 +4347,12 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') closeUpdateM
   if (lc) lc.addEventListener('click', function(e){ if (e.target === this) closeLossCertModal(); });
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLossCertModal(); });
 })();
+// Cierre del modal de datos societarios (v5.1)
+(function(){
+  const sd = document.getElementById('startup-data-modal');
+  if (sd) sd.addEventListener('click', function(e){ if (e.target === this) closeStartupDataModal(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeStartupDataModal(); });
+})();
 
 // ═══════════════════════════════════════════════════════════════
 // ADMIN UPDATE PANEL renderer
@@ -4271,6 +4402,94 @@ async function adminSaveUpdate(startupKey, startupName) {
     setTimeout(() => { msg.style.display = 'none'; msg.textContent = '✓ Guardado correctamente'; }, 3000);
   }
 }
+
+// ═══════════════════════════════════════════════════════════════
+// DATOS SOCIETARIOS DE STARTUPS (admin, v5.1)
+// ═══════════════════════════════════════════════════════════════
+function _sdFmtDate(iso) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso || '');
+  return m ? `${m[3]}/${m[2]}/${m[1]}` : (iso || '');
+}
+
+function renderStartupDataPanel(allStartups) {
+  const grid = document.getElementById('startup-data-grid');
+  if (!grid) return;
+  const esc = s => String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  grid.innerHTML = '';
+  allStartups.forEach(p => {
+    const d = getStartupDetails(p.key);
+    const filled = !!(d.companyName || d.cif || d.investmentDate || d.participationAccount || d.registeredOffice);
+    const meta = filled ? `
+        <div class="sd-card-meta">
+          ${d.companyName ? `<div><b>Sociedad:</b> ${esc(d.companyName)}</div>` : ''}
+          ${d.cif ? `<div><b>CIF:</b> ${esc(d.cif)}</div>` : ''}
+          ${d.investmentDate ? `<div><b>Fecha inversión:</b> ${esc(_sdFmtDate(d.investmentDate))}</div>` : ''}
+          ${d.participationAccount ? `<div><b>Nº cuenta particip.:</b> ${esc(d.participationAccount)}</div>` : ''}
+        </div>` : `<div class="sd-card-meta" style="font-style:italic;">Sin datos societarios registrados.</div>`;
+    const card = document.createElement('div');
+    card.className = 'sd-card';
+    card.innerHTML = `
+      <div class="sd-card-head">
+        <span class="sd-card-name">${esc(p.name)}</span>
+        <span class="sd-card-badge ${filled ? 'sd-badge-ok' : 'sd-badge-empty'}">${filled ? '✓ COMPLETO' : '○ PENDIENTE'}</span>
+      </div>
+      ${meta}
+      <button class="sd-edit-btn" onclick="openStartupDataModal('${p.key.replace(/'/g,"\\'")}')">${filled ? '✎ Editar datos' : '+ Añadir datos'}</button>`;
+    grid.appendChild(card);
+  });
+}
+
+let _sdCurrentKey = null;
+function openStartupDataModal(startupKey) {
+  _sdCurrentKey = startupKey;
+  const s = STARTUPS[startupKey];
+  const d = getStartupDetails(startupKey);
+  const sub = document.getElementById('startup-data-modal-sub');
+  if (sub) sub.textContent = (s ? s.name : startupKey) + ' · datos legales/fiscales de la sociedad';
+  const setV = (id, v) => { const el = document.getElementById(id); if (el) el.value = v || ''; };
+  setV('sd-companyName', d.companyName);
+  setV('sd-cif', d.cif);
+  setV('sd-investmentDate', d.investmentDate);
+  setV('sd-participationAccount', d.participationAccount);
+  setV('sd-registeredOffice', d.registeredOffice);
+  setV('sd-constitutionDate', d.constitutionDate);
+  setV('sd-investmentAmount', d.investmentAmount);
+  setV('sd-mercantileRegistry', d.mercantileRegistry);
+  setV('sd-notes', d.notes);
+  const msg = document.getElementById('startup-data-msg'); if (msg) { msg.style.display='none'; msg.textContent=''; }
+  document.getElementById('startup-data-modal').classList.add('open');
+}
+
+function closeStartupDataModal() {
+  const m = document.getElementById('startup-data-modal'); if (m) m.classList.remove('open');
+  _sdCurrentKey = null;
+}
+
+async function saveStartupDataModal() {
+  if (!_sdCurrentKey) return;
+  const getV = id => (document.getElementById(id)?.value || '').trim();
+  const details = {
+    companyName:          getV('sd-companyName'),
+    cif:                  getV('sd-cif'),
+    investmentDate:       getV('sd-investmentDate'),
+    participationAccount: getV('sd-participationAccount'),
+    registeredOffice:     getV('sd-registeredOffice'),
+    constitutionDate:     getV('sd-constitutionDate'),
+    investmentAmount:     getV('sd-investmentAmount'),
+    mercantileRegistry:   getV('sd-mercantileRegistry'),
+    notes:                getV('sd-notes'),
+  };
+  const msg = document.getElementById('startup-data-msg');
+  if (msg) { msg.style.display='block'; msg.textContent='⏳ Guardando…'; msg.style.color='var(--muted)'; }
+  const ok = await saveStartupDetails(_sdCurrentKey, details);
+  const allSorted = Object.entries(STARTUPS).map(([key,s])=>({...s,key})).sort((a,b)=>a.name.localeCompare(b.name));
+  renderStartupDataPanel(allSorted);
+  if (msg) {
+    msg.textContent = ok ? '✅ Datos guardados en MongoDB' : '⚠️ Error al guardar (revisa conexión)';
+    msg.style.color = ok ? '#2BA84A' : '#C62828';
+  }
+  if (ok) setTimeout(closeStartupDataModal, 900);
+}
 let loginMode = 'investor';
 
 function setLoginMode(mode) {
@@ -4280,7 +4499,7 @@ function setLoginMode(mode) {
   document.getElementById('investor-fields').style.display = isAdmin ? 'none' : 'block';
   document.getElementById('investor-step2').style.display  = 'none';
   document.getElementById('admin-fields').style.display    = isAdmin ? 'block' : 'none';
-  document.getElementById('login-title').innerHTML = isAdmin ? 'Acceso Administrador' : 'Portal del Inversor <span style="font-size:11px;font-family:\'DM Mono\',monospace;font-weight:600;color:var(--gold);letter-spacing:0.10em;background:rgba(230,168,23,0.12);padding:2px 8px;border-radius:6px;border:1px solid rgba(230,168,23,0.35);">v5.0</span>';
+  document.getElementById('login-title').innerHTML = isAdmin ? 'Acceso Administrador' : 'Portal del Inversor <span style="font-size:11px;font-family:\'DM Mono\',monospace;font-weight:600;color:var(--gold);letter-spacing:0.10em;background:rgba(230,168,23,0.12);padding:2px 8px;border-radius:6px;border:1px solid rgba(230,168,23,0.35);">v5.1</span>';
   document.getElementById('login-sub').textContent = isAdmin
     ? 'Acceso exclusivo para el equipo de AngelClub'
     : 'Introduce tu correo electrónico para acceder';
@@ -4716,7 +4935,7 @@ function showDashboard() {
   document.getElementById('user-badge').style.display = 'flex';
   document.getElementById('admin-badge').style.display = 'none';
   document.getElementById('btn-download-report').style.display = 'flex';
-  document.getElementById('topbar-subtitle').innerHTML = 'Portal Inversor <span style="letter-spacing:0.08em;font-weight:600;color:var(--gold);background:rgba(230,168,23,0.13);padding:1px 7px;border-radius:5px;border:1px solid rgba(230,168,23,0.30);">v5.0</span>';
+  document.getElementById('topbar-subtitle').innerHTML = 'Portal Inversor <span style="letter-spacing:0.08em;font-weight:600;color:var(--gold);background:rgba(230,168,23,0.13);padding:1px 7px;border-radius:5px;border:1px solid rgba(230,168,23,0.30);">v5.1</span>';
   document.getElementById('topbar-view-label').textContent = 'Mi Portfolio';
 
   const inv = currentInvestor;
@@ -5268,13 +5487,21 @@ function _renderLossCertificatePDF(inv, dni, fails) {
   const totalInvert = fails.reduce((s,p) => s + (p.amount||0), 0);
   const totalLoss   = totalInvert; // pérdida total = capital aportado (sin recuperación)
 
-  const tableRows = fails.map(p => `
+  const tableRows = fails.map(p => {
+    const det = (typeof getStartupDetails === 'function') ? getStartupDetails(p.key) : {};
+    // Nombre legal de la sociedad + CIF si están registrados; si no, el nombre de la startup
+    const projLabel = det.companyName
+      ? `${esc(det.companyName)}${det.cif ? ` <span style="color:#5A7A9F;font-size:9px;">(CIF ${esc(det.cif)})</span>` : ''}`
+      : esc(p.name);
+    const invDate = det.investmentDate ? esc(_sdFmtDate(det.investmentDate)) : '—';
+    return `
     <tr>
-      <td>${esc(p.name)}</td>
-      <td style="text-align:center;color:#5A7A9F;">—</td>
+      <td>${projLabel}</td>
+      <td style="text-align:center;color:#5A7A9F;">${invDate}</td>
       <td style="text-align:right;">${fmt(p.amount)}</td>
       <td style="text-align:right;color:#C62828;font-weight:700;">${fmt(p.amount)}</td>
-    </tr>`).join('');
+    </tr>`;
+  }).join('');
 
   // Referencia única del documento
   const ref = 'AC-CERT-' + anio + String(now.getMonth()+1).padStart(2,'0') + String(dia).padStart(2,'0')
@@ -5994,6 +6221,7 @@ function renderAdminExtras(allStartups, totalCapital) {
   const allSorted = allStartups.slice().sort((a,b) => a.name.localeCompare(b.name));
   renderAdminUpdatesPanel(allSorted);
   renderAdminEquityPanel(allSorted);
+  renderStartupDataPanel(allSorted);
   adminRenderPasswordsTable();
   refreshAccessLogPanel();
   refreshCertLogPanel();
@@ -6616,6 +6844,9 @@ function togglePanel(headerEl) {
   if (panel) panel.classList.toggle('collapsed');
 }
 window.togglePanel = togglePanel;
+window.openStartupDataModal  = openStartupDataModal;
+window.closeStartupDataModal = closeStartupDataModal;
+window.saveStartupDataModal  = saveStartupDataModal;
 
 // ── Auto-restore session on page load/refresh ───────────────────
 // ── Page initialisation: handles both normal load and BFCache restore ──
