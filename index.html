@@ -6,7 +6,7 @@
 // Fuerza URL con ?v= para bypassar caché del CDN sin acceso a Cloudflare.
 // IMPORTANTE: cambia _DEPLOY_VERSION cada vez que subas un nuevo index.html
 (function(){
-  var _DEPLOY_VERSION = '5.4';
+  var _DEPLOY_VERSION = '5.5';
   var params = new URLSearchParams(window.location.search);
   if (params.get('v') !== _DEPLOY_VERSION) {
     params.set('v', _DEPLOY_VERSION);
@@ -19,7 +19,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AngelClub — Portal Inversor v5.4</title>
+<title>AngelClub — Portal Inversor v5.5</title>
 <!-- Favicon e iconos PWA / acceso a pantalla de inicio en móvil (v4.9) -->
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <link rel="icon" type="image/png" href="favicon.png">
@@ -325,6 +325,28 @@
   .admincert-meta { font-size: 10px; color: var(--muted); font-family: 'DM Mono', monospace; font-weight: 400; display:block; margin-top:2px; }
   .admincert-total { display:flex; justify-content:space-between; align-items:center; border-top:1px solid var(--border); padding-top:10px; margin-top:6px; font-family:'Syne',sans-serif; font-weight:700; font-size:13px; color:var(--text); }
   .admincert-total span:last-child { font-family:'DM Mono',monospace; color:#C62828; }
+  /* ── Admin: informe Inversiones por año (v5.5) ── */
+  #invyear-modal {
+    position: fixed; inset: 0; background: rgba(13,27,46,0.45); backdrop-filter: blur(4px);
+    z-index: 10000; display: none; align-items: center; justify-content: center; padding: 20px;
+  }
+  #invyear-modal.open { display: flex; animation: fadeIn 0.2s ease both; }
+  .invyear-opts { display:flex; gap:12px; flex-wrap:wrap; margin-bottom:10px; }
+  .invyear-opts > div { flex:1; min-width:150px; }
+  .invyear-check { display:flex; align-items:center; gap:8px; font-size:12px; color:var(--text); margin-bottom:12px; cursor:pointer; }
+  .invyear-check input { accent-color: var(--blue-bright); width:15px; height:15px; }
+  #invyear-preview { max-height: 34vh; overflow-y: auto; }
+  .invyear-row { display:flex; align-items:center; gap:10px; padding:8px 10px; border:1px solid var(--border); border-radius:10px; margin-bottom:6px; background:rgba(255,255,255,0.6); }
+  .invyear-y { font-family:'Syne',sans-serif; font-weight:800; font-size:14px; color:var(--text); min-width:44px; }
+  .invyear-n { flex:1; font-size:11px; color:var(--muted); font-family:'DM Mono',monospace; }
+  .invyear-amt { font-family:'DM Mono',monospace; font-weight:700; font-size:12px; color:var(--blue-bright); }
+  .invyear-acc { font-family:'DM Mono',monospace; font-size:10px; color:var(--muted); min-width:110px; text-align:right; }
+  #invyear-undated { display:none; background:#FBF8EC; border:1px solid #E7D9A8; border-radius:10px; padding:9px 12px; font-size:11px; color:#6B5E36; margin-top:10px; line-height:1.5; }
+  .invyear-btns { display:flex; gap:10px; margin-top:14px; }
+  .invyear-btns .profile-save-btn { flex:1; margin-top:0; }
+  .invyear-btns .profile-save-btn.alt { background: linear-gradient(135deg,#2E7D32,#43A047); }
+  #invyear-msg { font-size: 12px; margin-top: 12px; text-align: center; font-family: 'DM Mono', monospace; display: none; min-height: 18px; font-weight: 600; }
+  @media (max-width: 480px) { .invyear-acc { display:none; } .invyear-btns { flex-direction:column; } }
   #admincert-msg { font-size: 12px; margin-top: 12px; text-align: center; font-family: 'DM Mono', monospace; display: none; min-height: 18px; font-weight: 600; }
 
   /* ── Loss certificate modal (v4.6) ── */
@@ -832,7 +854,7 @@
     .contact-actions { flex-direction: column; align-items: stretch; }
 
     /* Modales a casi pantalla completa */
-    #profile-modal, #losscert-modal, #admincert-modal { padding: 14px; }
+    #profile-modal, #losscert-modal, #admincert-modal, #invyear-modal { padding: 14px; }
     .profile-modal-card { padding: 26px 20px; border-radius: 20px; }
 
     /* Login a pantalla casi completa */
@@ -982,7 +1004,7 @@
       <button id="tab-admin" onclick="setLoginMode('admin')" style="flex:1;padding:9px 0;border:none;border-radius:9px;font-family:'Syne',sans-serif;font-weight:700;font-size:12px;cursor:pointer;transition:all 0.2s;background:transparent;color:var(--muted);">⚙️ Administrador</button>
     </div>
 
-    <div id="login-title" class="login-title">Portal del Inversor <span style="font-size:13px;font-family:'DM Mono',monospace;font-weight:600;color:var(--gold);letter-spacing:0.10em;background:rgba(230,168,23,0.12);padding:2px 8px;border-radius:6px;border:1px solid rgba(230,168,23,0.35);">v5.4</span></div>
+    <div id="login-title" class="login-title">Portal del Inversor <span style="font-size:13px;font-family:'DM Mono',monospace;font-weight:600;color:var(--gold);letter-spacing:0.10em;background:rgba(230,168,23,0.12);padding:2px 8px;border-radius:6px;border:1px solid rgba(230,168,23,0.35);">v5.5</span></div>
     <div id="login-sub" class="login-sub">Introduce tu correo electrónico para continuar</div>
 
     <!-- INVESTOR FIELDS — STEP 1: email -->
@@ -1161,6 +1183,36 @@
   </div>
 </div>
 
+<!-- ═══════ INVERSIONES POR AÑO (admin, v5.5) — fuera del container ═══════ -->
+<div id="invyear-modal">
+  <div class="profile-modal-card" style="max-width:600px;">
+    <button class="update-modal-close" onclick="closeAdminInvYearModal()">✕</button>
+    <div class="profile-modal-title">📅 Inversiones por año</div>
+    <div class="profile-modal-sub">Startups invertidas por ejercicio, con fecha y capital invertido por el club, para registrarlas en las cuentas anuales</div>
+
+    <div class="invyear-opts">
+      <div>
+        <label class="login-label">Ejercicio</label>
+        <select id="invyear-year" class="profile-input" onchange="adminInvYearRefresh()"><option value="all">Todos los años</option></select>
+      </div>
+      <div>
+        <label class="login-label">Cuenta contable</label>
+        <input type="text" id="invyear-account" class="profile-input" value="240" maxlength="10" oninput="adminInvYearRefresh()">
+      </div>
+    </div>
+    <label class="invyear-check"><input type="checkbox" id="invyear-closed" checked onchange="adminInvYearRefresh()"> Incluir startups en estado FAIL y EXIT</label>
+
+    <div id="invyear-preview"></div>
+    <div id="invyear-undated"></div>
+
+    <div class="invyear-btns">
+      <button class="profile-save-btn" onclick="adminInvYearPDF()">📄 Descargar PDF</button>
+      <button class="profile-save-btn alt" onclick="adminInvYearExcel()">📊 Descargar Excel</button>
+    </div>
+    <div id="invyear-msg"></div>
+  </div>
+</div>
+
 <!-- ═══════ DATOS SOCIETARIOS DE STARTUP (admin, v5.1) — fuera del container ═══════ -->
 <div id="startup-data-modal">
   <div class="profile-modal-card" style="max-width:580px;">
@@ -1250,7 +1302,7 @@
       <div class="logo-icon">A</div>
       <div>
         <div class="logo-text">ANGEL<span>CLUB</span></div>
-        <div id="topbar-subtitle" style="font-size:10px;color:var(--muted);letter-spacing:0.15em;text-transform:uppercase;margin-top:2px;">Portal Inversor <span style="letter-spacing:0.08em;font-weight:600;color:var(--gold);background:rgba(230,168,23,0.13);padding:1px 7px;border-radius:5px;border:1px solid rgba(230,168,23,0.30);">v5.4</span></div>
+        <div id="topbar-subtitle" style="font-size:10px;color:var(--muted);letter-spacing:0.15em;text-transform:uppercase;margin-top:2px;">Portal Inversor <span style="letter-spacing:0.08em;font-weight:600;color:var(--gold);background:rgba(230,168,23,0.13);padding:1px 7px;border-radius:5px;border:1px solid rgba(230,168,23,0.30);">v5.5</span></div>
       </div>
     </div>
     <div class="topbar-right">
@@ -1279,6 +1331,7 @@
           <button class="admin-reports-btn" id="btn-admin-reports" onclick="toggleAdminReportsMenu(event)">📥 Descargar informes ▾</button>
           <div id="admin-reports-dropdown">
             <div class="profile-dd-item" id="admin-dd-cert" onclick="openAdminLossCertModal()">📉 &nbsp;<span>Certificado de pérdidas (contable)<span class="admin-dd-sub" id="admin-dd-cert-sub">—</span></span></div>
+            <div class="profile-dd-item" id="admin-dd-invyear" onclick="openAdminInvYearModal()">📅 &nbsp;<span>Inversiones por año<span class="admin-dd-sub" id="admin-dd-invyear-sub">—</span></span></div>
           </div>
         </span>
       </div>
@@ -4452,6 +4505,12 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') closeUpdateM
   if (ac) ac.addEventListener('click', function(e){ if (e.target === this) closeAdminLossCertModal(); });
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closeAdminLossCertModal(); });
 })();
+// Cierre del modal Inversiones por año (v5.5)
+(function(){
+  const iy = document.getElementById('invyear-modal');
+  if (iy) iy.addEventListener('click', function(e){ if (e.target === this) closeAdminInvYearModal(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeAdminInvYearModal(); });
+})();
 // Cierre del modal de datos societarios (v5.1)
 (function(){
   const sd = document.getElementById('startup-data-modal');
@@ -4611,7 +4670,7 @@ function setLoginMode(mode) {
   document.getElementById('investor-fields').style.display = isAdmin ? 'none' : 'block';
   document.getElementById('investor-step2').style.display  = 'none';
   document.getElementById('admin-fields').style.display    = isAdmin ? 'block' : 'none';
-  document.getElementById('login-title').innerHTML = isAdmin ? 'Acceso Administrador' : 'Portal del Inversor <span style="font-size:11px;font-family:\'DM Mono\',monospace;font-weight:600;color:var(--gold);letter-spacing:0.10em;background:rgba(230,168,23,0.12);padding:2px 8px;border-radius:6px;border:1px solid rgba(230,168,23,0.35);">v5.4</span>';
+  document.getElementById('login-title').innerHTML = isAdmin ? 'Acceso Administrador' : 'Portal del Inversor <span style="font-size:11px;font-family:\'DM Mono\',monospace;font-weight:600;color:var(--gold);letter-spacing:0.10em;background:rgba(230,168,23,0.12);padding:2px 8px;border-radius:6px;border:1px solid rgba(230,168,23,0.35);">v5.5</span>';
   document.getElementById('login-sub').textContent = isAdmin
     ? 'Acceso exclusivo para el equipo de AngelClub'
     : 'Introduce tu correo electrónico para acceder';
@@ -5047,7 +5106,7 @@ function showDashboard() {
   document.getElementById('user-badge').style.display = 'flex';
   document.getElementById('admin-badge').style.display = 'none';
   document.getElementById('btn-download-report').style.display = 'flex';
-  document.getElementById('topbar-subtitle').innerHTML = 'Portal Inversor <span style="letter-spacing:0.08em;font-weight:600;color:var(--gold);background:rgba(230,168,23,0.13);padding:1px 7px;border-radius:5px;border:1px solid rgba(230,168,23,0.30);">v5.4</span>';
+  document.getElementById('topbar-subtitle').innerHTML = 'Portal Inversor <span style="letter-spacing:0.08em;font-weight:600;color:var(--gold);background:rgba(230,168,23,0.13);padding:1px 7px;border-radius:5px;border:1px solid rgba(230,168,23,0.30);">v5.5</span>';
   document.getElementById('topbar-view-label').textContent = 'Mi Portfolio';
 
   const inv = currentInvestor;
@@ -5804,6 +5863,12 @@ function toggleAdminReportsMenu(e) {
       ? `${fails.length} startup${fails.length!==1?'s':''} en FAIL · €${total.toLocaleString('es-ES')}`
       : 'No hay startups en estado FAIL';
   }
+  const iySub = document.getElementById('admin-dd-invyear-sub');
+  if (iySub) {
+    const { dated, undated } = getAdminInvestmentsByYear();
+    const ys = [...new Set(dated.map(r => r.year))];
+    iySub.textContent = `${dated.length + undated.length} startups · ${ys.length} año${ys.length!==1?'s':''}${undated.length ? ` · ${undated.length} sin fecha` : ''}`;
+  }
   if (dd.classList.contains('open')) {
     dd.classList.remove('open');
   } else {
@@ -6084,6 +6149,266 @@ function _renderAdminLossCertificatePDF(fails) {
   w.focus();
   setTimeout(() => { w.print(); }, 700);
   return true;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// ADMIN — Informe "Inversiones por año" (v5.5)
+// Startups invertidas agrupadas por año de inversión (fecha de los
+// datos societarios) con el capital invertido por el club, para su
+// registro en las cuentas anuales (cuenta 240 por defecto, editable).
+// ═══════════════════════════════════════════════════════════════
+function getAdminInvestmentsByYear() {
+  const dated = [], undated = [];
+  Object.entries(STARTUPS).forEach(([key, s]) => {
+    let capital = s.capital || 0;
+    if (capital <= 0) capital = _adminStartupParticipants(key).reduce((t,p) => t + p.amount, 0);
+    if (capital <= 0) return; // sin capital registrado: no es una inversión contabilizable
+    const det = getStartupDetails(key);
+    const iso = (det.investmentDate || '').trim();
+    const year = /^\d{4}/.test(iso) ? parseInt(iso.slice(0,4), 10) : null;
+    const row = { key, name: s.name, capital, status: getEffectiveStatus(key), date: iso, year,
+                  companyName: det.companyName || '', cif: det.cif || '', account: det.participationAccount || '' };
+    (year ? dated : undated).push(row);
+  });
+  dated.sort((a,b) => a.date.localeCompare(b.date) || b.capital - a.capital);
+  undated.sort((a,b) => b.capital - a.capital);
+  return { dated, undated };
+}
+
+function _invYearStatusLabel(st) { return st === 'fail' ? 'FAIL' : st === 'exit' ? 'EXIT' : 'ACTIVA'; }
+
+// Lee las opciones del modal y devuelve los datos filtrados
+function _invYearCollect() {
+  const yearSel = document.getElementById('invyear-year')?.value || 'all';
+  const acct = (document.getElementById('invyear-account')?.value || '240').trim() || '240';
+  const inclClosed = !!document.getElementById('invyear-closed')?.checked;
+  const { dated, undated } = getAdminInvestmentsByYear();
+  const keep = r => inclClosed || r.status === 'active';
+  const all = dated.filter(keep);
+  const und = undated.filter(keep);
+  const years = [...new Set(all.map(r => r.year))].sort((a,b) => a-b);
+  const byYear = years.map(y => {
+    const rows = all.filter(r => r.year === y);
+    return { year: y, rows, total: rows.reduce((t,r) => t + r.capital, 0) };
+  });
+  let acc = 0;
+  byYear.forEach(g => { acc += g.total; g.cumulative = acc; });
+  const shown = yearSel === 'all' ? byYear : byYear.filter(g => String(g.year) === yearSel);
+  return { yearSel, acct, inclClosed, byYear, shown, undated: und,
+           undatedTotal: und.reduce((t,r) => t + r.capital, 0) };
+}
+
+function openAdminInvYearModal() {
+  if (!currentInvestor || currentInvestor.role !== 'admin') return;
+  const dd = document.getElementById('admin-reports-dropdown'); if (dd) dd.classList.remove('open');
+  const { dated } = getAdminInvestmentsByYear();
+  const years = [...new Set(dated.map(r => r.year))].sort((a,b) => b-a);
+  const sel = document.getElementById('invyear-year');
+  const prev = sel.value;
+  sel.innerHTML = '<option value="all">Todos los años</option>' + years.map(y => `<option value="${y}">${y}</option>`).join('');
+  if ([...sel.options].some(o => o.value === prev)) sel.value = prev;
+  const msg = document.getElementById('invyear-msg'); if (msg) { msg.style.display = 'none'; msg.textContent = ''; }
+  adminInvYearRefresh();
+  document.getElementById('invyear-modal').classList.add('open');
+}
+
+function closeAdminInvYearModal() {
+  const m = document.getElementById('invyear-modal'); if (m) m.classList.remove('open');
+}
+
+// Vista previa del resumen en el modal
+function adminInvYearRefresh() {
+  const d = _invYearCollect();
+  const fmt = n => '€' + Number(n||0).toLocaleString('es-ES');
+  const box = document.getElementById('invyear-preview');
+  if (!box) return;
+  const rows = d.shown.map(g => `
+    <div class="invyear-row"><span class="invyear-y">${g.year}</span>
+      <span class="invyear-n">${g.rows.length} startup${g.rows.length!==1?'s':''}</span>
+      <span class="invyear-amt">${fmt(g.total)}</span>
+      <span class="invyear-acc">Acum. ${fmt(g.cumulative)}</span></div>`).join('');
+  const total = d.shown.reduce((t,g) => t + g.total, 0);
+  box.innerHTML = (rows || '<div class="losscert-hint" style="margin:6px 0;">No hay inversiones con fecha registrada para este filtro.</div>')
+    + `<div class="admincert-total"><span>${d.yearSel === 'all' ? 'Total con fecha' : 'Altas ' + d.yearSel}</span><span style="color:var(--blue-bright);">${fmt(total)}</span></div>`;
+  const warn = document.getElementById('invyear-undated');
+  if (warn) {
+    warn.style.display = d.undated.length ? 'block' : 'none';
+    warn.innerHTML = d.undated.length
+      ? `⚠️ <strong>${d.undated.length} startup${d.undated.length!==1?'s':''} sin fecha de inversión</strong> (${fmt(d.undatedTotal)}): ${d.undated.map(r => r.name).join(', ')}. Se listan aparte en el informe. Complétalas en <em>Datos societarios</em> para asignarlas a su año.`
+      : '';
+  }
+}
+
+function _invYearMsg(t, c) {
+  const msg = document.getElementById('invyear-msg');
+  if (msg) { msg.style.display = 'block'; msg.textContent = t; msg.style.color = c; }
+}
+
+function adminInvYearPDF() {
+  const d = _invYearCollect();
+  if (!d.shown.length && !d.undated.length) { _invYearMsg('⚠️ No hay inversiones para este filtro', '#C62828'); return; }
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('es-ES', { day:'numeric', month:'long', year:'numeric' });
+  const timeStr = now.toLocaleTimeString('es-ES');
+  const esc = s => String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const fmt = n => '€' + Number(n||0).toLocaleString('es-ES');
+  const stCls = st => st === 'fail' ? 'st-fail' : st === 'exit' ? 'st-exit' : 'st-act';
+  const single = d.yearSel !== 'all';
+  const shownTotal = d.shown.reduce((t,g) => t + g.total, 0);
+  const lastCum = single ? (d.shown[0]?.cumulative || 0) : (d.byYear.length ? d.byYear[d.byYear.length-1].cumulative : 0);
+
+  const summaryRows = d.byYear
+    .filter(g => !single || g.year <= Number(d.yearSel))
+    .map(g => `<tr${single && String(g.year) === d.yearSel ? ' class="hl"' : ''}><td>${g.year}</td><td style="text-align:center;">${g.rows.length}</td><td style="text-align:right;">${fmt(g.total)}</td><td style="text-align:right;font-weight:700;">${fmt(g.cumulative)}</td></tr>`).join('');
+
+  const yearBlocks = d.shown.map(g => `
+    <div class="year-block">
+      <div class="year-h"><span>Ejercicio ${g.year}</span><span>Altas cuenta ${esc(d.acct)}: ${fmt(g.total)}</span></div>
+      <table class="inv">
+        <thead><tr><th>Fecha</th><th>Startup / Sociedad</th><th>CIF</th><th>Ref. cuenta en participación</th><th class="c">Estado</th><th class="r">Capital invertido</th></tr></thead>
+        <tbody>
+          ${g.rows.map(r => `<tr>
+            <td style="white-space:nowrap;">${esc(_sdFmtDate(r.date))}</td>
+            <td><strong>${esc(r.name)}</strong>${r.companyName && r.companyName !== r.name ? `<br><span class="mut">${esc(r.companyName)}</span>` : ''}</td>
+            <td>${esc(r.cif) || '<span class="mut">—</span>'}</td>
+            <td>${esc(r.account) || '<span class="mut">—</span>'}</td>
+            <td style="text-align:center;"><span class="st ${stCls(r.status)}">${_invYearStatusLabel(r.status)}</span></td>
+            <td style="text-align:right;">${fmt(r.capital)}</td></tr>`).join('')}
+          <tr class="total"><td colspan="5">Total ejercicio ${g.year}</td><td style="text-align:right;">${fmt(g.total)}</td></tr>
+          <tr class="cum"><td colspan="5">Saldo acumulado a 31/12/${g.year}</td><td style="text-align:right;">${fmt(g.cumulative)}</td></tr>
+        </tbody>
+      </table>
+    </div>`).join('');
+
+  const undatedBlock = d.undated.length ? `
+    <div class="year-block">
+      <div class="year-h warn"><span>Inversiones sin fecha registrada</span><span>${fmt(d.undatedTotal)}</span></div>
+      <p class="mut" style="margin:4px 0 6px;">No constan en el portal la fecha de inversión de estas startups, por lo que no se han asignado a ningún ejercicio. Complete la fecha en <em>Datos societarios</em> para incluirlas en el año que corresponda.</p>
+      <table class="inv">
+        <thead><tr><th>Startup / Sociedad</th><th>CIF</th><th class="c">Estado</th><th class="r">Capital invertido</th></tr></thead>
+        <tbody>
+          ${d.undated.map(r => `<tr><td><strong>${esc(r.name)}</strong>${r.companyName && r.companyName !== r.name ? `<br><span class="mut">${esc(r.companyName)}</span>` : ''}</td><td>${esc(r.cif) || '<span class="mut">—</span>'}</td><td style="text-align:center;"><span class="st ${stCls(r.status)}">${_invYearStatusLabel(r.status)}</span></td><td style="text-align:right;">${fmt(r.capital)}</td></tr>`).join('')}
+          <tr class="total"><td colspan="3">Total sin fecha</td><td style="text-align:right;">${fmt(d.undatedTotal)}</td></tr>
+        </tbody>
+      </table>
+    </div>` : '';
+
+  const title = single ? `Inversiones del ejercicio ${d.yearSel}` : 'Inversiones por año';
+  const html = `<!DOCTYPE html>
+<html lang="es"><head><meta charset="UTF-8">
+<title>${esc(title)} — Cuenta ${esc(d.acct)} — AngelClub</title>
+<style>
+  @page { size: A4 landscape; margin: 14mm; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  :root { color-scheme: light; }
+  html, body { background:#fff; }
+  body { font-family: Arial, Helvetica, sans-serif; color:#1A2B4A; font-size:11px; line-height:1.45; }
+  .head { display:flex; justify-content:space-between; align-items:flex-end; border-bottom:2.5px solid #1565C0; padding-bottom:10px; margin-bottom:14px; }
+  .head h1 { font-size:18px; color:#10243f; }
+  .head .sub { font-size:11px; color:#1565C0; font-weight:700; margin-top:2px; }
+  .head .ent { text-align:right; font-size:10px; color:#5A7A9F; }
+  .head .ent b { color:#10243f; font-size:11px; }
+  .kpis { display:flex; gap:10px; margin-bottom:14px; }
+  .kpis > div { flex:1; border:1px solid #D0DFF5; border-radius:8px; padding:8px 10px; background:#f8fbff; }
+  .k-l { font-size:8.5px; color:#5A7A9F; text-transform:uppercase; letter-spacing:0.5px; }
+  .k-v { font-size:16px; font-weight:800; color:#10243f; }
+  .section-h { font-weight:800; font-size:11px; color:#10243f; margin:14px 0 6px; text-transform:uppercase; letter-spacing:0.6px; border-bottom:1px solid #D0DFF5; padding-bottom:4px; }
+  table.inv { width:100%; border-collapse:collapse; font-size:10.5px; }
+  table.inv th { background:#eef3fb; border:1px solid #b9cbe8; padding:5px 7px; text-align:left; font-weight:700; color:#10243f; }
+  table.inv th.r { text-align:right; } table.inv th.c { text-align:center; }
+  table.inv td { border:1px solid #D0DFF5; padding:5px 7px; vertical-align:top; }
+  table.inv tr.total td { font-weight:800; background:#f4f7fc; }
+  table.inv tr.cum td { font-weight:700; color:#1565C0; background:#fbfdff; }
+  table.inv tr.hl td { background:#FFF7E0; font-weight:700; }
+  table.summary { width:60%; }
+  .year-block { margin-top:16px; page-break-inside:auto; }
+  .year-h { display:flex; justify-content:space-between; background:#1565C0; color:#fff; font-weight:800; font-size:12px; padding:6px 10px; border-radius:6px 6px 0 0; }
+  .year-h.warn { background:#B7791F; }
+  .mut { color:#5A7A9F; font-size:9.5px; }
+  .st { display:inline-block; padding:1px 7px; border-radius:5px; font-size:9px; font-weight:800; }
+  .st-act { background:#E3F2E6; color:#2E7D32; } .st-fail { background:#FDE7E7; color:#C62828; } .st-exit { background:#E3EEFB; color:#1565C0; }
+  .note { background:#FBF8EC; border:1px solid #E7D9A8; border-radius:7px; padding:9px 12px; font-size:9px; color:#6B5E36; margin-top:16px; line-height:1.5; }
+  .foot { margin-top:14px; border-top:1px solid #D0DFF5; padding-top:6px; font-size:8.5px; color:#8A9AB5; }
+  @media print { body { -webkit-print-color-adjust:exact; print-color-adjust:exact; } }
+</style></head>
+<body>
+  <div class="head">
+    <div>
+      <h1>${esc(title)}</h1>
+      <div class="sub">Cuenta ${esc(d.acct)} · Participaciones a largo plazo en instrumentos de patrimonio</div>
+    </div>
+    <div class="ent"><b>CLUB DE ANGEL FUNDING SL</b><br>CIF B87848321<br>Generado el ${esc(dateStr)}, ${esc(timeStr)}</div>
+  </div>
+
+  <div class="kpis">
+    <div><div class="k-l">${single ? 'Altas del ejercicio ' + esc(d.yearSel) : 'Total inversiones con fecha'}</div><div class="k-v">${fmt(shownTotal)}</div></div>
+    <div><div class="k-l">${single ? 'Saldo acumulado a 31/12/' + esc(d.yearSel) : 'Saldo acumulado'}</div><div class="k-v">${fmt(lastCum)}</div></div>
+    <div><div class="k-l">Startups ${single ? 'invertidas en ' + esc(d.yearSel) : 'con fecha'}</div><div class="k-v">${d.shown.reduce((t,g) => t + g.rows.length, 0)}</div></div>
+    <div><div class="k-l">Sin fecha registrada</div><div class="k-v" style="color:${d.undated.length ? '#B7791F' : '#10243f'};">${d.undated.length} · ${fmt(d.undatedTotal)}</div></div>
+  </div>
+
+  <div class="section-h">Resumen por ejercicio</div>
+  <table class="inv summary">
+    <thead><tr><th>Ejercicio</th><th class="c">Nº startups</th><th class="r">Altas del ejercicio</th><th class="r">Saldo acumulado 31/12</th></tr></thead>
+    <tbody>${summaryRows || '<tr><td colspan="4" class="mut">Sin inversiones con fecha</td></tr>'}</tbody>
+  </table>
+
+  <div class="section-h">Detalle de inversiones</div>
+  ${yearBlocks}
+  ${undatedBlock}
+
+  <div class="note"><strong>Notas:</strong> Importes = capital total invertido por el club en cada startup según el portal. El ejercicio se determina por la <em>fecha de la inversión</em> registrada en los datos societarios. ${d.inclClosed ? 'Se incluyen startups en estado FAIL y EXIT: su baja o deterioro deberá reflejarse en el ejercicio correspondiente.' : 'Solo se incluyen startups en estado ACTIVA (se excluyen FAIL y EXIT).'} El saldo acumulado es la suma de altas hasta el 31/12 de cada ejercicio, sin considerar bajas, deterioros ni desinversiones. Documento informativo de apoyo a la contabilidad; la imputación contable debe ser validada por el asesor contable/auditor de la sociedad.</div>
+  <div class="foot">AngelClub · CLUB DE ANGEL FUNDING SL · Informe "Inversiones por año" · Cuenta ${esc(d.acct)}</div>
+</body></html>`;
+
+  const w = window.open('', '_blank', 'width=1100,height=820');
+  if (!w) { _invYearMsg('⚠️ Activa las ventanas emergentes para descargar el informe.', '#C62828'); return; }
+  w.document.write(html);
+  w.document.close();
+  w.focus();
+  setTimeout(() => { w.print(); }, 700);
+  _invYearMsg('✅ Informe PDF generado', 'var(--blue-bright)');
+}
+
+function adminInvYearExcel() {
+  const d = _invYearCollect();
+  if (!d.shown.length && !d.undated.length) { _invYearMsg('⚠️ No hay inversiones para este filtro', '#C62828'); return; }
+  const build = () => {
+    const XLSX = window.XLSX;
+    const wb = XLSX.utils.book_new();
+    const single = d.yearSel !== 'all';
+    const sum = [
+      ['CLUB DE ANGEL FUNDING SL — CIF B87848321'],
+      [`Inversiones por año · Cuenta ${d.acct} · ${single ? 'Ejercicio ' + d.yearSel : 'Todos los ejercicios'}`],
+      [`Generado: ${new Date().toLocaleString('es-ES')} · ${d.inclClosed ? 'Incluye FAIL/EXIT' : 'Solo ACTIVAS'}`],
+      [],
+      ['Ejercicio', 'Nº startups', 'Altas del ejercicio (€)', 'Saldo acumulado 31/12 (€)'],
+      ...d.byYear.filter(g => !single || g.year <= Number(d.yearSel)).map(g => [g.year, g.rows.length, g.total, g.cumulative]),
+    ];
+    if (d.undated.length) sum.push([], ['Sin fecha registrada', d.undated.length, d.undatedTotal, '']);
+    const ws1 = XLSX.utils.aoa_to_sheet(sum);
+    ws1['!cols'] = [{ wch: 22 }, { wch: 13 }, { wch: 24 }, { wch: 26 }];
+    XLSX.utils.book_append_sheet(wb, ws1, 'Resumen por año');
+
+    const det = [['Ejercicio', 'Fecha inversión', 'Startup', 'Sociedad', 'CIF', 'Ref. cuenta en participación', 'Estado', 'Cuenta', 'Capital invertido (€)']];
+    d.shown.forEach(g => g.rows.forEach(r => det.push([r.year, _sdFmtDate(r.date), r.name, r.companyName, r.cif, r.account, _invYearStatusLabel(r.status), d.acct, r.capital])));
+    d.undated.forEach(r => det.push(['Sin fecha', '', r.name, r.companyName, r.cif, r.account, _invYearStatusLabel(r.status), d.acct, r.capital]));
+    const ws2 = XLSX.utils.aoa_to_sheet(det);
+    ws2['!cols'] = [{ wch: 10 }, { wch: 14 }, { wch: 20 }, { wch: 30 }, { wch: 12 }, { wch: 30 }, { wch: 9 }, { wch: 8 }, { wch: 20 }];
+    ws2['!autofilter'] = { ref: `A1:I${det.length}` };
+    XLSX.utils.book_append_sheet(wb, ws2, 'Detalle');
+
+    const fileName = `AngelClub_Inversiones_${single ? d.yearSel : 'por_anio'}_cta${d.acct}_${new Date().toISOString().slice(0,10)}.xlsx`;
+    XLSX.writeFile(wb, fileName);
+    _invYearMsg('✅ Excel descargado', 'var(--blue-bright)');
+  };
+  if (window.XLSX) return build();
+  _invYearMsg('Cargando librería Excel…', 'var(--muted)');
+  const script = document.createElement('script');
+  script.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+  script.onload = build;
+  script.onerror = () => _invYearMsg('⚠️ Error al cargar la librería Excel', '#C62828');
+  document.head.appendChild(script);
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -7327,6 +7652,11 @@ window.adminCertSelectAll        = adminCertSelectAll;
 window.adminCertUpdateTotal      = adminCertUpdateTotal;
 window.adminCertDownloadOne      = adminCertDownloadOne;
 window.generateAdminLossCertificate = generateAdminLossCertificate;
+window.openAdminInvYearModal     = openAdminInvYearModal;
+window.closeAdminInvYearModal    = closeAdminInvYearModal;
+window.adminInvYearRefresh       = adminInvYearRefresh;
+window.adminInvYearPDF           = adminInvYearPDF;
+window.adminInvYearExcel         = adminInvYearExcel;
 // Acordeón de paneles admin (v4.8): recoge/despliega un panel
 function togglePanel(headerEl) {
   const panel = headerEl && headerEl.closest('.panel');
