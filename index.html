@@ -6,7 +6,7 @@
 // Fuerza URL con ?v= para bypassar caché del CDN sin acceso a Cloudflare.
 // IMPORTANTE: cambia _DEPLOY_VERSION cada vez que subas un nuevo index.html
 (function(){
-  var _DEPLOY_VERSION = '5.3';
+  var _DEPLOY_VERSION = '5.4';
   var params = new URLSearchParams(window.location.search);
   if (params.get('v') !== _DEPLOY_VERSION) {
     params.set('v', _DEPLOY_VERSION);
@@ -19,7 +19,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AngelClub — Portal Inversor v5.3</title>
+<title>AngelClub — Portal Inversor v5.4</title>
 <!-- Favicon e iconos PWA / acceso a pantalla de inicio en móvil (v4.9) -->
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <link rel="icon" type="image/png" href="favicon.png">
@@ -285,6 +285,47 @@
     z-index: 9000; display: none; animation: fadeUp 0.15s ease both;
   }
   #reports-dropdown.open { display: block; }
+
+  /* ── Admin: menú Descargar informes + certificado contable (v5.4) ── */
+  #admin-reports-wrapper { position: relative; display: inline-flex; margin-left: 6px; }
+  .admin-reports-btn {
+    background: rgba(230,168,23,0.14); border: 1px solid rgba(230,168,23,0.45);
+    color: #9A6B00; border-radius: 10px; padding: 6px 12px;
+    font-family: 'DM Mono', monospace; font-size: 11px; font-weight: 600; cursor: pointer;
+    transition: all 0.2s; white-space: nowrap;
+  }
+  .admin-reports-btn:hover { background: rgba(230,168,23,0.24); border-color: rgba(230,168,23,0.65); }
+  #admin-reports-dropdown {
+    position: absolute; top: calc(100% + 10px); right: 0;
+    background: rgba(255,255,255,0.98); border: 1px solid var(--border);
+    border-radius: 14px; padding: 6px; min-width: 270px;
+    box-shadow: 0 8px 32px rgba(21,101,192,0.18);
+    z-index: 9000; display: none; animation: fadeUp 0.15s ease both;
+  }
+  #admin-reports-dropdown.open { display: block; }
+  .admin-dd-sub { display:block; font-size: 10px; color: var(--muted); font-family: 'DM Mono', monospace; font-weight: 400; margin-top: 2px; }
+  .profile-dd-item.disabled { opacity: 0.5; cursor: default; }
+  #admincert-modal {
+    position: fixed; inset: 0; background: rgba(13,27,46,0.45); backdrop-filter: blur(4px);
+    z-index: 10000; display: none; align-items: center; justify-content: center; padding: 20px;
+  }
+  #admincert-modal.open { display: flex; animation: fadeIn 0.2s ease both; }
+  .admincert-toolbar { display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:8px; flex-wrap:wrap; }
+  .admincert-link { background:none; border:none; color:var(--blue-bright); font-family:'DM Mono',monospace; font-size:11px; cursor:pointer; padding:0; text-decoration:underline; }
+  .admincert-list { max-height: 46vh; overflow-y: auto; }
+  .admincert-row { display:flex; align-items:center; gap:10px; }
+  .admincert-row .losscert-proj { flex:1; margin-bottom:0; }
+  .admincert-row-wrap { margin-bottom: 8px; }
+  .admincert-one {
+    flex-shrink:0; background: rgba(21,101,192,0.08); border: 1px solid rgba(21,101,192,0.22);
+    color: var(--blue-bright); border-radius: 9px; padding: 8px 10px;
+    font-family: 'DM Mono', monospace; font-size: 10px; cursor: pointer; white-space: nowrap;
+  }
+  .admincert-one:hover { background: rgba(21,101,192,0.16); }
+  .admincert-meta { font-size: 10px; color: var(--muted); font-family: 'DM Mono', monospace; font-weight: 400; display:block; margin-top:2px; }
+  .admincert-total { display:flex; justify-content:space-between; align-items:center; border-top:1px solid var(--border); padding-top:10px; margin-top:6px; font-family:'Syne',sans-serif; font-weight:700; font-size:13px; color:var(--text); }
+  .admincert-total span:last-child { font-family:'DM Mono',monospace; color:#C62828; }
+  #admincert-msg { font-size: 12px; margin-top: 12px; text-align: center; font-family: 'DM Mono', monospace; display: none; min-height: 18px; font-weight: 600; }
 
   /* ── Loss certificate modal (v4.6) ── */
   #losscert-modal {
@@ -791,7 +832,7 @@
     .contact-actions { flex-direction: column; align-items: stretch; }
 
     /* Modales a casi pantalla completa */
-    #profile-modal, #losscert-modal { padding: 14px; }
+    #profile-modal, #losscert-modal, #admincert-modal { padding: 14px; }
     .profile-modal-card { padding: 26px 20px; border-radius: 20px; }
 
     /* Login a pantalla casi completa */
@@ -810,6 +851,11 @@
     .panel { padding: 15px 13px; }
     .panel-title { font-size: 14px; }
     .login-card { padding: 24px 18px; }
+    /* Badge admin compacto con botón de informes (v5.4) */
+    #admin-badge { padding: 6px 8px 6px 10px !important; gap: 8px !important; max-width: 100%; }
+    #admin-badge-email { display: none; }
+    .admin-reports-btn { padding: 6px 9px; font-size: 10px; }
+    #admin-reports-dropdown { min-width: 240px; max-width: calc(100vw - 32px); }
   }
 
   /* En táctil: sin animaciones de hover-lift que despistan */
@@ -936,7 +982,7 @@
       <button id="tab-admin" onclick="setLoginMode('admin')" style="flex:1;padding:9px 0;border:none;border-radius:9px;font-family:'Syne',sans-serif;font-weight:700;font-size:12px;cursor:pointer;transition:all 0.2s;background:transparent;color:var(--muted);">⚙️ Administrador</button>
     </div>
 
-    <div id="login-title" class="login-title">Portal del Inversor <span style="font-size:13px;font-family:'DM Mono',monospace;font-weight:600;color:var(--gold);letter-spacing:0.10em;background:rgba(230,168,23,0.12);padding:2px 8px;border-radius:6px;border:1px solid rgba(230,168,23,0.35);">v5.3</span></div>
+    <div id="login-title" class="login-title">Portal del Inversor <span style="font-size:13px;font-family:'DM Mono',monospace;font-weight:600;color:var(--gold);letter-spacing:0.10em;background:rgba(230,168,23,0.12);padding:2px 8px;border-radius:6px;border:1px solid rgba(230,168,23,0.35);">v5.4</span></div>
     <div id="login-sub" class="login-sub">Introduce tu correo electrónico para continuar</div>
 
     <!-- INVESTOR FIELDS — STEP 1: email -->
@@ -1091,6 +1137,30 @@
   </div>
 </div>
 
+<!-- ═══════ CERTIFICADO DE PÉRDIDAS CONTABLE (admin, v5.4) — fuera del container ═══════ -->
+<div id="admincert-modal">
+  <div class="profile-modal-card" style="max-width:600px;">
+    <button class="update-modal-close" onclick="closeAdminLossCertModal()">✕</button>
+    <div class="profile-modal-title">📉 Certificado de pérdidas · Contabilidad</div>
+    <div class="profile-modal-sub">Capital total invertido por el club en startups en estado FAIL, para su registro como pérdida en las cuentas de la sociedad</div>
+
+    <div class="admincert-toolbar">
+      <div class="losscert-step-title" style="margin-bottom:0;">Startups en estado FAIL</div>
+      <div id="admincert-selall-wrap" style="display:none;">
+        <button class="admincert-link" onclick="adminCertSelectAll(true)">Seleccionar todas</button>
+        <span style="color:var(--muted);font-size:11px;"> · </span>
+        <button class="admincert-link" onclick="adminCertSelectAll(false)">Ninguna</button>
+      </div>
+    </div>
+    <div class="losscert-hint" id="admincert-hint">Descarga el certificado individual de una startup (⬇ PDF) o marca varias y genera un certificado conjunto.</div>
+    <div class="admincert-list" id="admincert-projects"></div>
+    <div class="admincert-total"><span id="admincert-total-label">Total seleccionado</span><span id="admincert-total">€0</span></div>
+
+    <button class="profile-save-btn" style="margin-top:14px;" onclick="generateAdminLossCertificate()">📄 Generar certificado de las seleccionadas (PDF)</button>
+    <div id="admincert-msg"></div>
+  </div>
+</div>
+
 <!-- ═══════ DATOS SOCIETARIOS DE STARTUP (admin, v5.1) — fuera del container ═══════ -->
 <div id="startup-data-modal">
   <div class="profile-modal-card" style="max-width:580px;">
@@ -1180,7 +1250,7 @@
       <div class="logo-icon">A</div>
       <div>
         <div class="logo-text">ANGEL<span>CLUB</span></div>
-        <div id="topbar-subtitle" style="font-size:10px;color:var(--muted);letter-spacing:0.15em;text-transform:uppercase;margin-top:2px;">Portal Inversor <span style="letter-spacing:0.08em;font-weight:600;color:var(--gold);background:rgba(230,168,23,0.13);padding:1px 7px;border-radius:5px;border:1px solid rgba(230,168,23,0.30);">v5.3</span></div>
+        <div id="topbar-subtitle" style="font-size:10px;color:var(--muted);letter-spacing:0.15em;text-transform:uppercase;margin-top:2px;">Portal Inversor <span style="letter-spacing:0.08em;font-weight:600;color:var(--gold);background:rgba(230,168,23,0.13);padding:1px 7px;border-radius:5px;border:1px solid rgba(230,168,23,0.30);">v5.4</span></div>
       </div>
     </div>
     <div class="topbar-right">
@@ -1204,6 +1274,13 @@
           <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:13px;color:var(--text);">Administrador</div>
           <div style="font-size:10px;color:var(--muted);"><span id="admin-badge-email"></span></div>
         </div>
+        <!-- Descargar informes (admin, v5.4) -->
+        <span id="admin-reports-wrapper">
+          <button class="admin-reports-btn" id="btn-admin-reports" onclick="toggleAdminReportsMenu(event)">📥 Descargar informes ▾</button>
+          <div id="admin-reports-dropdown">
+            <div class="profile-dd-item" id="admin-dd-cert" onclick="openAdminLossCertModal()">📉 &nbsp;<span>Certificado de pérdidas (contable)<span class="admin-dd-sub" id="admin-dd-cert-sub">—</span></span></div>
+          </div>
+        </span>
       </div>
       <div class="topbar-date">
         <strong id="today-date"></strong>
@@ -4369,6 +4446,12 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') closeUpdateM
   if (lc) lc.addEventListener('click', function(e){ if (e.target === this) closeLossCertModal(); });
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLossCertModal(); });
 })();
+// Cierre del modal de certificado contable admin (v5.4)
+(function(){
+  const ac = document.getElementById('admincert-modal');
+  if (ac) ac.addEventListener('click', function(e){ if (e.target === this) closeAdminLossCertModal(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeAdminLossCertModal(); });
+})();
 // Cierre del modal de datos societarios (v5.1)
 (function(){
   const sd = document.getElementById('startup-data-modal');
@@ -4528,7 +4611,7 @@ function setLoginMode(mode) {
   document.getElementById('investor-fields').style.display = isAdmin ? 'none' : 'block';
   document.getElementById('investor-step2').style.display  = 'none';
   document.getElementById('admin-fields').style.display    = isAdmin ? 'block' : 'none';
-  document.getElementById('login-title').innerHTML = isAdmin ? 'Acceso Administrador' : 'Portal del Inversor <span style="font-size:11px;font-family:\'DM Mono\',monospace;font-weight:600;color:var(--gold);letter-spacing:0.10em;background:rgba(230,168,23,0.12);padding:2px 8px;border-radius:6px;border:1px solid rgba(230,168,23,0.35);">v5.3</span>';
+  document.getElementById('login-title').innerHTML = isAdmin ? 'Acceso Administrador' : 'Portal del Inversor <span style="font-size:11px;font-family:\'DM Mono\',monospace;font-weight:600;color:var(--gold);letter-spacing:0.10em;background:rgba(230,168,23,0.12);padding:2px 8px;border-radius:6px;border:1px solid rgba(230,168,23,0.35);">v5.4</span>';
   document.getElementById('login-sub').textContent = isAdmin
     ? 'Acceso exclusivo para el equipo de AngelClub'
     : 'Introduce tu correo electrónico para acceder';
@@ -4964,7 +5047,7 @@ function showDashboard() {
   document.getElementById('user-badge').style.display = 'flex';
   document.getElementById('admin-badge').style.display = 'none';
   document.getElementById('btn-download-report').style.display = 'flex';
-  document.getElementById('topbar-subtitle').innerHTML = 'Portal Inversor <span style="letter-spacing:0.08em;font-weight:600;color:var(--gold);background:rgba(230,168,23,0.13);padding:1px 7px;border-radius:5px;border:1px solid rgba(230,168,23,0.30);">v5.3</span>';
+  document.getElementById('topbar-subtitle').innerHTML = 'Portal Inversor <span style="letter-spacing:0.08em;font-weight:600;color:var(--gold);background:rgba(230,168,23,0.13);padding:1px 7px;border-radius:5px;border:1px solid rgba(230,168,23,0.30);">v5.4</span>';
   document.getElementById('topbar-view-label').textContent = 'Mi Portfolio';
 
   const inv = currentInvestor;
@@ -5674,6 +5757,336 @@ function _renderLossCertificatePDF(inv, dni, fails) {
 }
 
 // ═══════════════════════════════════════════════════════════════
+// ADMIN — Descargar informes + Certificado de pérdidas contable (v5.4)
+// Capital total invertido por el club en startups en estado FAIL,
+// para su registro como pérdida en las cuentas de la sociedad.
+// ═══════════════════════════════════════════════════════════════
+// Partícipes (inversores) de una startup, a partir de INVESTOR_DB
+function _adminStartupParticipants(startupKey) {
+  const list = [];
+  Object.entries(INVESTOR_DB).forEach(([email, rec]) => {
+    const amt = rec.investments.get(startupKey) || 0;
+    if (amt > 0) {
+      const name = [...rec.names].sort((a,b)=>b.length-a.length)[0] || email;
+      list.push({ email, name, amount: amt });
+    }
+  });
+  list.sort((a,b) => b.amount - a.amount);
+  return list;
+}
+
+// Startups cuyo estado efectivo es 'fail', con el capital total invertido por el club
+function getAdminFailStartups() {
+  const list = [];
+  Object.entries(STARTUPS).forEach(([key, s]) => {
+    if (getEffectiveStatus(key) !== 'fail') return;
+    const participants = _adminStartupParticipants(key);
+    const partSum = participants.reduce((t,p) => t + p.amount, 0);
+    // Capital del club (el mismo que muestra el panel admin); si no está informado, suma de partícipes
+    const capital = (s.capital || 0) > 0 ? s.capital : partSum;
+    list.push({ key, name: s.name, capital, participants, partSum });
+  });
+  list.sort((a,b) => b.capital - a.capital);
+  return list;
+}
+
+function toggleAdminReportsMenu(e) {
+  if (e) e.stopPropagation();
+  const dd = document.getElementById('admin-reports-dropdown');
+  if (!dd) return;
+  const fails = getAdminFailStartups();
+  const item = document.getElementById('admin-dd-cert');
+  const sub  = document.getElementById('admin-dd-cert-sub');
+  if (item) item.classList.toggle('disabled', fails.length === 0);
+  if (sub) {
+    const total = fails.reduce((t,p) => t + p.capital, 0);
+    sub.textContent = fails.length
+      ? `${fails.length} startup${fails.length!==1?'s':''} en FAIL · €${total.toLocaleString('es-ES')}`
+      : 'No hay startups en estado FAIL';
+  }
+  if (dd.classList.contains('open')) {
+    dd.classList.remove('open');
+  } else {
+    dd.classList.add('open');
+    setTimeout(() => document.addEventListener('click', _closeAdminReportsMenuOutside, { once: true }), 0);
+  }
+}
+
+function _closeAdminReportsMenuOutside(e) {
+  const wrapper = document.getElementById('admin-reports-wrapper');
+  if (wrapper && wrapper.contains(e.target)) {
+    document.addEventListener('click', _closeAdminReportsMenuOutside, { once: true });
+  } else {
+    const dd = document.getElementById('admin-reports-dropdown'); if (dd) dd.classList.remove('open');
+  }
+}
+
+function openAdminLossCertModal() {
+  if (!currentInvestor || currentInvestor.role !== 'admin') return;
+  const fails = getAdminFailStartups();
+  if (!fails.length) return; // sin startups en FAIL no se abre
+  const dd = document.getElementById('admin-reports-dropdown'); if (dd) dd.classList.remove('open');
+  const msg = document.getElementById('admincert-msg'); if (msg) { msg.style.display = 'none'; msg.textContent = ''; }
+  const multi = fails.length > 1;
+  document.getElementById('admincert-selall-wrap').style.display = multi ? 'block' : 'none';
+  document.getElementById('admincert-hint').textContent = multi
+    ? 'Descarga el certificado individual de una startup (⬇ PDF) o marca varias y genera un certificado conjunto.'
+    : 'Solo hay una startup en estado FAIL. Genera su certificado con el botón inferior o con ⬇ PDF.';
+  const escA = s => String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');
+  document.getElementById('admincert-projects').innerHTML = fails.map(p => {
+    const det = getStartupDetails(p.key);
+    const meta = [
+      det.companyName && det.companyName !== p.name ? det.companyName : '',
+      `${p.participants.length} partícipe${p.participants.length!==1?'s':''}`,
+      det.closureDate ? 'Cierre ' + _sdFmtDate(det.closureDate) : ''
+    ].filter(Boolean).join(' · ');
+    return `
+    <div class="admincert-row-wrap"><div class="admincert-row">
+      <label class="losscert-proj">
+        <input type="checkbox" class="losscert-proj-cb admincert-cb" value="${escA(p.key)}" checked onchange="adminCertUpdateTotal()">
+        <span class="losscert-proj-name">${escA(p.name)}<span class="admincert-meta">${escA(meta)}</span></span>
+        <span class="losscert-proj-amt">€${p.capital.toLocaleString('es-ES')}</span>
+      </label>
+      <button class="admincert-one" onclick="adminCertDownloadOne('${escA(p.key).replace(/'/g,"\\'")}')" title="Certificado individual de ${escA(p.name)}">⬇ PDF</button>
+    </div></div>`;
+  }).join('');
+  adminCertUpdateTotal();
+  document.getElementById('admincert-modal').classList.add('open');
+}
+
+function closeAdminLossCertModal() {
+  const m = document.getElementById('admincert-modal'); if (m) m.classList.remove('open');
+}
+
+function adminCertSelectAll(on) {
+  document.querySelectorAll('.admincert-cb').forEach(cb => { cb.checked = !!on; });
+  adminCertUpdateTotal();
+}
+
+function adminCertUpdateTotal() {
+  const sel = [...document.querySelectorAll('.admincert-cb:checked')].map(cb => cb.value);
+  const fails = getAdminFailStartups().filter(p => sel.includes(p.key));
+  const total = fails.reduce((t,p) => t + p.capital, 0);
+  const lbl = document.getElementById('admincert-total-label');
+  if (lbl) lbl.textContent = `Total seleccionado (${fails.length} startup${fails.length!==1?'s':''})`;
+  const el = document.getElementById('admincert-total');
+  if (el) el.textContent = '€' + total.toLocaleString('es-ES');
+}
+
+function _adminCertMsg(t, c) {
+  const msg = document.getElementById('admincert-msg');
+  if (msg) { msg.style.display = 'block'; msg.textContent = t; msg.style.color = c; }
+}
+
+function adminCertDownloadOne(key) {
+  const fails = getAdminFailStartups().filter(p => p.key === key);
+  if (!fails.length) { _adminCertMsg('⚠️ La startup ya no está en estado FAIL', '#C62828'); return; }
+  if (_renderAdminLossCertificatePDF(fails)) _adminCertMsg(`✅ Certificado de ${fails[0].name} generado`, 'var(--blue-bright)');
+}
+
+function generateAdminLossCertificate() {
+  const sel = [...document.querySelectorAll('.admincert-cb:checked')].map(cb => cb.value);
+  if (!sel.length) { _adminCertMsg('⚠️ Selecciona al menos una startup', '#C62828'); return; }
+  const fails = getAdminFailStartups().filter(p => sel.includes(p.key));
+  if (!fails.length) { _adminCertMsg('⚠️ No hay startups válidas seleccionadas', '#C62828'); return; }
+  if (_renderAdminLossCertificatePDF(fails)) closeAdminLossCertModal();
+}
+
+function _renderAdminLossCertificatePDF(fails) {
+  const now = new Date();
+  const MESES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  const dia = now.getDate(), anio = now.getFullYear();
+  const dateLong = `${dia} de ${MESES[now.getMonth()]} de ${anio}`;
+  const timeStr = now.toLocaleTimeString('es-ES');
+  const esc = s => String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const fmt = n => '€' + Number(n||0).toLocaleString('es-ES');
+  const single = fails.length === 1;
+
+  const totalLoss = fails.reduce((t,p) => t + (p.capital||0), 0);
+  const totalParticipants = new Set(fails.flatMap(p => p.participants.map(x => x.email))).size;
+
+  const closureCauses = [...new Set(fails.map(p => (getStartupDetails(p.key).closureCause||'').trim()).filter(Boolean))];
+  const causeText = closureCauses.length ? closureCauses.join(' / ') : 'la situación de insolvencia / concurso de acreedores';
+
+  const tableRows = fails.map(p => {
+    const det = getStartupDetails(p.key);
+    const projLabel = det.companyName
+      ? `${esc(det.companyName)}${det.cif ? ` <span style="color:#5A7A9F;font-size:9px;">(CIF ${esc(det.cif)})</span>` : ''}${det.companyName !== p.name ? `<br><span style="color:#5A7A9F;font-size:9px;">${esc(p.name)}</span>` : ''}`
+      : esc(p.name) + (det.cif ? ` <span style="color:#5A7A9F;font-size:9px;">(CIF ${esc(det.cif)})</span>` : '');
+    return `
+    <tr>
+      <td>${projLabel}</td>
+      <td style="text-align:center;color:#5A7A9F;">${det.investmentDate ? esc(_sdFmtDate(det.investmentDate)) : '—'}</td>
+      <td style="text-align:center;color:#5A7A9F;">${det.closureDate ? esc(_sdFmtDate(det.closureDate)) : '—'}</td>
+      <td style="text-align:center;">${p.participants.length}</td>
+      <td style="text-align:right;">${fmt(p.capital)}</td>
+      <td style="text-align:right;color:#C62828;font-weight:700;">${fmt(p.capital)}</td>
+    </tr>`;
+  }).join('');
+
+  // Detalle societario por startup
+  const socBlocks = fails.map(p => {
+    const det = getStartupDetails(p.key);
+    const pairs = [
+      ['CIF', det.cif],
+      ['Domicilio social', det.registeredOffice],
+      ['Ref. cuenta en participación', det.participationAccount],
+      ['Fecha de la inversión', det.investmentDate ? _sdFmtDate(det.investmentDate) : ''],
+      ['Causa de la pérdida', det.closureCause],
+      ['Fecha de la causa', det.closureDate ? _sdFmtDate(det.closureDate) : ''],
+      ['Referencia del auto', det.autoReference],
+    ].filter(r => r[1]);
+    if (!pairs.length) return '';
+    return `<div class="soc-detail">
+      <div class="soc-detail-title">${esc(det.companyName || p.name)}${(det.companyName && det.companyName !== p.name) ? ` <span style="font-weight:400;color:#5A7A9F;">— ${esc(p.name)}</span>` : ''}</div>
+      <div class="soc-grid">${pairs.map(([l,v]) => `<div class="soc-item"><span class="soc-label">${esc(l)}</span><span class="soc-val">${esc(v)}</span></div>`).join('')}</div>
+    </div>`;
+  }).filter(Boolean);
+  const socSection = socBlocks.length ? `<div class="section-h">Detalle societario de las inversiones</div>${socBlocks.join('')}` : '';
+
+  // Anexo: desglose del capital por partícipe
+  const annex = fails.map(p => {
+    if (!p.participants.length) return '';
+    const rows = p.participants.map((x,i) => `<tr><td style="text-align:center;color:#5A7A9F;">${i+1}</td><td>${esc(x.name)}</td><td style="text-align:right;">${fmt(x.amount)}</td></tr>`).join('');
+    const diff = p.capital - p.partSum;
+    const diffNote = diff !== 0
+      ? `<div class="annex-note">La suma de aportaciones registradas de partícipes (${fmt(p.partSum)}) difiere del capital total invertido registrado para la startup (${fmt(p.capital)}) en ${fmt(Math.abs(diff))}.</div>`
+      : '';
+    return `<div class="annex-block">
+      <div class="soc-detail-title">${esc(p.name)} · ${p.participants.length} partícipe${p.participants.length!==1?'s':''}</div>
+      <table class="inv annex"><thead><tr><th class="c" style="width:34px;">#</th><th>Partícipe</th><th class="r">Aportación</th></tr></thead>
+      <tbody>${rows}<tr class="total"><td></td><td>Total aportaciones</td><td style="text-align:right;">${fmt(p.partSum)}</td></tr></tbody></table>
+      ${diffNote}
+    </div>`;
+  }).filter(Boolean);
+  const annexSection = annex.length ? `<div class="annex-h">ANEXO · Desglose del capital invertido por partícipe</div>${annex.join('')}` : '';
+
+  const ref = 'AC-CONT-' + anio + String(now.getMonth()+1).padStart(2,'0') + String(dia).padStart(2,'0')
+            + '-' + Math.random().toString(36).slice(2,8).toUpperCase();
+  const titleNames = single ? fails[0].name : `${fails.length} startups`;
+
+  const html = `<!DOCTYPE html>
+<html lang="es"><head><meta charset="UTF-8">
+<title>Certificado de Pérdidas (contable) — ${esc(titleNames)}</title>
+<style>
+  @page { margin: 18mm 18mm; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family: 'Times New Roman', Georgia, serif; color:#1A2B4A; font-size:12.5px; line-height:1.6; }
+  .doc-head { text-align:center; border-bottom:2.5px solid #1565C0; padding-bottom:14px; margin-bottom:20px; }
+  .doc-title { font-size:18px; font-weight:800; letter-spacing:0.5px; color:#10243f; margin-bottom:4px; text-transform:uppercase; }
+  .doc-subtitle { font-size:11px; color:#5A7A9F; font-family:Arial,sans-serif; letter-spacing:1px; text-transform:uppercase; margin-bottom:10px; }
+  .doc-entity { font-size:13px; font-weight:700; color:#1565C0; }
+  .doc-meta { font-size:11px; color:#5A7A9F; margin-top:2px; }
+  .place-date { margin:18px 0 14px; font-size:12.5px; }
+  .certifica { text-align:center; font-weight:800; letter-spacing:3px; font-size:14px; margin:14px 0; color:#10243f; }
+  p.body-p { text-align:justify; margin-bottom:12px; }
+  table.inv { width:100%; border-collapse:collapse; margin:14px 0; font-size:11px; font-family:Arial,sans-serif; }
+  table.inv th { background:#f4f4f4; border:1px solid #999; padding:6px 8px; text-align:left; font-weight:700; }
+  table.inv th.r { text-align:right; } table.inv th.c { text-align:center; }
+  table.inv td { border:1px solid #999; padding:6px 8px; vertical-align:top; }
+  table.inv tr.total td { font-weight:800; background:#fbfbfb; }
+  table.inv.annex { font-size:10px; margin:6px 0 4px; }
+  table.inv.annex td, table.inv.annex th { padding:4px 8px; }
+  .kpi-box { display:flex; gap:10px; margin:6px 0 14px; font-family:Arial,sans-serif; }
+  .kpi-box > div { flex:1; border:1px solid #D0DFF5; border-radius:8px; padding:8px 10px; background:#f8fbff; }
+  .kpi-box .k-l { font-size:8.5px; color:#5A7A9F; text-transform:uppercase; letter-spacing:0.5px; }
+  .kpi-box .k-v { font-size:15px; font-weight:800; color:#10243f; }
+  .kpi-box .k-v.red { color:#C62828; }
+  .section-h { font-family:Arial,sans-serif; font-weight:800; font-size:11px; color:#10243f; margin:16px 0 8px; text-transform:uppercase; letter-spacing:0.6px; border-bottom:1px solid #D0DFF5; padding-bottom:4px; }
+  .soc-detail { border:1px solid #D0DFF5; border-radius:8px; padding:10px 12px; margin-bottom:9px; background:#f8fbff; page-break-inside:avoid; }
+  .soc-detail-title { font-family:Arial,sans-serif; font-weight:800; font-size:11.5px; color:#1565C0; margin-bottom:7px; }
+  .soc-grid { display:grid; grid-template-columns:1fr 1fr; gap:5px 18px; font-family:Arial,sans-serif; }
+  .soc-item { display:flex; flex-direction:column; padding:1px 0; }
+  .soc-label { color:#5A7A9F; font-size:8px; text-transform:uppercase; letter-spacing:0.4px; }
+  .soc-val { color:#1A2B4A; font-weight:600; font-size:10px; }
+  .annex-h { page-break-before:always; font-family:Arial,sans-serif; font-weight:800; font-size:12px; color:#10243f; text-transform:uppercase; letter-spacing:0.6px; border-bottom:2px solid #1565C0; padding-bottom:6px; margin-bottom:12px; }
+  .annex-block { margin-bottom:14px; }
+  .annex-note { font-family:Arial,sans-serif; font-size:9px; color:#8A6D00; }
+  .sig-wrap { margin-top:34px; display:flex; justify-content:flex-end; page-break-inside:avoid; }
+  .sig-card { width:340px; border:1.5px solid #1a4fba; border-radius:10px; padding:14px 16px; background:linear-gradient(180deg,#f7faff,#eef3fb); }
+  .sig-mono { font-family:'Segoe Script','Brush Script MT','Apple Chancery',cursive; font-size:30px; color:#10243f; line-height:1; margin-bottom:4px; transform:rotate(-3deg); }
+  .sig-line { border-top:1px solid #1A2B4A; margin:6px 0 6px; }
+  .sig-name { font-family:Arial,sans-serif; font-weight:800; font-size:12px; color:#10243f; }
+  .sig-role { font-family:Arial,sans-serif; font-size:10px; color:#5A7A9F; margin-bottom:9px; }
+  .sig-verified { display:flex; gap:9px; align-items:flex-start; border-top:1px dashed #b9cbe8; padding-top:9px; }
+  .sig-check { flex-shrink:0; width:22px; height:22px; border-radius:50%; background:#1f9d55; color:#fff; font-size:13px; font-weight:800; display:flex; align-items:center; justify-content:center; }
+  .sig-vtitle { font-family:Arial,sans-serif; font-weight:800; font-size:10.5px; color:#1a4fba; }
+  .sig-vmeta { font-family:Arial,sans-serif; font-size:8.3px; color:#5A7A9F; line-height:1.45; margin-top:2px; }
+  .doc-footer { margin-top:26px; border-top:1px solid #D0DFF5; padding-top:8px; font-size:8.5px; color:#8A9AB5; font-family:Arial,sans-serif; }
+  .disclaimer { background:#FBF8EC; border:1px solid #E7D9A8; border-radius:7px; padding:9px 13px; font-size:8.4px; line-height:1.5; color:#6B5E36; margin-top:14px; font-family:Arial,sans-serif; }
+  @media print { body { -webkit-print-color-adjust:exact; print-color-adjust:exact; } }
+</style></head>
+<body>
+  <div class="doc-head">
+    <div class="doc-title">Certificado de Pérdida de Inversiones</div>
+    <div class="doc-subtitle">A efectos de registro contable de la sociedad</div>
+    <div class="doc-entity">CLUB DE ANGEL FUNDING SL</div>
+    <div class="doc-meta">CIF: B87848321 · Domicilio social: Calle Núñez de Balboa, núm. 120, 28006 Madrid (Madrid)</div>
+  </div>
+
+  <div class="place-date">En Madrid, a ${dateLong}.</div>
+  <div class="certifica">CERTIFICA</div>
+
+  <p class="body-p">Que CLUB DE ANGEL FUNDING SL, en su condición de gestor de los contratos de cuenta en participación suscritos conforme a lo dispuesto en los artículos 239 a 243 del Código de Comercio, canalizó a través de los mismos las inversiones en ${single ? 'la sociedad que se detalla' : 'las sociedades que se detallan'} a continuación, figurando a la fecha de su declaración como fallida${single ? '' : 's'} el siguiente capital total invertido:</p>
+
+  <div class="kpi-box">
+    <div><div class="k-l">Startups fallidas</div><div class="k-v">${fails.length}</div></div>
+    <div><div class="k-l">Partícipes afectados</div><div class="k-v">${totalParticipants}</div></div>
+    <div><div class="k-l">Capital total invertido</div><div class="k-v">${fmt(totalLoss)}</div></div>
+    <div><div class="k-l">Importe a registrar como pérdida</div><div class="k-v red">${fmt(totalLoss)}</div></div>
+  </div>
+
+  <table class="inv">
+    <thead>
+      <tr><th>Startup / Sociedad</th><th class="c">Fecha inversión</th><th class="c">Fecha causa</th><th class="c">Partícipes</th><th class="r">Capital invertido</th><th class="r">Importe pérdida</th></tr>
+    </thead>
+    <tbody>
+      ${tableRows}
+      <tr class="total"><td>TOTAL</td><td></td><td></td><td style="text-align:center;">${totalParticipants}</td><td style="text-align:right;">${fmt(totalLoss)}</td><td style="text-align:right;color:#C62828;">${fmt(totalLoss)}</td></tr>
+    </tbody>
+  </table>
+
+  ${socSection}
+
+  <p class="body-p">Que, como consecuencia de la situación económica y financiera de ${single ? 'la citada sociedad' : 'las citadas sociedades'}, ${single ? 'la inversión ha resultado totalmente fallida' : 'las inversiones han resultado totalmente fallidas'} debido a ${esc(causeText)}, no existiendo expectativa razonable de recuperación, ni total ni parcial, del capital invertido.</p>
+
+  <p class="body-p">Que el importe total del capital invertido que procede registrar como pérdida en la contabilidad de la sociedad asciende a <strong>${fmt(totalLoss)}</strong>, cuyo desglose por partícipe se recoge en el Anexo del presente certificado.</p>
+
+  <p class="body-p">Y para que así conste a los efectos oportunos, especialmente para la regularización de ${single ? 'dicha inversión' : 'dichas inversiones'} en las cuentas contables de la sociedad, se expide el presente certificado.</p>
+
+  <div class="sig-wrap">
+    <div class="sig-card">
+      <div class="sig-mono">Eneko Knörr</div>
+      <div class="sig-line"></div>
+      <div class="sig-name">D. Eneko Knörr de Santiago</div>
+      <div class="sig-role">En representación de CLUB DE ANGEL FUNDING SL</div>
+      <div class="sig-verified">
+        <div class="sig-check">✓</div>
+        <div>
+          <div class="sig-vtitle">Firma electrónica avanzada verificada</div>
+          <div class="sig-vmeta">Firmado digitalmente por ENEKO KNÖRR DE SANTIAGO<br>Fecha: ${dateLong}, ${timeStr} (CET)<br>Certificado digital válido · CLUB DE ANGEL FUNDING SL — CIF B87848321<br>Ref. documento: ${ref}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="disclaimer"><strong>Aviso:</strong> Documento generado automáticamente desde el panel de administración del Portal de AngelClub a partir de los datos registrados (capital invertido por startup, estado FAIL y datos societarios). El tratamiento contable concreto de la pérdida (deterioro o baja de la inversión) y su efecto fiscal deben ser validados por el asesor contable/auditor de la sociedad. Consérvese junto con la documentación acreditativa de la causa (auto de concurso, liquidación, etc.).</div>
+
+  ${annexSection}
+
+  <div class="doc-footer">AngelClub · CLUB DE ANGEL FUNDING SL · Certificado de pérdidas (contable) · Ref. ${ref} · Generado el ${dateLong} ${timeStr}</div>
+</body></html>`;
+
+  const w = window.open('', '_blank', 'width=960,height=820');
+  if (!w) { _adminCertMsg('⚠️ Activa las ventanas emergentes para descargar el certificado.', '#C62828'); return false; }
+  w.document.write(html);
+  w.document.close();
+  w.focus();
+  setTimeout(() => { w.print(); }, 700);
+  return true;
+}
+
+// ═══════════════════════════════════════════════════════════════
 // ADMIN DASHBOARD
 // ═══════════════════════════════════════════════════════════════
 // ══════════════════════════════════════════════════════════════
@@ -6013,6 +6426,7 @@ function showAdminDashboard() {
   document.getElementById('btn-download-report').style.display = 'none';
   const adminBadge = document.getElementById('admin-badge');
   adminBadge.style.display = 'flex';
+  const _ard = document.getElementById('admin-reports-dropdown'); if (_ard) _ard.classList.remove('open'); // v5.4
   document.getElementById('topbar-subtitle').textContent = 'Panel Administrador';
   document.getElementById('topbar-view-label').textContent = 'Vista Global';
   document.getElementById('today-date').textContent = new Date().toLocaleDateString('es-ES',{day:'numeric',month:'long',year:'numeric'});
@@ -6906,6 +7320,13 @@ window.toggleReportsMenu         = toggleReportsMenu;
 window.openLossCertModal         = openLossCertModal;
 window.closeLossCertModal        = closeLossCertModal;
 window.generateLossCertificate   = generateLossCertificate;
+window.toggleAdminReportsMenu    = toggleAdminReportsMenu;
+window.openAdminLossCertModal    = openAdminLossCertModal;
+window.closeAdminLossCertModal   = closeAdminLossCertModal;
+window.adminCertSelectAll        = adminCertSelectAll;
+window.adminCertUpdateTotal      = adminCertUpdateTotal;
+window.adminCertDownloadOne      = adminCertDownloadOne;
+window.generateAdminLossCertificate = generateAdminLossCertificate;
 // Acordeón de paneles admin (v4.8): recoge/despliega un panel
 function togglePanel(headerEl) {
   const panel = headerEl && headerEl.closest('.panel');
